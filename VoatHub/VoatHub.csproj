@@ -99,6 +99,13 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Data\ApiBaseResponse.cs" />
+    <Compile Include="Data\ApiComment.cs" />
+    <Compile Include="Data\ApiGetResponse.cs" />
+    <Compile Include="Data\ApiGetResponseList.cs" />
+    <Compile Include="Data\ApiSubmission.cs" />
+    <Compile Include="Data\ApiSubverseInfo.cs" />
+    <Compile Include="Data\ErrorInfo.cs" />
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>

@@ -7,7 +7,15 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-
+    <Grid HorizontalAlignment="Left" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <StackPanel Orientation="Vertical" Width="50">
+            
+        </StackPanel>
+        <StackPanel Orientation="Vertical">
+            
+        </StackPanel>
+        <StackPanel Orientation="Vertical">
+            
+        </StackPanel>
     </Grid>
 </Page>
