@@ -3,11 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Runtime.Serialization;
 
 namespace VoatHub.Data
 {
+    [DataContract]
     class ApiSubmission
     {
+        [DataMember(Name = "id")]
         public int Id { get; }
         public int CommentCount { get; }
         public DateTime Date { get; }

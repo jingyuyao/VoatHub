@@ -8,6 +8,6 @@ namespace VoatHub.Data
 {
     class ApiGetResponseList<T> : ApiBaseResponse
     {
-        public List<T> data { get; }
+        public List<T> Data { get; set; }
     }
 }

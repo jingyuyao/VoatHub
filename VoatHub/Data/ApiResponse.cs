@@ -6,9 +6,10 @@ using System.Threading.Tasks;
 
 namespace VoatHub.Data
 {
-    class ApiBaseResponse
+    interface ApiResponse<T>
     {
-        public bool Success { get; }
-        public ErrorInfo error { get; }
+        T Data { get; }
+        bool Success { get; }
+        ErrorInfo Error { get; }
     }
 }
