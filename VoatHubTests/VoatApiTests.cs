@@ -10,16 +10,16 @@ using VoatHub.Data;
 namespace VoatHubTests
 {
     [TestClass]
-    public class ApiTests
+    public class VoatApiTests
     {
-        Api api;
+        VoatApi api;
         readonly string apiKey = "ZbDlC73ndD6TB84WQmKvMA==";
         readonly string baseUri = "https://fakevout.azurewebsites.net/api/v1/";
 
         [TestMethod]
         public async Task GetSubmissions()
         {
-            api = new Api(apiKey, baseUri);
+            api = new VoatApi(apiKey, baseUri);
             var submissions = await api.GetSubmissions("Test");
             Assert.IsInstanceOfType(submissions, typeof(ApiResponse<List<ApiSubmission>>));
             Assert.IsInstanceOfType(submissions.data, typeof(List<ApiSubmission>));

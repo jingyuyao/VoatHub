@@ -11,14 +11,14 @@ namespace VoatHub.Api
     /// <summary>
     /// Class to interface to Voat's API
     /// </summary>
-    public class Api : IDisposable
+    public class VoatApi : IDisposable
     {
-        private ApiClient apiClient;
+        private VoatApiClient apiClient;
         private Uri baseUri;
 
-        public Api(string apiKey, string baseUri)
+        public VoatApi(string apiKey, string baseUri)
         {
-            apiClient = new ApiClient(apiKey);
+            apiClient = new VoatApiClient(apiKey);
             this.baseUri = new Uri(baseUri);
         }
 

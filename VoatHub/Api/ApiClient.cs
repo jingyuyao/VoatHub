@@ -17,11 +17,11 @@ namespace VoatHub.Api
     /// the approperiate class.
     /// </para>
     /// </summary>
-    public class ApiClient : IDisposable
+    public class VoatApiClient : IDisposable
     {
         private HttpClient httpClient;
 
-        public ApiClient(string apiKey)
+        public VoatApiClient(string apiKey)
         {
             httpClient = new HttpClient();
             httpClient.DefaultRequestHeaders.Add("Voat-ApiKey", apiKey);
