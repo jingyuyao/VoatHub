@@ -11,53 +11,62 @@ using VoatHub.Data;
 
 namespace VoatHub.Api
 {
-    public class ApiClient
+    /// <summary>An HttpClient tailored for Voat's API.
+    /// <para>
+    /// Adds Voat-ApiKey on every request and deserializes Json response into
+    /// the approperiate class.
+    /// </para>
+    /// </summary>
+    public class ApiClient : IDisposable
     {
         private HttpClient httpClient;
-        private Uri baseUri;
 
-        public ApiClient(string apiKey, string baseUri)
+        public ApiClient(string apiKey)
         {
             httpClient = new HttpClient();
-            this.baseUri = new Uri(baseUri);
-
-            var headers = httpClient.DefaultRequestHeaders;
-
-            headers.Add("Voat-ApiKey", apiKey);
+            httpClient.DefaultRequestHeaders.Add("Voat-ApiKey", apiKey);
         }
 
         /// <summary>
-        /// Get the list of submissions for a subverse.
-        /// </summary>
-        /// <param name="subverse">Name of a subverse.</param>
-        /// <returns>Task containing the response.</returns>
-        public async Task<ApiResponse<List<ApiSubmission>>> GetSubmissions(string subverse)
-        {
-            return await GetAndDeserialize<List<ApiSubmission>>("v/" + subverse);
-        }
-
-        /// <summary>
-        /// Returns deserialized ApiResponse from a get request to the absolute uri formed using the given relativeUri.
+        /// Wraps <see cref="HttpClient.GetAsync(Uri)"/> to return an <see cref="ApiResponse{T}"/>
         /// </summary>
         /// <typeparam name="T"></typeparam>
-        /// <param name="relativeUri"></param>
+        /// <param name="uri"></param>
         /// <returns></returns>
-        private async Task<ApiResponse<T>> GetAndDeserialize<T>(string relativeUri)
+        public async Task<ApiResponse<T>> GetAsync<T>(Uri uri)
         {
-            Uri uri = GetAbsoluteUri(relativeUri);
             HttpResponseMessage response = await this.httpClient.GetAsync(uri);
+            return await DeserializeResponse<T>(response);
+        }
+
+        /// <summary>
+        /// Wraps <see cref="HttpClient.PostAsync(Uri, IHttpContent)"/> to return an <see cref="ApiResponse{T}"/>
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="uri"></param>
+        /// <param name="content"></param>
+        /// <returns></returns>
+        public async Task<ApiResponse<T>> PostAsync<T>(Uri uri, IHttpContent content)
+        {
+            HttpResponseMessage response = await this.httpClient.PostAsync(uri, content);
+            return await DeserializeResponse<T>(response);
+        }
+
+        /// <summary>
+        /// Deserializes response containing JSON data into an ApiResponse.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="response"></param>
+        /// <returns></returns>
+        private async Task<ApiResponse<T>> DeserializeResponse<T>(HttpResponseMessage response)
+        {
             string responseContent = await response.Content.ReadAsStringAsync();
             return JsonConvert.DeserializeObject<ApiResponse<T>>(responseContent);
         }
 
-        /// <summary>
-        /// Get the absolute API uri by combining baseUri and a relative uri string.
-        /// </summary>
-        /// <param name="relativeUri">A relative uri. Relative uri should not be prefixed with a '/'.</param>
-        /// <returns>The absolute uri of the API endpoint.</returns>
-        private Uri GetAbsoluteUri(string relativeUri)
+        public void Dispose()
         {
-            return new Uri(this.baseUri, relativeUri);
+            httpClient.Dispose();
         }
     }
 }
