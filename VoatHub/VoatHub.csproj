@@ -96,8 +96,11 @@
     <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Api\Api.cs" />
-    <Compile Include="Api\ApiClient.cs" />
+    <Compile Include="Api\OauthClient.cs" />
+    <Compile Include="Api\VoatApi.cs" />
+    <Compile Include="Api\VoatApiClient.cs" />
+    <Compile Include="Api\CredentialManager.cs" />
+    <Compile Include="Api\TokenManager.cs" />
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>

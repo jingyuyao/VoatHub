@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.Web.Http;
+using Windows.Storage;
+using Windows.Security.Credentials;
 
 using Newtonsoft.Json;
 
@@ -20,11 +22,14 @@ namespace VoatHub.Api
     public class VoatApiClient : IDisposable
     {
         private HttpClient httpClient;
+        private string accessToken;
+        private DateTime? accessTokenExpiration;  // Can be null
 
         public VoatApiClient(string apiKey)
         {
             httpClient = new HttpClient();
             httpClient.DefaultRequestHeaders.Add("Voat-ApiKey", apiKey);
+            
         }
 
         /// <summary>
