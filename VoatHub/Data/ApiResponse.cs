@@ -6,10 +6,15 @@ using System.Threading.Tasks;
 
 namespace VoatHub.Data
 {
-    interface ApiResponse<T>
+    /// <summary>
+    /// Generic response returned by the Voat API.
+    /// </summary>
+    /// <remarks>http://fakevout.azurewebsites.net/api/help</remarks>
+    /// <typeparam name="T"></typeparam>
+    public class ApiResponse<T>
     {
-        T Data { get; }
-        bool Success { get; }
-        ErrorInfo Error { get; }
+        public T data { get; set; }
+        public bool success { get; set; }
+        public ErrorInfo error { get; set; }
     }
 }

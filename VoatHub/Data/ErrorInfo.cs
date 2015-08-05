@@ -6,9 +6,13 @@ using System.Threading.Tasks;
 
 namespace VoatHub.Data
 {
-    class ErrorInfo
+    /// <summary>
+    /// Container for an error information.
+    /// </summary>
+    /// <remarks>http://fakevout.azurewebsites.net/api/help/resourcemodel?modelName=ErrorInfo</remarks>
+    public class ErrorInfo
     {
-        public string Type { get; }
-        public string Message { get; }
+        public string type { get; }
+        public string message { get; }
     }
 }

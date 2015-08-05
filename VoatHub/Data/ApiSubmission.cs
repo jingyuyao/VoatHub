@@ -7,24 +7,30 @@ using System.Runtime.Serialization;
 
 namespace VoatHub.Data
 {
-    [DataContract]
-    class ApiSubmission
+    /// <summary>
+    /// Container for a submission.
+    /// </summary>
+    /// <remarks>http://fakevout.azurewebsites.net/api/help/resourcemodel?modelName=ApiSubmission</remarks>
+    public class ApiSubmission
     {
-        [DataMember(Name = "id")]
-        public int Id { get; }
-        public int CommentCount { get; }
-        public DateTime Date { get; }
-        public int UpVotes { get; }
-        public int DownVotes { get; }
-        public DateTime LastEditDate { get; }
-        public int Views { get; }
-        public string UserName { get; }
-        public string Subverse { get; }
-        public string Thumbnail { get; }
-        public string Title { get; }
-        public int Type { get; }
-        public string Url { get; }
-        public string Content { get; }
-        public string FormattedContent { get; }
+        public int id { get; set; }
+        public int commentCount { get; set; }
+        public DateTime date { get; set; }
+        public int upVotes { get; set; }
+        public int downVotes { get; set; }
+        public string lastEditDate { get; set; }
+        public int views { get; set; }
+        public string userName { get; set; }
+        public string subverse { get; set; }
+        public Uri thumbnail { get; set; }
+        public string title { get; set; }
+
+        /// <summary>
+        /// The type of submission. Values: 1 for Self Posts, 2 for Link Posts
+        /// </summary>
+        public int type { get; set; }
+        public Uri url { get; set; }
+        public string content { get; set; }
+        public string formattedContent { get; set; }
     }
 }

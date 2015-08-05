@@ -6,15 +6,19 @@ using System.Threading.Tasks;
 
 namespace VoatHub.Data
 {
-    class ApiSubverseInfo
+    /// <summary>
+    /// Container for information pertaining to a subverse.
+    /// </summary>
+    /// <remarks>http://fakevout.azurewebsites.net/api/help/resourcemodel?modelName=ApiSubverseInfo</remarks>
+    public class ApiSubverseInfo
     {
-        public string Name { get; }
-        public string Title { get; }
-        public string Description { get; }
-        public DateTime CreationDate { get; }
-        public int SubscriberCount { get; }
-        public bool RatedAdult { get; }
-        public string Sidebar { get; }
-        public string Type { get; }
+        public string name { get; set; }
+        public string title { get; set; }
+        public string description { get; set; }
+        public DateTime creationDate { get; set; }
+        public int subscriberCount { get; set; }
+        public bool ratedAdult { get; set; }
+        public string sidebar { get; set; }
+        public string type { get; set; }
     }
 }
