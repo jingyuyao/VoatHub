@@ -34,7 +34,7 @@ namespace VoatHub.Api
 
             credentialManager = new CredentialManager("voatClient");
             tokenManager = new TokenManager(tokenUri, httpClient, credentialManager);
-            if (credentialManager.LoggedIn) setAuthorizationHeader();
+            setAuthorizationHeader().RunSynchronously();
         }
 
         /// <summary>
@@ -45,7 +45,7 @@ namespace VoatHub.Api
         /// <returns></returns>
         public async Task<ApiResponse<T>> GetAsync<T>(Uri uri)
         {
-            updateHeader();
+            await setAuthorizationHeader();
             HttpResponseMessage response = await this.httpClient.GetAsync(uri);
             return await DeserializeResponse<T>(response);
         }
@@ -60,22 +60,20 @@ namespace VoatHub.Api
         /// <returns></returns>
         public async Task<ApiResponse<T>> PostAsync<T>(Uri uri, IHttpContent content)
         {
-            updateHeader();
+            await setAuthorizationHeader();
             content.Headers.ContentType = new HttpMediaTypeHeaderValue("application/json");
             HttpResponseMessage response = await this.httpClient.PostAsync(uri, content);
             return await DeserializeResponse<T>(response);
         }
 
-        private void setAuthorizationHeader()
+        private async Task setAuthorizationHeader()
         {
-            var accessToken = tokenManager.AccessToken;
-            if (accessToken != null)
-                httpClient.DefaultRequestHeaders.Authorization = new HttpCredentialsHeaderValue("Bearer", accessToken);
-        }
-
-        private void updateHeader()
-        {
-            if (credentialManager.LoggedIn && tokenManager.Expired) setAuthorizationHeader();
+            var accessToken = await tokenManager.AccessToken();
+            var headers = httpClient.DefaultRequestHeaders;
+            if (accessToken == null)
+                headers.Authorization = null;
+            else if (headers.Authorization == null || headers.Authorization.Token != accessToken)
+                headers.Authorization = new HttpCredentialsHeaderValue("Bearer", accessToken);
         }
 
         /// <summary>
@@ -98,6 +96,7 @@ namespace VoatHub.Api
         public void Logout()
         {
             credentialManager.Logout();
+            tokenManager.Clear();
         }
 
         public bool LoggedIn

@@ -12,7 +12,7 @@ namespace VoatHub.Api
     /// Manages credentials to login to various clients.
     /// </summary>
     /// <remarks>Currently only supports one user per client.</remarks>
-    public class CredentialManager
+    public sealed class CredentialManager
     {
         private PasswordVault vault;
         private string clientName;
@@ -45,18 +45,15 @@ namespace VoatHub.Api
         /// </summary>
         public void Logout()
         {
-            try
-            {
-                var credentials = vault.FindAllByResource(clientName);
+            var allCredentials = vault.RetrieveAll();
 
-                foreach (var credential in credentials)
+            foreach (var credential in allCredentials)
+            {
+                if (credential.Resource == clientName)
                 {
                     vault.Remove(credential);
                 }
             }
-            // Catches exception thrown by FindAllByResource
-            catch(Exception e) { Debug.WriteLine(e); }
-
             credential = null;
         }
 
@@ -82,25 +79,21 @@ namespace VoatHub.Api
             {
                 if (credential == null)
                 {
-                    try
-                    {
-                        var credentials = vault.FindAllByResource(clientName);
+                    var allCredentials = vault.RetrieveAll();
 
-                        if (credentials.Count > 0)
+                    foreach (var credential in allCredentials)
+                    {
+                        if(credential.Resource == clientName)
                         {
-                            credentials[0].RetrievePassword();
-                            return credentials[0];
+                            credential.RetrievePassword();
+                            return credential;
                         }
                     }
-                    // Catches exception thrown by FindAllByResource
-                    catch (Exception e) { Debug.WriteLine(e); }
 
                     return null;
                 }
-                else
-                {
-                    return credential;
-                }
+
+                return credential;
             }
         }
     }
