@@ -7,32 +7,42 @@ using System.Threading.Tasks;
 using VoatHub.Api;
 using VoatHub.Data;
 
-namespace VoatHubTests
+namespace VoatHubTests.Api
 {
     [TestClass]
     public class VoatApiTests
     {
-        VoatApi api;
         readonly string apiKey = "ZbDlC73ndD6TB84WQmKvMA==";
         readonly string baseUri = "https://fakevout.azurewebsites.net/api/v1/";
+        readonly string tokenUri = "https://fakevout.azurewebsites.net/api/token";
+
+        [TestMethod]
+        public async Task PostSubmission()
+        {
+            VoatApi api = new VoatApi(apiKey, baseUri, tokenUri);
+            var submission = new UserSubmission();
+            submission.title = "Test test test test!!!";
+            submission.nsfw = false;
+            submission.anon = false;
+            submission.url = "https://www.google.com";
+            submission.content = "Lets hope this works. " + DateTime.Now.ToString();
+            submission.HasState = true;
+
+            api.Login("swampfire100", "password");
+
+            var response = await api.PostSubmission("Test", submission);
+            Assert.IsInstanceOfType(response, typeof(ApiResponse<ApiSubmission>));
+        }
 
         [TestMethod]
         public async Task GetSubmissions()
         {
-            api = new VoatApi(apiKey, baseUri);
+            VoatApi api = new VoatApi(apiKey, baseUri, tokenUri);
             var submissions = await api.GetSubmissions("Test");
             Assert.IsInstanceOfType(submissions, typeof(ApiResponse<List<ApiSubmission>>));
             Assert.IsInstanceOfType(submissions.data, typeof(List<ApiSubmission>));
-            Assert.AreNotEqual(submissions.data.Count, 0);
             Assert.AreEqual(submissions.success, true);
             Assert.AreEqual(submissions.error, null);
-
-            foreach (var submission in submissions.data)
-            {
-                verifySubmission(submission);
-            }
-
-            api.Dispose();
         }
 
         /// <summary>

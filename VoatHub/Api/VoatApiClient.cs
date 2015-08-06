@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.Web.Http;
+using Windows.Web.Http.Headers;
 using Windows.Storage;
 using Windows.Security.Credentials;
 
@@ -22,14 +24,17 @@ namespace VoatHub.Api
     public class VoatApiClient : IDisposable
     {
         private HttpClient httpClient;
-        private string accessToken;
-        private DateTime? accessTokenExpiration;  // Can be null
+        private CredentialManager credentialManager;
+        private TokenManager tokenManager;
 
-        public VoatApiClient(string apiKey)
+        public VoatApiClient(string apiKey, string tokenUri)
         {
             httpClient = new HttpClient();
             httpClient.DefaultRequestHeaders.Add("Voat-ApiKey", apiKey);
-            
+
+            credentialManager = new CredentialManager("voatClient");
+            tokenManager = new TokenManager(tokenUri, httpClient, credentialManager);
+            if (credentialManager.LoggedIn) setAuthorizationHeader();
         }
 
         /// <summary>
@@ -40,12 +45,14 @@ namespace VoatHub.Api
         /// <returns></returns>
         public async Task<ApiResponse<T>> GetAsync<T>(Uri uri)
         {
+            updateHeader();
             HttpResponseMessage response = await this.httpClient.GetAsync(uri);
             return await DeserializeResponse<T>(response);
         }
 
         /// <summary>
-        /// Wraps <see cref="HttpClient.PostAsync(Uri, IHttpContent)"/> to return an <see cref="ApiResponse{T}"/>
+        /// Wraps <see cref="HttpClient.PostAsync(Uri, IHttpContent)"/> to send "application/json"
+        /// and return an <see cref="ApiResponse{T}"/>
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="uri"></param>
@@ -53,8 +60,22 @@ namespace VoatHub.Api
         /// <returns></returns>
         public async Task<ApiResponse<T>> PostAsync<T>(Uri uri, IHttpContent content)
         {
+            updateHeader();
+            content.Headers.ContentType = new HttpMediaTypeHeaderValue("application/json");
             HttpResponseMessage response = await this.httpClient.PostAsync(uri, content);
             return await DeserializeResponse<T>(response);
+        }
+
+        private void setAuthorizationHeader()
+        {
+            var accessToken = tokenManager.AccessToken;
+            if (accessToken != null)
+                httpClient.DefaultRequestHeaders.Authorization = new HttpCredentialsHeaderValue("Bearer", accessToken);
+        }
+
+        private void updateHeader()
+        {
+            if (credentialManager.LoggedIn && tokenManager.Expired) setAuthorizationHeader();
         }
 
         /// <summary>
@@ -67,6 +88,24 @@ namespace VoatHub.Api
         {
             string responseContent = await response.Content.ReadAsStringAsync();
             return JsonConvert.DeserializeObject<ApiResponse<T>>(responseContent);
+        }
+
+        public void Login(string username, string password)
+        {
+            credentialManager.Login(username, password);
+        }
+
+        public void Logout()
+        {
+            credentialManager.Logout();
+        }
+
+        public bool LoggedIn
+        {
+            get
+            {
+                return credentialManager.LoggedIn;
+            }
         }
 
         public void Dispose()

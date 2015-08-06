@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Windows.Web.Http;
+
+using Newtonsoft.Json;
 
 using VoatHub.Data;
 
@@ -16,9 +19,9 @@ namespace VoatHub.Api
         private VoatApiClient apiClient;
         private Uri baseUri;
 
-        public VoatApi(string apiKey, string baseUri)
+        public VoatApi(string apiKey, string baseUri, string tokenUri)
         {
-            apiClient = new VoatApiClient(apiKey);
+            apiClient = new VoatApiClient(apiKey, tokenUri);
             this.baseUri = new Uri(baseUri);
         }
 
@@ -29,8 +32,45 @@ namespace VoatHub.Api
         /// <returns>Task containing the response.</returns>
         public async Task<ApiResponse<List<ApiSubmission>>> GetSubmissions(string subverse)
         {
+            // TODO Search options support
             Uri uri = GetAbsoluteUri("v/" + subverse);
             return await apiClient.GetAsync<List<ApiSubmission>>(uri);
+        }
+
+        public async Task<ApiResponse<ApiSubmission>> PostSubmission(string subverse, UserSubmission submission)
+        {
+            requireLogin();
+            Uri uri = GetAbsoluteUri("v/" + subverse);
+
+            var content = new HttpStringContent(JsonConvert.SerializeObject(submission));
+
+            return await apiClient.PostAsync<ApiSubmission>(uri, content);
+        }
+
+        public void Login(string username, string password)
+        {
+            apiClient.Login(username, password);
+        }
+
+        public void Logout()
+        {
+            apiClient.Logout();
+        }
+
+        public bool LoggedIn
+        {
+            get
+            {
+                return apiClient.LoggedIn;
+            }
+        }
+
+        private void requireLogin()
+        {
+            if (!apiClient.LoggedIn)
+            {
+                throw new UnauthenticatedException();
+            }
         }
 
         /// <summary>
@@ -48,4 +88,7 @@ namespace VoatHub.Api
             apiClient.Dispose();
         }
     }
+
+    public class UnauthenticatedException : Exception
+    { }
 }

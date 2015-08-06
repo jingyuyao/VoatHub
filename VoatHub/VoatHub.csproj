@@ -96,7 +96,6 @@
     <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Api\OauthClient.cs" />
     <Compile Include="Api\VoatApi.cs" />
     <Compile Include="Api\VoatApiClient.cs" />
     <Compile Include="Api\CredentialManager.cs" />
@@ -108,7 +107,9 @@
     <Compile Include="Data\ApiResponse.cs" />
     <Compile Include="Data\ApiSubmission.cs" />
     <Compile Include="Data\ApiSubverseInfo.cs" />
+    <Compile Include="Data\ApiToken.cs" />
     <Compile Include="Data\ErrorInfo.cs" />
+    <Compile Include="Data\UserSubmission.cs" />
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
