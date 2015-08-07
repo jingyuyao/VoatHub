@@ -12,35 +12,24 @@ namespace VoatHubTests.Api
     [TestClass]
     public class TokenManagerTests
     {
-        readonly string tokenUri = "https://fakevout.azurewebsites.net/api/token";
-
-        TokenManager tokenManager;
-        CredentialManager credentialManager;
-        HttpClient httpClient;
-
-        private void setUp()
-        {
-            credentialManager = new CredentialManager("tokenManagerTest");
-            httpClient = new HttpClient();
-            httpClient.DefaultRequestHeaders.Add("Voat-ApiKey", "ZbDlC73ndD6TB84WQmKvMA==");
-        }
+        readonly string TOKEN_URI = "https://fakevout.azurewebsites.net/api/token";
+        readonly string API_KEY = "ZbDlC73ndD6TB84WQmKvMA==";
 
         [TestMethod]
         public async Task InitializationTest()
         {
-            setUp();
-            credentialManager.Logout();
-            tokenManager = new TokenManager(tokenUri, httpClient, credentialManager);
+            var client = new VoatApiClient(API_KEY, TOKEN_URI);
+            var tokenManager = new TokenManager(client);
             Assert.AreEqual(await tokenManager.AccessToken(), null);
         }
 
         [TestMethod]
         public async Task TokenTest()
         {
-            setUp();
-            credentialManager.Login("swampfire100", "password");
+            var client = new VoatApiClient(API_KEY, TOKEN_URI);
+            client.Login("swampfire100", "password");
 
-            tokenManager = new TokenManager(tokenUri, httpClient, credentialManager);
+            var tokenManager = new TokenManager(client);
             Assert.AreNotEqual(await tokenManager.AccessToken(), null);
         }
     }

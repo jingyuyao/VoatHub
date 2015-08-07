@@ -45,14 +45,11 @@ namespace VoatHubTests.Api
             Assert.AreEqual(submissions.error, null);
         }
 
-        /// <summary>
-        /// Temporary for verifying my sanity
-        /// </summary>
-        /// <param name="submission"></param>
-        private void verifySubmission(ApiSubmission submission)
+        [TestMethod]
+        public void VoatApiDisposeTest()
         {
-            Assert.IsNotNull(submission.id);
-            Assert.IsNotNull(submission.date);
+            var client = new VoatApi(apiKey, baseUri, tokenUri);
+            client.Dispose();
         }
     }
 }

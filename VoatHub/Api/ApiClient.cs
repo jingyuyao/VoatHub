@@ -1,42 +1,74 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using VoatHub.Data;
 using Windows.Web.Http;
 using Windows.Web.Http.Headers;
-using Windows.Storage;
-using Windows.Security.Credentials;
-
-using Newtonsoft.Json;
-
-using VoatHub.Data;
 
 namespace VoatHub.Api
 {
-    /// <summary>An HttpClient tailored for Voat's API.
-    /// <para>
-    /// Adds Voat-ApiKey on every request and deserializes Json response into
-    /// the approperiate class.
-    /// </para>
-    /// </summary>
-    public class VoatApiClient : IDisposable
+    public abstract class ApiClient : IApiClient
     {
-        private static readonly TimeSpan THROTTLE_WAIT_TIME = new TimeSpan(0, 0, 1);
-        private HttpClient httpClient;
-        private CredentialManager credentialManager;
-        private TokenManager tokenManager;
-        private ThrottleManager throttleManager;
+        protected HttpClient httpClient;
+        protected CredentialManager credentialManager;
+        protected TokenManager tokenManager;
+        protected ThrottleManager throttleManager;
 
-        public VoatApiClient(string apiKey, string tokenUri)
+        public ApiClient()
         {
             httpClient = new HttpClient();
-            httpClient.DefaultRequestHeaders.Add("Voat-ApiKey", apiKey);
-
-            credentialManager = new CredentialManager("voatClient");
-            tokenManager = new TokenManager(tokenUri, httpClient, credentialManager);
+            credentialManager = new CredentialManager(ClientName);
+            tokenManager = new TokenManager(this);
             throttleManager = new ThrottleManager();
+        }
+
+        public abstract string ClientName { get; }
+        public abstract Task<ApiToken> RetrieveToken();
+
+        /// <summary>
+        /// Deserializes response to user defined type using client specific serializer.
+        /// </summary>
+        /// <typeparam name="T">Type the response is deserialized to.</typeparam>
+        /// <param name="response">Response to deserialize.</param>
+        /// <returns>Serialized response.</returns>
+        /// <exception cref="SerializationException"></exception>
+        /// <seealso cref="JsonApiClient.deserializeResponse{T}(HttpResponseMessage)"/>
+        protected abstract Task<T> deserializeResponse<T>(HttpResponseMessage response);
+
+        /// <summary>
+        /// Login in the given user.
+        /// </summary>
+        /// <remarks>Actually implementation is delegated to <see cref="CredentialManager"/></remarks>
+        /// <param name="username"></param>
+        /// <param name="password"></param>
+        public void Login(string username, string password)
+        {
+            credentialManager.Login(username, password);
+        }
+
+        /// <summary>
+        /// Logout the current user. Also clears token.
+        /// </summary>
+        /// <remarks>Actual implementation is delegated to <see cref="CredentialManager"/>
+        /// and <see cref="TokenManager"/></remarks>
+        public void Logout()
+        {
+            credentialManager.Logout();
+            tokenManager.Clear();
+        }
+
+        /// <summary>
+        /// Check if the user is logged in.
+        /// </summary>
+        /// <remarks>Actual implementation is delegated to <see cref="CredentialManager"/></remarks>
+        public bool LoggedIn
+        {
+            get
+            {
+                return credentialManager.LoggedIn;
+            }
         }
 
         /// <summary>
@@ -45,7 +77,7 @@ namespace VoatHub.Api
         /// <typeparam name="T"></typeparam>
         /// <param name="uri"></param>
         /// <returns></returns>
-        public async Task<ApiResponse<T>> GetAsync<T>(Uri uri)
+        public async Task<T> GetAsync<T>(Uri uri)
         {
             await preCall();
 
@@ -61,7 +93,7 @@ namespace VoatHub.Api
         /// <param name="uri"></param>
         /// <param name="content"></param>
         /// <returns></returns>
-        public async Task<ApiResponse<T>> PostAsync<T>(Uri uri, IHttpContent content)
+        public async Task<T> PostAsync<T>(Uri uri, IHttpContent content)
         {
             await preCall();
 
@@ -70,25 +102,6 @@ namespace VoatHub.Api
             return await handleResponse<T>(response);
         }
 
-        public void Login(string username, string password)
-        {
-            credentialManager.Login(username, password);
-        }
-
-        public void Logout()
-        {
-            credentialManager.Logout();
-            tokenManager.Clear();
-        }
-
-        public bool LoggedIn
-        {
-            get
-            {
-                return credentialManager.LoggedIn;
-            }
-        }
-        
         /// <summary>
         /// Bundles functions that need to happen before each call.
         /// </summary>
@@ -121,7 +134,7 @@ namespace VoatHub.Api
         /// <typeparam name="T"></typeparam>
         /// <param name="response"></param>
         /// <returns>The API response or null if serialization fails.</returns>
-        private async Task<ApiResponse<T>> handleResponse<T>(HttpResponseMessage response)
+        private async Task<T> handleResponse<T>(HttpResponseMessage response)
         {
             throttleManager.MadeCall();
             try
@@ -129,23 +142,11 @@ namespace VoatHub.Api
                 // Leave error handling to api client user
                 return await deserializeResponse<T>(response);
             }
-            catch (JsonSerializationException)
+            catch (SerializationException)
             {
                 // Server returns ill formed data which we can't serialize
-                return null;
+                return default(T);
             }
-        }
-
-        /// <summary>
-        /// Deserializes response containing JSON data into an ApiResponse.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="response"></param>
-        /// <returns></returns>
-        private async Task<ApiResponse<T>> deserializeResponse<T>(HttpResponseMessage response)
-        {
-            string responseContent = await response.Content.ReadAsStringAsync();
-            return JsonConvert.DeserializeObject<ApiResponse<T>>(responseContent);
         }
 
         public void Dispose()

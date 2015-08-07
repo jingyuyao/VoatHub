@@ -96,11 +96,16 @@
     <None Include="project.json" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Api\ApiExceptions.cs" />
+    <Compile Include="Api\IApiClient.cs" />
+    <Compile Include="Api\ApiClient.cs" />
+    <Compile Include="Api\JsonApiClient.cs" />
     <Compile Include="Api\ThrottleManager.cs" />
-    <Compile Include="Api\VoatApi.cs" />
-    <Compile Include="Api\VoatApiClient.cs" />
+    <Compile Include="Api\Voat\VoatApi.cs" />
+    <Compile Include="Api\Voat\VoatApiClient.cs" />
     <Compile Include="Api\CredentialManager.cs" />
     <Compile Include="Api\TokenManager.cs" />
+    <Compile Include="Api\Voat\VoatSubmissionApi.cs" />
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>

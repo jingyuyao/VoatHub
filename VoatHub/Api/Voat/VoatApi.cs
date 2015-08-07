@@ -34,7 +34,7 @@ namespace VoatHub.Api
         {
             // TODO Search options support
             Uri uri = GetAbsoluteUri("v/" + subverse);
-            return await apiClient.GetAsync<List<ApiSubmission>>(uri);
+            return await apiClient.GetAsync<ApiResponse<List<ApiSubmission>>>(uri);
         }
 
         public async Task<ApiResponse<ApiSubmission>> PostSubmission(string subverse, UserSubmission submission)
@@ -44,7 +44,7 @@ namespace VoatHub.Api
 
             var content = new HttpStringContent(JsonConvert.SerializeObject(submission));
 
-            return await apiClient.PostAsync<ApiSubmission>(uri, content);
+            return await apiClient.PostAsync<ApiResponse<ApiSubmission>>(uri, content);
         }
 
         public void Login(string username, string password)
@@ -88,7 +88,4 @@ namespace VoatHub.Api
             apiClient.Dispose();
         }
     }
-
-    public class UnauthenticatedException : Exception
-    { }
 }

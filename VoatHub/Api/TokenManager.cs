@@ -19,27 +19,30 @@ namespace VoatHub.Api
     /// </summary>
     public sealed class TokenManager
     {
-        private const string VOAT_ACCESS_TOKEN = "voatAccessToken";
-        private const string VOAT_ACCESS_TOKEN_EXPIRATION = "voatAccessTokenExpiration";
-
-        private Uri tokenUri;
-        private HttpClient httpClient;
-        private CredentialManager credentialManager;
+        private IApiClient apiClient;
         private ApplicationDataContainer roamingSettings;
-        private string voatAccessToken;  // Invariant: Must be null when not logged in.
-        private DateTime voatAccessTokenExpiration;  // Invariant: Must be default DateTime when not logged in.
+        private string accessTokenKey;
+        private string accessTokenExpirationKey;
+        /// <summary>
+        /// Invariant: Must be null when not logged in.
+        /// </summary>
+        private string accessToken;
+        /// <summary>
+        /// Invariant: Must be default DateTime when not logged in.
+        /// </summary>
+        private DateTime accessTokenExpiration;
 
         /// <summary>
-        /// 
+        /// A manager to manage refresh and retreival of tokens.
+        /// <para>Actual logic to get token from server is provided by <see cref="IApiClient"/>.</para>
         /// </summary>
-        /// <param name="tokenUri">Absolute path to the token endpoint.</param>
-        /// <param name="httpClient"></param>
-        /// <param name="credentialManager"></param>
-        public TokenManager(string tokenUri, HttpClient httpClient, CredentialManager credentialManager)
+        /// <param name="apiClient">The client this manager is managing tokens for.</param>
+        public TokenManager(IApiClient apiClient)
         {
-            this.tokenUri = new Uri(tokenUri);
-            this.httpClient = httpClient;
-            this.credentialManager = credentialManager;
+            this.apiClient = apiClient;
+            accessTokenKey = apiClient.ClientName + "AccessToken";
+            accessTokenExpirationKey = apiClient.ClientName + "AccessTokenExpiration";
+
             roamingSettings = ApplicationData.Current.RoamingSettings;
             getDataFromSettings();
         }
@@ -52,12 +55,12 @@ namespace VoatHub.Api
         /// <returns>The accessToken or null if there are none.</returns>
         public async Task<string> AccessToken()
         {
-            if(credentialManager.LoggedIn && (voatAccessToken == null || Expired))
+            if(apiClient.LoggedIn && (accessToken == null || Expired))
             {
                 await updateTokenData();
             }
 
-            return voatAccessToken;
+            return accessToken;
         }
 
         /// <summary>
@@ -68,7 +71,7 @@ namespace VoatHub.Api
         {
             get
             {
-                return voatAccessTokenExpiration < DateTime.Now;
+                return accessTokenExpiration < DateTime.Now;
             }
         }
 
@@ -77,8 +80,8 @@ namespace VoatHub.Api
         /// </summary>
         public void Clear()
         {
-            voatAccessToken = null;
-            voatAccessTokenExpiration = new DateTime();
+            accessToken = null;
+            accessTokenExpiration = new DateTime();
             setDataToSettings();
         }
 
@@ -88,10 +91,10 @@ namespace VoatHub.Api
         /// <param name="clientName"></param>
         private void getDataFromSettings()
         {
-            voatAccessToken = (string)roamingSettings.Values[VOAT_ACCESS_TOKEN];
-            var binaryTime = roamingSettings.Values[VOAT_ACCESS_TOKEN_EXPIRATION];
+            accessToken = (string)roamingSettings.Values[accessTokenKey];
+            var binaryTime = roamingSettings.Values[accessTokenExpirationKey];
 
-            voatAccessTokenExpiration = binaryTime == null ? new DateTime() : DateTime.FromBinary((long)binaryTime);
+            accessTokenExpiration = binaryTime == null ? new DateTime() : DateTime.FromBinary((long)binaryTime);
         }
 
         /// <summary>
@@ -100,8 +103,8 @@ namespace VoatHub.Api
         /// </summary>
         private void setDataToSettings()
         {
-            roamingSettings.Values[VOAT_ACCESS_TOKEN] = voatAccessToken;
-            roamingSettings.Values[VOAT_ACCESS_TOKEN_EXPIRATION] = voatAccessTokenExpiration.ToBinary();
+            roamingSettings.Values[accessTokenKey] = accessToken;
+            roamingSettings.Values[accessTokenExpirationKey] = accessTokenExpiration.ToBinary();
         }
 
         /// <summary>
@@ -110,23 +113,14 @@ namespace VoatHub.Api
         /// <param name="credential">Can be null.</param>
         private async Task updateTokenData()
         {
-            var credential = credentialManager.Credential;
+            var token = await apiClient.RetrieveToken();
 
-            var properties = new List<KeyValuePair<string, string>>();
-            properties.Add(new KeyValuePair<string, string>("grant_type", "password"));
-            properties.Add(new KeyValuePair<string, string>("username", credential.UserName));
-            properties.Add(new KeyValuePair<string, string>("password", credential.Password));
-
-            var content = new HttpFormUrlEncodedContent(properties);
-
-            // Blocking operations
-            var response = await httpClient.PostAsync(tokenUri, content);
-            var responseString = await response.Content.ReadAsStringAsync();
-            var token = JsonConvert.DeserializeObject<ApiToken>(responseString);
-
-            voatAccessToken = token.access_token;
-            voatAccessTokenExpiration = getExpiration(token.expires_in);
-            setDataToSettings();
+            if (token != null)
+            {
+                accessToken = token.access_token;
+                accessTokenExpiration = getExpiration(token.expires_in);
+                setDataToSettings();
+            }
         }
 
         /// <summary>
