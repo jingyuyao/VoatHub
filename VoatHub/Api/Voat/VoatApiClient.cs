@@ -41,6 +41,7 @@ namespace VoatHub.Api
 
         public override async Task<ApiToken> RetrieveToken()
         {
+            Debug.WriteLine("Retrieving token...", "ApiClient");
             await Task.Delay(throttleManager.WaitTime);
             // Does not need authorization header.
             // Calling setAuthorizationHeader can also cause circular reference
@@ -56,6 +57,7 @@ namespace VoatHub.Api
             var response = await httpClient.PostAsync(tokenUri, content);
             var responseString = await response.Content.ReadAsStringAsync();
             var token = JsonConvert.DeserializeObject<ApiToken>(responseString);
+            Debug.WriteLine(token, "ApiClient");
             return token;
         }
     }

@@ -105,7 +105,6 @@
     <Compile Include="Api\Voat\VoatApiClient.cs" />
     <Compile Include="Api\CredentialManager.cs" />
     <Compile Include="Api\TokenManager.cs" />
-    <Compile Include="Api\Voat\VoatSubmissionApi.cs" />
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>

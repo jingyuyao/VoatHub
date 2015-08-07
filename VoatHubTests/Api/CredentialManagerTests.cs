@@ -24,25 +24,15 @@ namespace VoatHubTests.Api
         }
 
         [TestMethod]
-        public void LoginTest()
+        public void CredentialManagerTest()
         {
             credentialManager = new CredentialManager(clientName);
             credentialManager.Login(username, password);
             var credential = credentialManager.Credential;
             Assert.AreEqual(credential.UserName, username);
             Assert.AreEqual(credential.Password, password);
-        }
-
-        [TestMethod]
-        public void LogoutTest()
-        {
-            credentialManager = new CredentialManager(clientName);
-            credentialManager.Login(username, password);
-            var credential = credentialManager.Credential;
-            Assert.AreEqual(credential.UserName, username);
-            Assert.AreEqual(credential.Password, password);
-
             credentialManager.Logout();
+
             credential = credentialManager.Credential;
             Assert.AreEqual(credential, null);
         }

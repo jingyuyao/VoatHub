@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Windows.Web.Http;
 
@@ -25,28 +23,6 @@ namespace VoatHub.Api
             this.baseUri = new Uri(baseUri);
         }
 
-        /// <summary>
-        /// Get the list of submissions for a subverse.
-        /// </summary>
-        /// <param name="subverse">Name of a subverse.</param>
-        /// <returns>Task containing the response.</returns>
-        public async Task<ApiResponse<List<ApiSubmission>>> GetSubmissions(string subverse)
-        {
-            // TODO Search options support
-            Uri uri = GetAbsoluteUri("v/" + subverse);
-            return await apiClient.GetAsync<ApiResponse<List<ApiSubmission>>>(uri);
-        }
-
-        public async Task<ApiResponse<ApiSubmission>> PostSubmission(string subverse, UserSubmission submission)
-        {
-            requireLogin();
-            Uri uri = GetAbsoluteUri("v/" + subverse);
-
-            var content = new HttpStringContent(JsonConvert.SerializeObject(submission));
-
-            return await apiClient.PostAsync<ApiResponse<ApiSubmission>>(uri, content);
-        }
-
         public void Login(string username, string password)
         {
             apiClient.Login(username, password);
@@ -65,7 +41,33 @@ namespace VoatHub.Api
             }
         }
 
-        private void requireLogin()
+        /// <summary>
+        /// Get the list of submissions for a subverse.
+        /// </summary>
+        /// <param name="subverse">Name of a subverse.</param>
+        /// <returns>Task containing the response.</returns>
+        public async Task<ApiResponse<List<ApiSubmission>>> GetSubmissionList(string subverse)
+        {
+            // TODO: Search options support
+            Uri uri = GetAbsoluteUri("v/" + subverse);
+            return await apiClient.GetAsync<ApiResponse<List<ApiSubmission>>>(uri);
+        }
+
+        public async Task<ApiResponse<ApiSubmission>> PostSubmission(string subverse, UserSubmission submission)
+        {
+            requireLogin();
+            Uri uri = GetAbsoluteUri("v/" + subverse);
+            var content = new HttpStringContent(JsonConvert.SerializeObject(submission));
+            return await apiClient.PostAsync<ApiResponse<ApiSubmission>>(uri, content);
+        }
+
+        public async Task<ApiResponse<ApiSubmission>> GetSubmission(string subverse, int submissionId)
+        {
+            Uri uri = GetAbsoluteUri("v/" + subverse + "/" + submissionId);
+            return await apiClient.GetAsync<ApiResponse<ApiSubmission>>(uri);
+        }
+
+        internal void requireLogin()
         {
             if (!apiClient.LoggedIn)
             {

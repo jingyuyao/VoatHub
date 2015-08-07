@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using VoatHub.Data;
 using Windows.Web.Http;
@@ -9,6 +8,9 @@ using Windows.Web.Http.Headers;
 
 namespace VoatHub.Api
 {
+    /// <summary>
+    /// Provides functionality to all common api client classes.
+    /// </summary>
     public abstract class ApiClient : IApiClient
     {
         protected HttpClient httpClient;
@@ -36,6 +38,17 @@ namespace VoatHub.Api
         /// <exception cref="SerializationException"></exception>
         /// <seealso cref="JsonApiClient.deserializeResponse{T}(HttpResponseMessage)"/>
         protected abstract Task<T> deserializeResponse<T>(HttpResponseMessage response);
+
+        /// <summary>
+        /// The ContentType of request data being sent. Default to null.
+        /// </summary>
+        protected virtual HttpMediaTypeHeaderValue requestContentType
+        {
+            get
+            {
+                return null;
+            }
+        }
 
         /// <summary>
         /// Login in the given user.
@@ -77,28 +90,61 @@ namespace VoatHub.Api
         /// <typeparam name="T"></typeparam>
         /// <param name="uri"></param>
         /// <returns></returns>
-        public async Task<T> GetAsync<T>(Uri uri)
+        public virtual async Task<T> GetAsync<T>(Uri uri)
         {
             await preCall();
-
+            Debug.WriteLine(uri, "ApiClient");
             HttpResponseMessage response = await this.httpClient.GetAsync(uri);
             return await handleResponse<T>(response);
         }
 
         /// <summary>
-        /// Wraps <see cref="HttpClient.PostAsync(Uri, IHttpContent)"/> to send "application/json"
+        /// Wraps <see cref="HttpClient.PostAsync(Uri, IHttpContent)"/>.
         /// and return an <see cref="ApiResponse{T}"/>
+        /// <para>ContentType is set to <see cref="requestContentType"/></para>
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="uri"></param>
         /// <param name="content"></param>
         /// <returns></returns>
-        public async Task<T> PostAsync<T>(Uri uri, IHttpContent content)
+        public virtual async Task<T> PostAsync<T>(Uri uri, IHttpContent content)
         {
             await preCall();
-
-            content.Headers.ContentType = new HttpMediaTypeHeaderValue("application/json");
+            Debug.WriteLine(uri, "ApiClient");
+            content.Headers.ContentType = requestContentType;
             HttpResponseMessage response = await this.httpClient.PostAsync(uri, content);
+            return await handleResponse<T>(response);
+        }
+
+        /// <summary>
+        /// Wraps <see cref="HttpClient.PutAsync(Uri, IHttpContent)"/>.
+        /// and return an <see cref="ApiResponse{T}"/>
+        /// </summary>
+        /// <para>ContentType is set to <see cref="requestContentType"/></para>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="uri"></param>
+        /// <param name="content"></param>
+        /// <returns></returns>
+        public virtual async Task<T> PutAsync<T>(Uri uri, IHttpContent content)
+        {
+            await preCall();
+            Debug.WriteLine(uri, "ApiClient");
+            content.Headers.ContentType = requestContentType;
+            HttpResponseMessage response = await this.httpClient.PutAsync(uri, content);
+            return await handleResponse<T>(response);
+        }
+
+        /// <summary>
+        /// Wraps <see cref="HttpClient.DeleteAsync(Uri)"/> to return an <see cref="ApiResponse{T}"/>
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="uri"></param>
+        /// <returns></returns>
+        public virtual async Task<T> DeleteAsync<T>(Uri uri)
+        {
+            await preCall();
+            Debug.WriteLine(uri, "ApiClient");
+            HttpResponseMessage response = await this.httpClient.DeleteAsync(uri);
             return await handleResponse<T>(response);
         }
 
@@ -106,7 +152,7 @@ namespace VoatHub.Api
         /// Bundles functions that need to happen before each call.
         /// </summary>
         /// <returns></returns>
-        private async Task preCall()
+        protected async Task preCall()
         {
             await Task.Delay(throttleManager.WaitTime);
             await setAuthorizationHeader();
@@ -117,7 +163,7 @@ namespace VoatHub.Api
         /// <para>Set Bearer token if there is a valid one.</para>
         /// </summary>
         /// <returns></returns>
-        private async Task setAuthorizationHeader()
+        protected async Task setAuthorizationHeader()
         {
             var accessToken = await tokenManager.AccessToken();
             var headers = httpClient.DefaultRequestHeaders;
@@ -134,13 +180,15 @@ namespace VoatHub.Api
         /// <typeparam name="T"></typeparam>
         /// <param name="response"></param>
         /// <returns>The API response or null if serialization fails.</returns>
-        private async Task<T> handleResponse<T>(HttpResponseMessage response)
+        protected async Task<T> handleResponse<T>(HttpResponseMessage response)
         {
             throttleManager.MadeCall();
             try
             {
                 // Leave error handling to api client user
-                return await deserializeResponse<T>(response);
+                var deserialized =  await deserializeResponse<T>(response);
+                Debug.WriteLine(deserialized, "ApiClient");
+                return deserialized;
             }
             catch (SerializationException)
             {

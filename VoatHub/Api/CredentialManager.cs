@@ -1,9 +1,5 @@
 ﻿using System;
 using System.Diagnostics;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Windows.Security.Credentials;
 
 namespace VoatHub.Api
@@ -52,6 +48,7 @@ namespace VoatHub.Api
                 if (credential.Resource == clientName)
                 {
                     vault.Remove(credential);
+                    Debug.WriteLine("Removed " + credential.UserName, this.GetType().Name);
                 }
             }
             credential = null;

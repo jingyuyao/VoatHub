@@ -1,16 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Collections;
-using System.Linq;
-using System.Text;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Windows.Storage;
-using Windows.Security.Credentials;
-using Windows.Web.Http;
-
-using Newtonsoft.Json;
-
-using VoatHub.Data;
 
 namespace VoatHub.Api
 {
@@ -80,6 +71,7 @@ namespace VoatHub.Api
         /// </summary>
         public void Clear()
         {
+            Debug.WriteLine("Clearing tokens...", this.GetType().Name);
             accessToken = null;
             accessTokenExpiration = new DateTime();
             setDataToSettings();
@@ -91,10 +83,14 @@ namespace VoatHub.Api
         /// <param name="clientName"></param>
         private void getDataFromSettings()
         {
+            Debug.WriteLine("Getting token data from settings...", this.GetType().Name);
             accessToken = (string)roamingSettings.Values[accessTokenKey];
             var binaryTime = roamingSettings.Values[accessTokenExpirationKey];
 
             accessTokenExpiration = binaryTime == null ? new DateTime() : DateTime.FromBinary((long)binaryTime);
+
+            Debug.WriteLine("accessToken: " + accessToken, this.GetType().Name);
+            Debug.WriteLine("accessTokenExpiration: " + accessTokenExpiration.ToString(), this.GetType().Name);
         }
 
         /// <summary>
@@ -103,8 +99,10 @@ namespace VoatHub.Api
         /// </summary>
         private void setDataToSettings()
         {
+            Debug.WriteLine("Setting token data to settings", this.GetType().Name);
             roamingSettings.Values[accessTokenKey] = accessToken;
             roamingSettings.Values[accessTokenExpirationKey] = accessTokenExpiration.ToBinary();
+            Debug.WriteLine(roamingSettings.Values, this.GetType().Name);
         }
 
         /// <summary>

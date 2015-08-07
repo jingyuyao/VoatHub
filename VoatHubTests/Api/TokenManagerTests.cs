@@ -31,6 +31,7 @@ namespace VoatHubTests.Api
 
             var tokenManager = new TokenManager(client);
             Assert.AreNotEqual(await tokenManager.AccessToken(), null);
+            client.Logout();
         }
     }
 }

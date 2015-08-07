@@ -36,13 +36,21 @@ namespace VoatHubTests.Api
         }
 
         [TestMethod]
-        public async Task GetSubmissions()
+        public async Task GetSubmissionList()
         {
-            var submissions = await api.GetSubmissions("Test");
+            var submissions = await api.GetSubmissionList("Test");
             Assert.IsInstanceOfType(submissions, typeof(ApiResponse<List<ApiSubmission>>));
             Assert.IsInstanceOfType(submissions.data, typeof(List<ApiSubmission>));
             Assert.AreEqual(submissions.success, true);
             Assert.AreEqual(submissions.error, null);
+        }
+
+        [TestMethod]
+        public async Task GetSubmission()
+        {
+            var submission = await api.GetSubmission("Test", 1);
+            // Heh
+            Assert.AreEqual(submission.data.title, "Wow, Voat on Azure is a pain in the...");
         }
 
         [TestMethod]

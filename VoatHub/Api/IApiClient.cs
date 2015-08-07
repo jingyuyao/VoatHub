@@ -27,5 +27,7 @@ namespace VoatHub.Api
 
         Task<T> GetAsync<T>(Uri uri);
         Task<T> PostAsync<T>(Uri uri, IHttpContent content);
+        Task<T> PutAsync<T>(Uri uri, IHttpContent content);
+        Task<T> DeleteAsync<T>(Uri uri);
     }
 }

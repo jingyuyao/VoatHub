@@ -1,16 +1,20 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Windows.Web.Http;
+using Windows.Web.Http.Headers;
 
 using Newtonsoft.Json;
 
 namespace VoatHub.Api
 {
+    /// <summary>
+    /// Extends <see cref="ApiClient"/> to send and receive Json data.
+    /// </summary>
     public abstract class JsonApiClient : ApiClient
     {
+        private static readonly HttpMediaTypeHeaderValue REQUEST_HEADER_VALUE = new HttpMediaTypeHeaderValue("application/json");
+
         /// <summary>
         /// Deserializes Json response into user defined type.
         /// </summary>
@@ -28,6 +32,14 @@ namespace VoatHub.Api
             catch(JsonSerializationException)
             {
                 throw new SerializationException();
+            }
+        }
+
+        protected override HttpMediaTypeHeaderValue requestContentType
+        {
+            get
+            {
+                return REQUEST_HEADER_VALUE;
             }
         }
     }
