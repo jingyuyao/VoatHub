@@ -12,14 +12,15 @@ namespace VoatHubTests.Api
     [TestClass]
     public class VoatApiTests
     {
-        readonly string apiKey = "ZbDlC73ndD6TB84WQmKvMA==";
-        readonly string baseUri = "https://fakevout.azurewebsites.net/api/v1/";
-        readonly string tokenUri = "https://fakevout.azurewebsites.net/api/token";
+        static readonly string apiKey = "ZbDlC73ndD6TB84WQmKvMA==";
+        static readonly string baseUri = "https://fakevout.azurewebsites.net/api/v1/";
+        static readonly string tokenUri = "https://fakevout.azurewebsites.net/api/token";
+
+        static VoatApi api = new VoatApi(apiKey, baseUri, tokenUri);
 
         [TestMethod]
         public async Task PostSubmission()
         {
-            VoatApi api = new VoatApi(apiKey, baseUri, tokenUri);
             var submission = new UserSubmission();
             submission.title = "Test test test test!!!";
             submission.nsfw = false;
@@ -37,7 +38,6 @@ namespace VoatHubTests.Api
         [TestMethod]
         public async Task GetSubmissions()
         {
-            VoatApi api = new VoatApi(apiKey, baseUri, tokenUri);
             var submissions = await api.GetSubmissions("Test");
             Assert.IsInstanceOfType(submissions, typeof(ApiResponse<List<ApiSubmission>>));
             Assert.IsInstanceOfType(submissions.data, typeof(List<ApiSubmission>));

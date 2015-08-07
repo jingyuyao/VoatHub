@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
 using Windows.Web.Http;
 
@@ -25,22 +26,22 @@ namespace VoatHubTests.Api
         }
 
         [TestMethod]
-        public void InitializationTest()
+        public async Task InitializationTest()
         {
             setUp();
             credentialManager.Logout();
             tokenManager = new TokenManager(tokenUri, httpClient, credentialManager);
-            Assert.AreEqual(tokenManager.AccessToken, null);
+            Assert.AreEqual(await tokenManager.AccessToken(), null);
         }
 
         [TestMethod]
-        public void TokenTest()
+        public async Task TokenTest()
         {
             setUp();
             credentialManager.Login("swampfire100", "password");
 
             tokenManager = new TokenManager(tokenUri, httpClient, credentialManager);
-            Assert.AreNotEqual(tokenManager.AccessToken, null);
+            Assert.AreNotEqual(await tokenManager.AccessToken(), null);
         }
     }
 }
