@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace VoatHub.Data
+﻿namespace VoatHub.Data.Voat
 {
-    public class ApiToken
+    public class ApiToken : IOauthTokenMinimum
     {
         public string access_token { get; set; }
         public string token_type { get; set; }

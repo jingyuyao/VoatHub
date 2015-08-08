@@ -4,8 +4,8 @@ using System.Collections.Generic;
 using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
 using System.Threading.Tasks;
 
-using VoatHub.Api;
-using VoatHub.Data;
+using VoatHub.Api.Voat;
+using VoatHub.Data.Voat;
 
 namespace VoatHubTests.Api
 {

@@ -5,7 +5,7 @@ using Windows.Storage;
 
 using VoatHub.Data;
 
-namespace VoatHub.Api
+namespace VoatHub.Api.Client
 {
     /// <summary>
     /// Manages token storage and calculates token expiration.
@@ -82,7 +82,7 @@ namespace VoatHub.Api
             setDataToSettings();
         }
 
-        public void SetToken(ApiToken token)
+        public void SetToken(IOauthTokenMinimum token)
         {
             Debug.WriteLine("Setting token...", "TokenManager");
             accessToken = token.access_token;

@@ -1,10 +1,6 @@
-﻿using System;
-using System.Diagnostics;
-using System.Collections.Generic;
-using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
-using System.Threading.Tasks;
+﻿using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
 
-using VoatHub.Api;
+using VoatHub.Api.Client;
 
 namespace VoatHubTests.Api
 {

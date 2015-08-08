@@ -7,8 +7,8 @@ using Windows.Web.Http;
 
 using Newtonsoft.Json;
 
-using VoatHub.Api;
-using VoatHub.Data;
+using VoatHub.Api.Voat;
+using VoatHub.Data.Voat;
 
 namespace VoatHubTests.Api.Voat
 {

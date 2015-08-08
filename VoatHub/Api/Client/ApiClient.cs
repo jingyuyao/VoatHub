@@ -1,13 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
-using VoatHub.Data;
 using Windows.Web.Http;
 using Windows.Web.Http.Filters;
 using Windows.Web.Http.Headers;
 
-namespace VoatHub.Api
+using VoatHub.Data.Voat;
+
+namespace VoatHub.Api.Client
 {
     /// <summary>
     /// Base class for all clients that interacts with the API.

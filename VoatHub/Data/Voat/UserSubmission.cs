@@ -2,7 +2,7 @@
 
 using Newtonsoft.Json;
 
-namespace VoatHub.Data
+namespace VoatHub.Data.Voat
 {
     public class UserSubmission
     {

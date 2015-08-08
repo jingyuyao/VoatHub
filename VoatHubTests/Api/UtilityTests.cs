@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
 
 using VoatHub.Api;
-using VoatHub.Data;
+using VoatHub.Data.Voat;
 
 namespace VoatHubTests.Api
 {

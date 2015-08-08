@@ -7,7 +7,7 @@ using Windows.Web.Http;
 
 using VoatHub.Data;
 
-namespace VoatHub.Api
+namespace VoatHub.Api.Client
 {
     /// <summary>
     /// Public facing interface for interacting with an API client.

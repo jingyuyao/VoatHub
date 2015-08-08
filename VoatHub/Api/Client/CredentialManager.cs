@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using Windows.Security.Credentials;
 
-namespace VoatHub.Api
+namespace VoatHub.Api.Client
 {
     /// <summary>
     /// Manages credentials to login to various clients.

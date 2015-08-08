@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
 
-using VoatHub.Api;
+using VoatHub.Api.Client;
+using VoatHub.Data.Voat;
 using VoatHub.Data;
 
 namespace VoatHubTests.Api
@@ -10,8 +11,8 @@ namespace VoatHubTests.Api
     {
         private readonly string testClientName = "someRandomTestClient";
         private TokenManager tokenManager;
-        private static ApiToken goodToken;
-        private static ApiToken badToken;
+        private static IOauthTokenMinimum goodToken;
+        private static IOauthTokenMinimum badToken;
 
         [ClassInitialize]
         public static void sampleTokenSetup(TestContext context)

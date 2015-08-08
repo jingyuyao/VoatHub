@@ -5,7 +5,7 @@ using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace VoatHub.Data
+namespace VoatHub.Data.Voat
 {
     /// <summary>
     /// Container for a comment.

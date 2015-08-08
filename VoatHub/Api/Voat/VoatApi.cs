@@ -8,9 +8,10 @@ using Windows.Web.Http;
 
 using Newtonsoft.Json;
 
-using VoatHub.Data;
+using VoatHub.Api.Client;
+using VoatHub.Data.Voat;
 
-namespace VoatHub.Api
+namespace VoatHub.Api.Voat
 {
     /// <summary>
     /// Class to interface to Voat's API

@@ -109,14 +109,15 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Data\ApiComment.cs" />
-    <Compile Include="Data\ApiResponse.cs" />
-    <Compile Include="Data\ApiSubmission.cs" />
-    <Compile Include="Data\ApiSubverseInfo.cs" />
-    <Compile Include="Data\ApiToken.cs" />
-    <Compile Include="Data\ErrorInfo.cs" />
-    <Compile Include="Data\SearchOptions.cs" />
-    <Compile Include="Data\UserSubmission.cs" />
+    <Compile Include="Data\IOauthToken.cs" />
+    <Compile Include="Data\Voat\ApiComment.cs" />
+    <Compile Include="Data\Voat\ApiResponse.cs" />
+    <Compile Include="Data\Voat\ApiSubmission.cs" />
+    <Compile Include="Data\Voat\ApiSubverseInfo.cs" />
+    <Compile Include="Data\Voat\ApiToken.cs" />
+    <Compile Include="Data\Voat\ErrorInfo.cs" />
+    <Compile Include="Data\Voat\SearchOptions.cs" />
+    <Compile Include="Data\Voat\UserSubmission.cs" />
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>

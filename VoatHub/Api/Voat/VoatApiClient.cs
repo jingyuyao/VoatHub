@@ -4,9 +4,10 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Windows.Web.Http;
 
-using VoatHub.Data;
+using VoatHub.Api.Client;
+using VoatHub.Data.Voat;
 
-namespace VoatHub.Api
+namespace VoatHub.Api.Voat
 {
     /// <summary>An ApiClient tailored for Voat's API.
     /// <para>

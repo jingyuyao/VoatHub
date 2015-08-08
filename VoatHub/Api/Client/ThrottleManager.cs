@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace VoatHub.Api
+namespace VoatHub.Api.Client
 {
     /// <summary>
     /// Simple manager for api throttling. Very relaxed throttle.

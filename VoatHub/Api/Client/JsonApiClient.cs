@@ -6,7 +6,7 @@ using Windows.Web.Http.Headers;
 
 using Newtonsoft.Json;
 
-namespace VoatHub.Api
+namespace VoatHub.Api.Client
 {
     /// <summary>
     /// Extends <see cref="ApiClient"/> to send and receive Json data.
