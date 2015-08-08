@@ -3,14 +3,16 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using Windows.Storage;
 
+using VoatHub.Data;
+
 namespace VoatHub.Api
 {
     /// <summary>
-    /// Provides async access to access token.
+    /// Manages token storage and calculates token expiration.
     /// </summary>
     public sealed class TokenManager
     {
-        private IApiClient apiClient;
+        private string clientName;
         private ApplicationDataContainer roamingSettings;
         private string accessTokenKey;
         private string accessTokenExpirationKey;
@@ -28,11 +30,11 @@ namespace VoatHub.Api
         /// <para>Actual logic to get token from server is provided by <see cref="IApiClient"/>.</para>
         /// </summary>
         /// <param name="apiClient">The client this manager is managing tokens for.</param>
-        public TokenManager(IApiClient apiClient)
+        public TokenManager(string clientName)
         {
-            this.apiClient = apiClient;
-            accessTokenKey = apiClient.ClientName + "AccessToken";
-            accessTokenExpirationKey = apiClient.ClientName + "AccessTokenExpiration";
+            this.clientName = clientName;
+            accessTokenKey = clientName + "AccessToken";
+            accessTokenExpirationKey = clientName + "AccessTokenExpiration";
 
             roamingSettings = ApplicationData.Current.RoamingSettings;
             getDataFromSettings();
@@ -44,14 +46,17 @@ namespace VoatHub.Api
         /// </summary>
         /// <param name="clientName"></param>
         /// <returns>The accessToken or null if there are none.</returns>
-        public async Task<string> AccessToken()
+        public string AccessToken
         {
-            if(apiClient.LoggedIn && (accessToken == null || Expired))
-            {
-                await updateTokenData();
-            }
+            //if(apiClient.LoggedIn && (accessToken == null || Expired))
+            //{
+            //    await updateTokenData();
+            //}
 
-            return accessToken;
+            get
+            {
+                return accessToken;
+            }
         }
 
         /// <summary>
@@ -74,6 +79,14 @@ namespace VoatHub.Api
             Debug.WriteLine("Clearing tokens...", this.GetType().Name);
             accessToken = null;
             accessTokenExpiration = new DateTime();
+            setDataToSettings();
+        }
+
+        public void SetToken(ApiToken token)
+        {
+            Debug.WriteLine("Setting token...", "TokenManager");
+            accessToken = token.access_token;
+            accessTokenExpiration = getExpiration(token.expires_in);
             setDataToSettings();
         }
 
@@ -109,17 +122,17 @@ namespace VoatHub.Api
         /// Updates <code>clientData</code> by requsting info from the client's API.
         /// </summary>
         /// <param name="credential">Can be null.</param>
-        private async Task updateTokenData()
-        {
-            var token = await apiClient.RetrieveToken();
+        //private async Task updateTokenData()
+        //{
+        //    var token = await apiClient.refreshToken();
 
-            if (token != null)
-            {
-                accessToken = token.access_token;
-                accessTokenExpiration = getExpiration(token.expires_in);
-                setDataToSettings();
-            }
-        }
+        //    if (token != null)
+        //    {
+        //        accessToken = token.access_token;
+        //        accessTokenExpiration = getExpiration(token.expires_in);
+        //        setDataToSettings();
+        //    }
+        //}
 
         /// <summary>
         /// Get a datetime with specific number of seconds in the future.

@@ -12,11 +12,7 @@ namespace VoatHubTests.Api
     [TestClass]
     public class VoatApiTests
     {
-        static readonly string apiKey = "ZbDlC73ndD6TB84WQmKvMA==";
-        static readonly string baseUri = "https://fakevout.azurewebsites.net/api/v1/";
-        static readonly string tokenUri = "https://fakevout.azurewebsites.net/api/token";
-
-        static VoatApi api = new VoatApi(apiKey, baseUri, tokenUri);
+        static VoatApi api = new VoatApi(TestSettings.ApiKey, TestSettings.BaseUri, TestSettings.TokenUri);
 
         [TestMethod]
         public async Task PostSubmission()
@@ -29,7 +25,8 @@ namespace VoatHubTests.Api
             submission.content = "Lets hope this works. " + DateTime.Now.ToString();
             submission.HasState = true;
 
-            api.Login("swampfire100", "password");
+            bool loggedIn = await api.Login("swampfire100", "password");
+            Assert.IsTrue(loggedIn);
 
             var response = await api.PostSubmission("Test", submission);
             Assert.IsInstanceOfType(response, typeof(ApiResponse<ApiSubmission>));
@@ -38,11 +35,11 @@ namespace VoatHubTests.Api
         [TestMethod]
         public async Task GetSubmissionList()
         {
-            var submissions = await api.GetSubmissionList("Test");
+            var submissions = await api.GetSubmissionList("Test", null);
             Assert.IsInstanceOfType(submissions, typeof(ApiResponse<List<ApiSubmission>>));
             Assert.IsInstanceOfType(submissions.data, typeof(List<ApiSubmission>));
-            Assert.AreEqual(submissions.success, true);
-            Assert.AreEqual(submissions.error, null);
+            Assert.AreEqual(true, submissions.success);
+            Assert.AreEqual(null, submissions.error);
         }
 
         [TestMethod]
@@ -50,14 +47,13 @@ namespace VoatHubTests.Api
         {
             var submission = await api.GetSubmission("Test", 1);
             // Heh
-            Assert.AreEqual(submission.data.title, "Wow, Voat on Azure is a pain in the...");
+            Assert.AreEqual("Wow, Voat on Azure is a pain in the...", submission.data.title);
         }
 
         [TestMethod]
         public void VoatApiDisposeTest()
         {
-            var client = new VoatApi(apiKey, baseUri, tokenUri);
-            client.Dispose();
+            api.Dispose();
         }
     }
 }

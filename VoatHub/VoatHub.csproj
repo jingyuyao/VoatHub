@@ -97,14 +97,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Api\ApiExceptions.cs" />
-    <Compile Include="Api\IApiClient.cs" />
-    <Compile Include="Api\ApiClient.cs" />
-    <Compile Include="Api\JsonApiClient.cs" />
-    <Compile Include="Api\ThrottleManager.cs" />
+    <Compile Include="Api\Client\IApiClient.cs" />
+    <Compile Include="Api\Client\ApiClient.cs" />
+    <Compile Include="Api\Client\JsonApiClient.cs" />
+    <Compile Include="Api\Client\ThrottleManager.cs" />
+    <Compile Include="Api\Utility.cs" />
     <Compile Include="Api\Voat\VoatApi.cs" />
     <Compile Include="Api\Voat\VoatApiClient.cs" />
-    <Compile Include="Api\CredentialManager.cs" />
-    <Compile Include="Api\TokenManager.cs" />
+    <Compile Include="Api\Client\CredentialManager.cs" />
+    <Compile Include="Api\Client\TokenManager.cs" />
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
@@ -114,6 +115,7 @@
     <Compile Include="Data\ApiSubverseInfo.cs" />
     <Compile Include="Data\ApiToken.cs" />
     <Compile Include="Data\ErrorInfo.cs" />
+    <Compile Include="Data\SearchOptions.cs" />
     <Compile Include="Data\UserSubmission.cs" />
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>

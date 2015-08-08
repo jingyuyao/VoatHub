@@ -1,33 +1,28 @@
 ﻿using System;
 using System.Diagnostics;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Windows.Web.Http;
-using Windows.Web.Http.Headers;
-using Windows.Storage;
-using Windows.Security.Credentials;
-
-using Newtonsoft.Json;
 
 using VoatHub.Data;
 
 namespace VoatHub.Api
 {
-    /// <summary>An HttpClient tailored for Voat's API.
+    /// <summary>An ApiClient tailored for Voat's API.
     /// <para>
-    /// Adds Voat-ApiKey on every request and deserializes Json response into
-    /// the approperiate class.
+    /// Adds Voat-ApiKey on every request and manages token, crendential and throttle.
+    /// The user of this client is responsible to handle errors returned by this class
+    /// as well as checking login status before making calls.
     /// </para>
     /// </summary>
-    public class VoatApiClient : JsonApiClient
+    public sealed class VoatApiClient : JsonApiClient
     {
+        private readonly string _clientName = "voatClient";
         private Uri tokenUri;
 
         public VoatApiClient(string apiKey, string tokenUri)
         {
-            httpClient.DefaultRequestHeaders.Add("Voat-ApiKey", apiKey);
+            addHeader("Voat-ApiKey", apiKey);
             this.tokenUri = new Uri(tokenUri);
         }
 
@@ -35,30 +30,39 @@ namespace VoatHub.Api
         {
             get
             {
-                return "voatClient";
+                return _clientName;
             }
         }
 
-        public override async Task<ApiToken> RetrieveToken()
+        protected override async Task<ApiToken> retrieveToken(string username, string password)
         {
-            Debug.WriteLine("Retrieving token...", "ApiClient");
-            await Task.Delay(throttleManager.WaitTime);
+            Debug.WriteLine("Retrieving token...", "VoatApiClient");
+            
             // Does not need authorization header.
             // Calling setAuthorizationHeader can also cause circular reference
 
-            var credential = credentialManager.Credential;
-
             var properties = new List<KeyValuePair<string, string>>();
             properties.Add(new KeyValuePair<string, string>("grant_type", "password"));
-            properties.Add(new KeyValuePair<string, string>("username", credential.UserName));
-            properties.Add(new KeyValuePair<string, string>("password", credential.Password));
+            properties.Add(new KeyValuePair<string, string>("username", username));
+            properties.Add(new KeyValuePair<string, string>("password", password));
 
             var content = new HttpFormUrlEncodedContent(properties);
-            var response = await httpClient.PostAsync(tokenUri, content);
-            var responseString = await response.Content.ReadAsStringAsync();
-            var token = JsonConvert.DeserializeObject<ApiToken>(responseString);
-            Debug.WriteLine(token, "ApiClient");
+            var token = await PostAsync<ApiToken>(tokenUri, content);
+
+            Debug.WriteLine(token, "VoatApiClient");
+
             return token;
+        }
+
+        protected override async Task<ApiToken> refreshToken()
+        {
+            var credential = credentialManager.Credential;
+            if (credential != null)
+            {
+                return await retrieveToken(credential.UserName, credential.Password);
+            }
+
+            return null;
         }
     }
 }

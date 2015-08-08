@@ -9,19 +9,17 @@ using VoatHub.Data;
 
 namespace VoatHub.Api
 {
+    /// <summary>
+    /// Public facing interface for interacting with an API client.
+    /// </summary>
     public interface IApiClient : IDisposable
     {
         /// <summary>
         /// Must be unique accross application.
         /// </summary>
         string ClientName { get; }
-        /// <summary>
-        /// Retrieve oauth token from API vendor.
-        /// </summary>
-        /// <returns></returns>
-        Task<ApiToken> RetrieveToken();
 
-        void Login(string username, string password);
+        Task<bool> Login(string username, string password);
         void Logout();
         bool LoggedIn { get; }
 

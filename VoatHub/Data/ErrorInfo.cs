@@ -12,7 +12,7 @@ namespace VoatHub.Data
     /// <remarks>http://fakevout.azurewebsites.net/api/help/resourcemodel?modelName=ErrorInfo</remarks>
     public class ErrorInfo
     {
-        public string type { get; }
-        public string message { get; }
+        public string type { get; set; }
+        public string message { get; set; }
     }
 }

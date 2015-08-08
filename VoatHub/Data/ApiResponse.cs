@@ -17,4 +17,13 @@ namespace VoatHub.Data
         public bool success { get; set; }
         public ErrorInfo error { get; set; }
     }
+
+    /// <summary>
+    /// Generic response returned by the Voat API with no data.
+    /// </summary>
+    public class ApiResponse
+    {
+        public bool success { get; set; }
+        public ErrorInfo error { get; set; }
+    }
 }

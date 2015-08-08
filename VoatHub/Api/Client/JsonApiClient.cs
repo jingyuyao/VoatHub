@@ -29,8 +29,9 @@ namespace VoatHub.Api
                 string responseContent = await response.Content.ReadAsStringAsync();
                 return JsonConvert.DeserializeObject<T>(responseContent);
             }
-            catch(JsonSerializationException)
+            catch(JsonException e)
             {
+                Debug.WriteLine(e);
                 throw new SerializationException();
             }
         }

@@ -31,6 +31,7 @@ namespace VoatHub.Api
         public void Login(string username, string password)
         {
             Logout();
+            Debug.WriteLine("Logged in " + username, "CredentialManager");
             credential = new PasswordCredential(clientName, username, password);
             vault.Add(credential);
         }
