@@ -5,7 +5,7 @@ using Windows.Web.Http;
 using Windows.Web.Http.Filters;
 using Windows.Web.Http.Headers;
 
-using VoatHub.Data.Voat;
+using VoatHub.Models.Voat;
 
 namespace VoatHub.Api.Client
 {
@@ -121,7 +121,7 @@ namespace VoatHub.Api.Client
         public async Task<T> GetAsync<T>(Uri uri)
         {
             await preCall();
-            Debug.WriteLine(uri, "ApiClient");
+            Debug.WriteLine("GET " + uri.AbsoluteUri, "ApiClient");
             HttpResponseMessage response = await this.httpClient.GetAsync(uri);
             return await handleResponse<T>(response);
         }
@@ -138,8 +138,9 @@ namespace VoatHub.Api.Client
         public async Task<T> PostAsync<T>(Uri uri, IHttpContent content)
         {
             await preCall();
-            Debug.WriteLine(uri, "ApiClient");
-            content.Headers.ContentType = requestContentType;
+            Debug.WriteLine("POST " + uri.AbsoluteUri, "ApiClient");
+            Debug.WriteLine("Content " + content, "ApiClient");
+            if (content != null) content.Headers.ContentType = requestContentType;
             HttpResponseMessage response = await httpClient.PostAsync(uri, content);
             return await handleResponse<T>(response);
         }
@@ -156,9 +157,9 @@ namespace VoatHub.Api.Client
         public async Task<T> PutAsync<T>(Uri uri, IHttpContent content)
         {
             await preCall();
-            Debug.WriteLine(uri, "ApiClient");
-            content.Headers.ContentType = requestContentType;
-            Debug.WriteLine(content);
+            Debug.WriteLine("PUT " + uri.AbsoluteUri, "ApiClient");
+            Debug.WriteLine("Content " + content, "ApiClient");
+            if (content != null) content.Headers.ContentType = requestContentType;
             HttpResponseMessage response = await httpClient.PutAsync(uri, content);
             return await handleResponse<T>(response);
         }
@@ -172,7 +173,7 @@ namespace VoatHub.Api.Client
         public async Task<T> DeleteAsync<T>(Uri uri)
         {
             await preCall();
-            Debug.WriteLine(uri, "ApiClient");
+            Debug.WriteLine("DELETE " + uri.AbsoluteUri, "ApiClient");
             HttpResponseMessage response = await httpClient.DeleteAsync(uri);
             return await handleResponse<T>(response);
         }
@@ -234,7 +235,7 @@ namespace VoatHub.Api.Client
         /// <returns></returns>
         private async Task preCall()
         {
-            Debug.WriteLine("precCall()", "ApiClient");
+            //Debug.WriteLine("precCall()", "ApiClient");
 
             await throttleManager.Wait();
             await updateAccessToken();
@@ -285,12 +286,10 @@ namespace VoatHub.Api.Client
             throttleManager.MadeCall();
 
             if (response == null) return default(T);
-
             try
             {
                 // Leave error handling to api client user
                 var deserialized =  await deserializeResponse<T>(response);
-                Debug.WriteLine(deserialized, "ApiClient");
                 return deserialized;
             }
             catch (SerializationException)

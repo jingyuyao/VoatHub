@@ -3,14 +3,14 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:VoatHub"
-    xmlns:voatData="using:VoatHub.Data.Voat"
+    xmlns:voatModels="using:VoatHub.Models.Voat.v1"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <Page.Resources>
-        <DataTemplate x:Key="SubmissionItemTemplate" x:DataType="voatData:ApiSubmission">
+        <DataTemplate x:Key="SubmissionItemTemplate" x:DataType="voatModels:ApiSubmission">
             <Grid Margin="12,11,12,13">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
@@ -22,27 +22,27 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <TextBlock Text="{x:Bind title}"
+                <TextBlock Text="{x:Bind Title}"
                            Foreground="{ThemeResource SystemControlForegroundBaseHighBrush}"
                            Style="{ThemeResource BodyTextBlockStyle}" />
 
-                <TextBlock Text="{x:Bind userName}" Grid.Row="1" MaxLines="1"
+                <TextBlock Text="{x:Bind UserName}" Grid.Row="1" MaxLines="1"
                            Foreground="{ThemeResource SystemControlForegroundBaseMediumBrush}"
                            Style="{ThemeResource BodyTextBlockStyle}" />
 
-                <TextBlock Text="{x:Bind date}" Grid.Column="1" Margin="12,2,0,0"
+                <TextBlock Text="{x:Bind Date}" Grid.Column="1" Margin="12,2,0,0"
                            Foreground="{ThemeResource SystemControlForegroundBaseMediumBrush}"
                            Style="{ThemeResource BodyTextBlockStyle}" />
             </Grid>
         </DataTemplate>
 
-        <DataTemplate x:Key="SubmissionContentTemplate" x:DataType="voatData:ApiSubmission">
+        <DataTemplate x:Key="SubmissionContentTemplate" x:DataType="voatModels:ApiSubmission">
             <StackPanel>
                 <TextBlock Margin="0,8" Style="{ThemeResource TitleTextBlockStyle}"
-                           HorizontalAlignment="Left" Text="{x:Bind title}"/>
+                           HorizontalAlignment="Left" Text="{x:Bind Title}"/>
 
                 <TextBlock Margin="0,9" HorizontalAlignment="Left" MaxWidth="560"
-                           Style="{ThemeResource BodyTextBlockStyle}" Text="{x:Bind content}" />
+                           Style="{ThemeResource BodyTextBlockStyle}" Text="{x:Bind Content}" />
             </StackPanel>
         </DataTemplate>
     </Page.Resources>

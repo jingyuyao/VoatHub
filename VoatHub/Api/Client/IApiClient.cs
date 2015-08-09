@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Windows.Web.Http;
 
-using VoatHub.Data;
+using VoatHub.Models;
 
 namespace VoatHub.Api.Client
 {

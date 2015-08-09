@@ -5,7 +5,8 @@ using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
 using System.Threading.Tasks;
 
 using VoatHub.Api.Voat;
-using VoatHub.Data.Voat;
+using VoatHub.Models.Voat;
+using VoatHub.Models.Voat.v1;
 
 namespace VoatHubTests.Api
 {
@@ -13,24 +14,44 @@ namespace VoatHubTests.Api
     public class VoatApiTests
     {
         private static VoatApi api = new VoatApi(TestSettings.ApiKey, TestSettings.Scheme, TestSettings.Host, TestSettings.ApiPath, TestSettings.TokenUri);
+        private static string testSub = "Test";
         private static UserSubmission sampleSubmission = new UserSubmission
         {
-            title = "Test test test test!!!",
-            nsfw = false,
-            anon = false,
-            content = "Lets hope this works. " + DateTime.Now.ToString(),
+            Title = "Test test test test!!!",
+            Nsfw = false,
+            Anonymous = false,
+            Content = "Lets hope this works. " + DateTime.Now.ToString(),
             HasState = true
+        };
+
+        private static UserSubmission updatedSubmission = new UserSubmission
+        {
+            Title = "Test update update update!!!",
+            Nsfw = false,
+            Anonymous = false,
+            Content = "To update or update? " + DateTime.Now.ToString(),
+            HasState = true
+        };
+
+        private static UserValue sampleComment = new UserValue
+        {
+            Value = "Generic hateful, ignorant and arrogant comment"
+        };
+
+        private static UserValue updatedComment = new UserValue
+        {
+            Value = "Generic cheerful, insightful and humble comment"
         };
 
         private static ApiUserPreferences samplePerf = new ApiUserPreferences
         {
-            disableCustomCSS = false,
-            enableAdultContent = true,
-            openLinksNewWindow = true,
-            publiclyDisplaySubscriptions = false,
-            language = "french",
-            enableNightMode = false,
-            publiclyDisplayVotes = false,
+            DisableCustomCSS = false,
+            EnableAdultContent = true,
+            ClickingMode = true,
+            PubliclyShowSubscriptions = false,
+            Language = "french",
+            EnableNightMode = false,
+            PubliclyDisplayVotes = false,
         };
 
         [ClassInitialize]
@@ -46,57 +67,95 @@ namespace VoatHubTests.Api
         }
 
         [TestMethod]
-        public async Task PostSubmission()
+        public async Task Submissions()
         {
-
-            var response = await api.PostSubmission("Test", sampleSubmission);
-            Assert.IsInstanceOfType(response, typeof(ApiResponse<ApiSubmission>));
+            assertResponse(await api.GetSubmissionList(testSub, null));
+            var title = assertResponse(await api.GetSubmission(testSub, 1)).data.Title;
+            Assert.AreEqual("Wow, Voat on Azure is a pain in the...", title);
+            assertResponse(await api.GetSubmission(1));
+            var id = assertResponse(await api.PostSubmission(testSub, sampleSubmission)).data.ID;
+            var updatedTitle = assertResponse(await api.PutSubmission(testSub, id, updatedSubmission)).data.Title;
+            Assert.AreEqual(updatedSubmission.Title, updatedTitle);
+            var id2 = assertResponse(await api.PostSubmission(testSub, sampleSubmission)).data.ID;
+            var updatedTitle2 = assertResponse(await api.PutSubmission(testSub, id2, updatedSubmission)).data.Title;
+            Assert.AreEqual(updatedSubmission.Title, updatedTitle2);
+            assertResponse(await api.DeleteSubmission(testSub, id));
+            assertResponse(await api.DeleteSubmission(testSub, id2));
         }
 
         [TestMethod]
-        public async Task GetSubmissionList()
+        public async Task Subverse()
         {
-            var submissions = await api.GetSubmissionList("Test", null);
-            Assert.IsInstanceOfType(submissions, typeof(ApiResponse<List<ApiSubmission>>));
-            Assert.IsInstanceOfType(submissions.data, typeof(List<ApiSubmission>));
-            Assert.IsTrue(submissions.success);
-            Assert.IsNull(submissions.error);
+            assertResponse(await api.GetSubverseInfo(testSub));
+            // Not implemented
+            //assertResponse(await api.PostSubverseBlock(testSub));
+            //assertResponse(await api.DeleteSubverseBlock(testSub));
         }
 
         [TestMethod]
-        public async Task GetSubmission()
+        public async Task Comments()
         {
-            var submission = await api.GetSubmission("Test", 1);
-            // Heh
-            Assert.AreEqual("Wow, Voat on Azure is a pain in the...", submission.data.title);
-
-            submission = await api.GetSubmission(1);
-            Assert.IsTrue(submission.success);
+            var submissionId = assertResponse(await api.PostSubmission(testSub, sampleSubmission)).data.ID;
+            var commentId = assertResponse(await api.PostComment(testSub, submissionId, sampleComment)).data.ID;
+            var commentId2 = assertResponse(await api.PostCommentReply(testSub, submissionId, commentId, sampleComment)).data.ID;
+            assertResponse(await api.PostCommentReply(commentId, sampleComment));
+            var numComments = assertResponse(await api.GetComment(commentId)).data.ChildCount;
+            //Assert.AreEqual(2, numComments);  // Bugged API
+            var updatedContent = assertResponse(await api.PutComment(commentId2, updatedComment)).data.Content;
+            Assert.AreEqual(updatedComment.Value, updatedContent);
+            assertResponse(await api.GetCommentList(testSub, submissionId, null));
+            assertResponse(await api.GetCommentList(testSub, submissionId, commentId, null));
+            assertResponse(await api.DeleteComment(commentId));
         }
 
         [TestMethod]
-        public async Task EditSubmission()
-        {
-            var response = await api.PostSubmission("Test", sampleSubmission);
-            int submissionId = response.data.id;
-            string newContent = DateTime.Now.ToString();
-            sampleSubmission.content = newContent;
-            response = await api.PutSubmission(submissionId, sampleSubmission);
-            Assert.IsTrue(response.success);
-            Assert.AreEqual(newContent, response.data.content);
-
-            var deletedResponse = await api.DeleteSubmission(submissionId);
-            Assert.IsTrue(response.success);
-        }
-
-        [TestMethod]
-        public async Task UserPerferences()
+        public async Task User()
         {
             // Internal server error?!
             //var response = await api.PutPreferences(samplePerf);
             //Assert.IsTrue(response.success);
-            var preferences = await api.GetPreferences();
-            Assert.IsTrue(preferences.success);
+            assertResponse(await api.GetPreferences());
+            assertResponse(await api.UserInfo(TestSettings.Username));
+            assertResponse(await api.UserComments(TestSettings.Username));
+            assertResponse(await api.UserSubmissions(TestSettings.Username));
+            assertResponse(await api.UserSubscriptions(TestSettings.Username));
+        }
+
+        [TestMethod]
+        public async Task Vote()
+        {
+            var submissionId = assertResponse(await api.PostSubmission(testSub, sampleSubmission)).data.ID;
+            var commentId = assertResponse(await api.PostComment(testSub, submissionId, sampleComment)).data.ID;
+            assertResponse(await api.PostVote("submission", submissionId, 1));
+            assertResponse(await api.PostVote("comment", commentId, 1));
+            assertResponse(await api.PostVoteRevokeOnRevote("submission", submissionId, 1, true));
+            assertResponse(await api.PostVoteRevokeOnRevote("comment", commentId, 1, true));
+        }
+
+        [TestMethod]
+        public async Task Save()
+        {
+            var submissionId = assertResponse(await api.PostSubmission(testSub, sampleSubmission)).data.ID;
+            var commentId = assertResponse(await api.PostComment(testSub, submissionId, sampleComment)).data.ID;
+            assertResponse(await api.PostSubmissionsSave(submissionId));
+            assertResponse(await api.DeleteSubmissionsSave(submissionId));
+            assertResponse(await api.PostCommentsSave(commentId));
+            assertResponse(await api.DeleteCommentsSave(commentId));
+        }
+
+        private ApiResponse assertResponse(ApiResponse response)
+        {
+            Assert.IsNotNull(response);
+            Assert.IsTrue(response.success);
+            return response;
+        }
+
+        private ApiResponse<T> assertResponse<T>(ApiResponse<T> response)
+        {
+            Assert.IsNotNull(response);
+            Assert.IsTrue(response.success);
+            Assert.IsNotNull(response.data);
+            return response;
         }
     }
 }

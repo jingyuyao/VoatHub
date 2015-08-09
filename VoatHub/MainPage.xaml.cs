@@ -16,7 +16,7 @@ using Windows.UI.Xaml.Navigation;
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
 using VoatHub.Api.Voat;
-using VoatHub.Data.Voat;
+using VoatHub.Models.Voat.v1;
 
 namespace VoatHub
 {

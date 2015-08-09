@@ -1,4 +1,4 @@
-﻿namespace VoatHub.Data
+﻿namespace VoatHub.Models
 {
     public interface IOauthTokenMinimum
     {

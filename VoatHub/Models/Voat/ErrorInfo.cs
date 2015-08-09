@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace VoatHub.Data.Voat
+namespace VoatHub.Models.Voat
 {
     /// <summary>
     /// Container for an error information.

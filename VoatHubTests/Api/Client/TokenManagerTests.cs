@@ -1,8 +1,8 @@
 ﻿using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
 
 using VoatHub.Api.Client;
-using VoatHub.Data.Voat;
-using VoatHub.Data;
+using VoatHub.Models.Voat;
+using VoatHub.Models;
 
 namespace VoatHubTests.Api
 {

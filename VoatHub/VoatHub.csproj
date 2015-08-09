@@ -97,6 +97,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Api\ApiExceptions.cs" />
+    <Compile Include="Api\ApiUriBuilder.cs" />
     <Compile Include="Api\Client\IApiClient.cs" />
     <Compile Include="Api\Client\ApiClient.cs" />
     <Compile Include="Api\Client\JsonApiClient.cs" />
@@ -109,19 +110,26 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Data\IOauthToken.cs" />
-    <Compile Include="Data\Voat\ApiComment.cs" />
-    <Compile Include="Data\Voat\ApiResponse.cs" />
-    <Compile Include="Data\Voat\ApiSubmission.cs" />
-    <Compile Include="Data\Voat\ApiSubverseInfo.cs" />
-    <Compile Include="Data\Voat\ApiToken.cs" />
-    <Compile Include="Data\Voat\ApiUserPreferences.cs" />
-    <Compile Include="Data\Voat\ErrorInfo.cs" />
-    <Compile Include="Data\Voat\SearchOptions.cs" />
-    <Compile Include="Data\Voat\UserComment.cs" />
-    <Compile Include="Data\Voat\UserInfo.cs" />
-    <Compile Include="Data\Voat\UserSubmission.cs" />
-    <Compile Include="Data\Voat\VoteResponse.cs" />
+    <Compile Include="Models\IOauthToken.cs" />
+    <Compile Include="Models\Voat\FormattedContentContainer.cs" />
+    <Compile Include="Models\Voat\Score.cs" />
+    <Compile Include="Models\Voat\v1\ApiBadge.cs" />
+    <Compile Include="Models\Voat\v1\ApiComment.cs" />
+    <Compile Include="Models\Voat\ApiResponse.cs" />
+    <Compile Include="Models\Voat\v1\ApiSendUserMessage.cs" />
+    <Compile Include="Models\Voat\v1\ApiSubmission.cs" />
+    <Compile Include="Models\Voat\v1\ApiSubscription.cs" />
+    <Compile Include="Models\Voat\v1\ApiSubverseInfo.cs" />
+    <Compile Include="Models\Voat\ApiToken.cs" />
+    <Compile Include="Models\Voat\v1\ApiUserBadge.cs" />
+    <Compile Include="Models\Voat\v1\ApiUserMessage.cs" />
+    <Compile Include="Models\Voat\v1\ApiUserPreferences.cs" />
+    <Compile Include="Models\Voat\ErrorInfo.cs" />
+    <Compile Include="Models\Voat\SearchOptions.cs" />
+    <Compile Include="Models\Voat\v1\UserValue.cs" />
+    <Compile Include="Models\Voat\v1\ApiUserInfo.cs" />
+    <Compile Include="Models\Voat\v1\UserSubmission.cs" />
+    <Compile Include="Models\Voat\VoteResponse.cs" />
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>

@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using Windows.Storage;
 
-using VoatHub.Data;
+using VoatHub.Models;
 
 namespace VoatHub.Api.Client
 {

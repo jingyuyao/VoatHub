@@ -8,7 +8,8 @@ using Windows.Web.Http;
 using Newtonsoft.Json;
 
 using VoatHub.Api.Voat;
-using VoatHub.Data.Voat;
+using VoatHub.Models.Voat;
+using VoatHub.Models.Voat.v1;
 
 namespace VoatHubTests.Api.Voat
 {
@@ -24,10 +25,10 @@ namespace VoatHubTests.Api.Voat
         public void setUp()
         {
             submission = new UserSubmission();
-            submission.title = "Test test test test!!!";
-            submission.nsfw = false;
-            submission.anon = false;
-            submission.content = "Lets hope this works. " + DateTime.Now.ToString();
+            submission.Title = "Test test test test!!!";
+            submission.Nsfw = false;
+            submission.Anonymous = false;
+            submission.Content = "Lets hope this works. " + DateTime.Now.ToString();
             submission.HasState = true;
 
             serializedSubmission = new HttpStringContent(JsonConvert.SerializeObject(submission));
@@ -82,16 +83,16 @@ namespace VoatHubTests.Api.Voat
             await Login();
             var data = await apiClient.PostAsync<ApiResponse<ApiSubmission>>(submissionListUri, serializedSubmission);
             Assert.IsNotNull(data.data);
-            int submissionId = data.data.id;
+            int submissionId = data.data.ID;
 
-            submission.content = "Update content test";
+            submission.Content = "Update content test";
             serializedSubmission = new HttpStringContent(JsonConvert.SerializeObject(submission));
 
             var submissionUri = new Uri(TestSettings.FullApiPath + "v/Test/" + submissionId);
 
             var putData = await apiClient.PutAsync<ApiResponse<ApiSubmission>>(submissionUri, serializedSubmission);
             Assert.IsNotNull(putData.data);
-            Assert.AreEqual("Update content test", putData.data.content);
+            Assert.AreEqual("Update content test", putData.data.Content);
         }
 
         [TestMethod]
@@ -100,7 +101,7 @@ namespace VoatHubTests.Api.Voat
             await Login();
             var data = await apiClient.PostAsync<ApiResponse<ApiSubmission>>(submissionListUri, serializedSubmission);
             Assert.IsNotNull(data.data);
-            int submissionId = data.data.id;
+            int submissionId = data.data.ID;
             var submissionUri = new Uri(TestSettings.FullApiPath + "v/Test/" + submissionId);
             var deleteData = await apiClient.DeleteAsync<ApiResponse>(submissionUri);
             Assert.IsTrue(deleteData.success);

@@ -2,6 +2,9 @@
 using System.Reflection;
 using System.Linq;
 using System.Diagnostics;
+using Windows.Web.Http;
+
+using Newtonsoft.Json;
 
 namespace VoatHub.Api
 {
@@ -28,6 +31,16 @@ namespace VoatHub.Api
         {
             var typeEquals = typeof(Enum).IsAssignableFrom(value.GetType());
             return name + "=" + (typeEquals ? ((int)value).ToString() : value.ToString());
+        }
+
+        /// <summary>
+        /// Serialize a Json object to <see cref="HttpStringContent"/>.
+        /// </summary>
+        /// <param name="anySerializeable"></param>
+        /// <returns></returns>
+        public static HttpStringContent serializeJson(object anySerializeable)
+        {
+            return new HttpStringContent(JsonConvert.SerializeObject(anySerializeable));
         }
     }
 }

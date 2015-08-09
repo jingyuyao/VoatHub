@@ -2,7 +2,7 @@
 using System.Net;
 
 
-namespace VoatHub.Data.Voat
+namespace VoatHub.Models.Voat
 {
     public class SearchOptions
     {
