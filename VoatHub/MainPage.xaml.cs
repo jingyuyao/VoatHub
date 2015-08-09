@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
@@ -37,12 +38,45 @@ namespace VoatHub
         {
             base.OnNavigatedTo(e);
 
-            var response = await voatApi.GetSubmissionList("Api", null);
+            var response = await voatApi.GetSubmissionList("Playground", null);
 
             if (response != null)
             {
                 var items = response.data;
                 SubmissionListView.ItemsSource = items;
+            }
+        }
+
+        private void SubmissionContentPresenter_DataContextChanged(FrameworkElement sender, DataContextChangedEventArgs args)
+        {
+            Debug.WriteLine(sender, "Data context changed");
+
+            if (sender != null && sender is ContentPresenter)
+            {
+                var presenter = sender as ContentPresenter;
+                var content = presenter.Content;
+                if (content != null && content is ApiSubmission)
+                {
+                    var submission = content as ApiSubmission;
+
+                    if (submission != null)
+                    {
+                        if (submission.Type == 2)
+                        {
+                            presenter.ContentTemplate = Resources["SubmissionWebViewTemplate"] as DataTemplate;
+
+                            Debug.WriteLine("SubmissionWebViewTemplate");
+                        }
+                        else
+                        {
+                            presenter.ContentTemplate = Resources["SubmissionContentTemplate"] as DataTemplate;
+
+                            Debug.WriteLine("SubmissionWebViewTemplate");
+                        }
+                    }
+
+                    Debug.WriteLine(submission.Content);
+                }
             }
         }
     }

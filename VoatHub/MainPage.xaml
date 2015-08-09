@@ -45,9 +45,28 @@
                            Style="{ThemeResource BodyTextBlockStyle}" Text="{x:Bind Content}" />
             </StackPanel>
         </DataTemplate>
+
+        <DataTemplate x:Key="SubmissionWebViewTemplate" x:DataType="voatModels:ApiSubmission">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Margin="0,8" Style="{ThemeResource TitleTextBlockStyle}"
+                           HorizontalAlignment="Left" Text="{x:Bind Title}"/>
+
+                <WebView x:Name="submissionWebView" Source="{x:Bind Url}"
+                         Grid.Row="2"></WebView>
+            </Grid>
+        </DataTemplate>
     </Page.Resources>
 
-    <Grid >
+    <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
@@ -73,9 +92,11 @@
             Grid.Column="1"
             BorderThickness="1,0,0,0"
             Padding="24,0"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch"
             BorderBrush="{ThemeResource SystemControlForegroundBaseLowBrush}"
             Content="{x:Bind SubmissionListView.SelectedItem, Mode=OneWay}"
-            ContentTemplate="{StaticResource SubmissionContentTemplate}">
+            DataContextChanged="SubmissionContentPresenter_DataContextChanged">
             <ContentPresenter.ContentTransitions>
                 <!-- Empty by default. See MasterListView_ItemClick -->
                 <TransitionCollection />
