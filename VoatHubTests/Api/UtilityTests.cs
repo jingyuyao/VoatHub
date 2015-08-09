@@ -21,10 +21,10 @@ namespace VoatHubTests.Api
             var options = new SearchOptions();
             options.count = 1;
 
-            Assert.AreEqual("?count=1", Utility.ToQueryString(options));
+            Assert.AreEqual("count=1", Utility.ToQueryString(options));
 
             options.sort = SortAlgorithm.Hot;
-            Assert.AreEqual("?sort=" + (int)SortAlgorithm.Hot + "&count=1", Utility.ToQueryString(options));
+            Assert.AreEqual("sort=" + (int)SortAlgorithm.Hot + "&count=1", Utility.ToQueryString(options));
         }
     }
 }

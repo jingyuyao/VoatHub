@@ -115,9 +115,13 @@
     <Compile Include="Data\Voat\ApiSubmission.cs" />
     <Compile Include="Data\Voat\ApiSubverseInfo.cs" />
     <Compile Include="Data\Voat\ApiToken.cs" />
+    <Compile Include="Data\Voat\ApiUserPreferences.cs" />
     <Compile Include="Data\Voat\ErrorInfo.cs" />
     <Compile Include="Data\Voat\SearchOptions.cs" />
+    <Compile Include="Data\Voat\UserComment.cs" />
+    <Compile Include="Data\Voat\UserInfo.cs" />
     <Compile Include="Data\Voat\UserSubmission.cs" />
+    <Compile Include="Data\Voat\VoteResponse.cs" />
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>

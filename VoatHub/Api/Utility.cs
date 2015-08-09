@@ -15,7 +15,7 @@ namespace VoatHub.Api
                         where p.GetValue(obj, null) != null
                         select nameValuePairMaker(p.Name, p.GetValue(obj, null));
 
-            return "?" + String.Join("&", properties.ToArray());
+            return String.Join("&", properties.ToArray());
         }
 
         /// <summary>

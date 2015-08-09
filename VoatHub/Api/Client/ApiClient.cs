@@ -37,7 +37,7 @@ namespace VoatHub.Api.Client
             httpClient = new HttpClient(httpBaseFilter);
             credentialManager = new CredentialManager(ClientName);
             tokenManager = new TokenManager(ClientName);
-            throttleManager = new ThrottleManager();
+            throttleManager = new ThrottleManager(ClientName);
         }
 
         /// <summary>
@@ -104,6 +104,14 @@ namespace VoatHub.Api.Client
             }
         }
 
+        public void EnsureLoggedIn()
+        {
+            if (!LoggedIn)
+            {
+                throw new UnauthenticatedException();
+            }
+        }
+
         /// <summary>
         /// Wraps <see cref="HttpClient.GetAsync(Uri)"/> to return an <see cref="ApiResponse{T}"/>
         /// </summary>
@@ -150,6 +158,7 @@ namespace VoatHub.Api.Client
             await preCall();
             Debug.WriteLine(uri, "ApiClient");
             content.Headers.ContentType = requestContentType;
+            Debug.WriteLine(content);
             HttpResponseMessage response = await httpClient.PutAsync(uri, content);
             return await handleResponse<T>(response);
         }

@@ -22,6 +22,11 @@ namespace VoatHub.Api.Client
         Task<bool> Login(string username, string password);
         void Logout();
         bool LoggedIn { get; }
+        /// <summary>
+        /// Throws exception if not logged in.
+        /// </summary>
+        /// <exception cref="UnauthenticatedException"></exception>
+        void EnsureLoggedIn();
 
         Task<T> GetAsync<T>(Uri uri);
         Task<T> PostAsync<T>(Uri uri, IHttpContent content);

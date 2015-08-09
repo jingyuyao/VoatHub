@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Windows.Storage;
 
 namespace VoatHub.Api.Client
 {
@@ -16,35 +17,41 @@ namespace VoatHub.Api.Client
 
         private DateTime lastCall;
         private TimeSpan rateLimit;
+        private ApplicationDataContainer roamingSettings;
+        private string lastCallStorageKey;
 
         /// <summary>
         /// Creates a <see cref="ThrottleManager"/> with rate limit equal to <see cref="DEFAULT_RATE_LIMIT"/>
         /// that allows call to be made immediately.
         /// </summary>
-        public ThrottleManager() : this(DEFAULT_RATE_LIMIT) { }
+        public ThrottleManager(string clientName) : this(clientName, DEFAULT_RATE_LIMIT) { }
 
         /// <summary>
         /// Creates a <see cref="ThrottleManager"/> with the given rate limit that
         /// allows call to be made immediately.
         /// </summary>
         /// <param name="rateLimit"></param>
-        public ThrottleManager(TimeSpan rateLimit)
+        public ThrottleManager(string clientName, TimeSpan rateLimit)
         {
             this.rateLimit = rateLimit;
-            // Allow a call to be made immediately.
-            lastCall = DateTime.Now.Subtract(rateLimit);
+            roamingSettings = ApplicationData.Current.RoamingSettings;
+            lastCallStorageKey = clientName + "lastCall";
+
+            var savedLastCall = roamingSettings.Values[lastCallStorageKey];
+
+            if (savedLastCall != null)
+            {
+                lastCall = DateTime.FromBinary((long)savedLastCall);
+            }
+            else
+            {
+                lastCall = new DateTime();
+            }
         }
 
-        /// <summary>
-        /// Creates a <see cref="ThrottleManager"/> with the given rate limit and
-        /// date which the last call is made.
-        /// </summary>
-        /// <param name="rateLimit"></param>
-        /// <param name="lastCall"></param>
-        public ThrottleManager(TimeSpan rateLimit, DateTime lastCall)
+        ~ThrottleManager()
         {
-            this.rateLimit = rateLimit;
-            this.lastCall = lastCall;
+            roamingSettings.Values[lastCallStorageKey] = lastCall.ToBinary();
         }
 
         /// <summary>

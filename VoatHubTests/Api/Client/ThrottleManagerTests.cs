@@ -9,6 +9,7 @@ namespace VoatHubTests.Api.Client
     [TestClass]
     public class ThrottleManagerTests
     {
+        private static string clientName = "randomClientNameForThisTest";
         private static ThrottleManager throttleManager;
         /// <summary>
         /// Allows throttle tests to run quickly.
@@ -18,7 +19,7 @@ namespace VoatHubTests.Api.Client
         [TestInitialize]
         public void setUp()
         {
-            throttleManager = new ThrottleManager(testTimeSpan);
+            throttleManager = new ThrottleManager(clientName, testTimeSpan);
         }
 
         [TestMethod]

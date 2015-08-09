@@ -15,7 +15,7 @@ namespace VoatHubTests.Api.Voat
     [TestClass]
     public class VoatApiClientTests
     {
-        private Uri submissionListUri = new Uri(TestSettings.BaseUri + "v/Test");
+        private Uri submissionListUri = new Uri(TestSettings.FullApiPath + "v/Test");
         private UserSubmission submission;
         private HttpStringContent serializedSubmission;
         private VoatApiClient apiClient = new VoatApiClient(TestSettings.ApiKey, TestSettings.TokenUri);
@@ -87,7 +87,7 @@ namespace VoatHubTests.Api.Voat
             submission.content = "Update content test";
             serializedSubmission = new HttpStringContent(JsonConvert.SerializeObject(submission));
 
-            var submissionUri = new Uri(TestSettings.BaseUri + "v/Test/" + submissionId);
+            var submissionUri = new Uri(TestSettings.FullApiPath + "v/Test/" + submissionId);
 
             var putData = await apiClient.PutAsync<ApiResponse<ApiSubmission>>(submissionUri, serializedSubmission);
             Assert.IsNotNull(putData.data);
@@ -101,7 +101,7 @@ namespace VoatHubTests.Api.Voat
             var data = await apiClient.PostAsync<ApiResponse<ApiSubmission>>(submissionListUri, serializedSubmission);
             Assert.IsNotNull(data.data);
             int submissionId = data.data.id;
-            var submissionUri = new Uri(TestSettings.BaseUri + "v/Test/" + submissionId);
+            var submissionUri = new Uri(TestSettings.FullApiPath + "v/Test/" + submissionId);
             var deleteData = await apiClient.DeleteAsync<ApiResponse>(submissionUri);
             Assert.IsTrue(deleteData.success);
         }
