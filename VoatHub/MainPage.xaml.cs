@@ -47,37 +47,109 @@ namespace VoatHub
             }
         }
 
-        private void SubmissionContentPresenter_DataContextChanged(FrameworkElement sender, DataContextChangedEventArgs args)
+        /// <summary>
+        /// Sets the data to the UI elements based on the clicked ApiSubmission.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        //private void SubmissionListView_ItemClick(object sender, ItemClickEventArgs e)
+        //{
+        //    if (e == null || e.ClickedItem == null || !(e.ClickedItem is ApiSubmission)) return;
+
+        //    var submission = e.ClickedItem as ApiSubmission;
+
+        //    SubmissionTitleTextBlock.Text = submission.Title ?? "";
+        //    if (submission.Type == 2)
+        //    {
+        //        if (submission.Url != null)
+        //        {
+        //            Uri uri;
+        //            bool uriOk = Uri.TryCreate(submission.Url, UriKind.Absolute, out uri);
+        //            if (uriOk)
+        //            {
+        //                SubmissionWebView.Navigate(uri);
+        //                SubmissionWebView.Visibility = Visibility.Visible;
+        //            }
+        //        }
+        //    }
+        //    else
+        //    {
+        //        SubmissionWebView.Visibility = Visibility.Collapsed;
+        //    }
+
+        //    if (submission.Content == null) SubmissionContentTextBlock.Visibility = Visibility.Collapsed;
+        //    else SubmissionContentTextBlock.Text = submission.Content;
+
+        //    Debug.WriteLine(submission.Content);
+        //}
+
+        /// <summary>
+        /// Changes which DataTempalte the ContentPresenter uses based on the type of the submission.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void SubmissionListView_ItemClick(object sender, ItemClickEventArgs e)
         {
-            Debug.WriteLine(sender, "Data context changed");
 
-            if (sender != null && sender is ContentPresenter)
+            if (e == null || e.ClickedItem == null || !(e.ClickedItem is ApiSubmission)) return;
+
+            var submission = e.ClickedItem as ApiSubmission;
+
+            if (submission != null)
             {
-                var presenter = sender as ContentPresenter;
-                var content = presenter.Content;
-                if (content != null && content is ApiSubmission)
+                if (submission.Type == 2)
                 {
-                    var submission = content as ApiSubmission;
+                    SubmissionContentPresenter.ContentTemplate = Resources["SubmissionWebViewTemplate"] as DataTemplate;
 
-                    if (submission != null)
-                    {
-                        if (submission.Type == 2)
-                        {
-                            presenter.ContentTemplate = Resources["SubmissionWebViewTemplate"] as DataTemplate;
+                    Debug.WriteLine("SubmissionWebViewTemplate");
+                }
+                else
+                {
+                    SubmissionContentPresenter.ContentTemplate = Resources["SubmissionContentTemplate"] as DataTemplate;
 
-                            Debug.WriteLine("SubmissionWebViewTemplate");
-                        }
-                        else
-                        {
-                            presenter.ContentTemplate = Resources["SubmissionContentTemplate"] as DataTemplate;
-
-                            Debug.WriteLine("SubmissionWebViewTemplate");
-                        }
-                    }
-
-                    Debug.WriteLine(submission.Content);
+                    Debug.WriteLine("SubmissionWebViewTemplate");
                 }
             }
+        }
+
+        /// <summary>
+        /// This is fired AFTER DataTemplate is set for the content. So it is not useful to update the data template since it will
+        /// not affect the current selected item.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="args"></param>
+        private void SubmissionContentPresenter_DataContextChanged(FrameworkElement sender, DataContextChangedEventArgs args)
+        {
+            Debug.WriteLine(args.NewValue, "Data context change");
+            
+            //    if (sender != null && sender is ContentPresenter)
+            //    {
+            //        var presenter = sender as ContentPresenter;
+            //        var newValue = args.NewValue;
+
+            //        if (newValue != null && newValue is ApiSubmission)
+            //        {
+            //            var submission = args.NewValue as ApiSubmission;
+
+            //            if (submission != null)
+            //            {
+            //                if (submission.Type == 2)
+            //                {
+            //                    presenter.ContentTemplate = Resources["SubmissionWebViewTemplate"] as DataTemplate;
+
+            //                    Debug.WriteLine("SubmissionWebViewTemplate");
+            //                }
+            //                else
+            //                {
+            //                    presenter.ContentTemplate = Resources["SubmissionContentTemplate"] as DataTemplate;
+
+            //                    Debug.WriteLine("SubmissionWebViewTemplate");
+            //                }
+            //            }
+
+            //            Debug.WriteLine(submission.Content);
+            //        }
+            //    }
         }
     }
 }
