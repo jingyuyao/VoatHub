@@ -141,6 +141,21 @@ namespace VoatHub
             Debug.WriteLine(args.NewValue, "Data context change");
         }
 
+        private void MasterCommandBarButton_Click(object sender, RoutedEventArgs e)
+        {
+            Debug.WriteLine(e.OriginalSource, "MasterBar");
+        }
+
+        private void DetailCommandBarButton_Click(object sender, RoutedEventArgs e)
+        {
+            Debug.WriteLine(e.OriginalSource, "DetailBar");
+        }
+
+        private void SortItem_Click(object sender, RoutedEventArgs e)
+        {
+            Debug.WriteLine(e.OriginalSource, "SortItem");
+        }
+
         // Not used
         /// <summary>
         /// Sets the data to the UI elements based on the clicked ApiSubmission.

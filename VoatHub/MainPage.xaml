@@ -20,20 +20,30 @@
 
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
                 <TextBlock Text="{x:Bind Title}"
                            Foreground="{ThemeResource SystemControlForegroundBaseHighBrush}"
                            Style="{ThemeResource BodyTextBlockStyle}" />
 
-                <TextBlock Text="{x:Bind UserName}" Grid.Row="1" MaxLines="1"
+                <Grid Grid.Row="1">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Text="{x:Bind UserName}" MaxLines="1"
                            Foreground="{ThemeResource SystemControlForegroundBaseMediumBrush}"
                            Style="{ThemeResource BodyTextBlockStyle}" />
 
-                <TextBlock Text="{x:Bind Date}" Grid.Column="1" Margin="12,2,0,0"
+                    <TextBlock Text="{x:Bind Date}" Grid.Column="1" Grid.Row="1" Margin="12,2,0,0"
                            Foreground="{ThemeResource SystemControlForegroundBaseMediumBrush}"
                            Style="{ThemeResource BodyTextBlockStyle}" />
+                </Grid>
             </Grid>
         </DataTemplate>
 
@@ -81,38 +91,108 @@
         </DataTemplate>
     </Page.Resources>
 
-    <Grid x:Name="rootGrid">
+    <Grid x:Name="RootGrid">
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
         <Grid.ColumnDefinitions>
-            <ColumnDefinition x:Name="MasterColumn" Width="320" />
+            <ColumnDefinition x:Name="MasterColumn" Width="400" />
             <ColumnDefinition x:Name="DetailColumn" Width="*" />
         </Grid.ColumnDefinitions>
 
-        <ListView x:Name="MasterListView" 
-                  ItemTemplate="{StaticResource SubmissionItemTemplate}"
-                  IsItemClickEnabled="True"
-                  ItemClick="MasterListView_ItemClick"
-                  Grid.Column="0">
-            <ListView.ItemContainerStyle>
-                <Style TargetType="ListViewItem">
-                    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                </Style>
-            </ListView.ItemContainerStyle>
-        </ListView>
+        <Grid x:Name="MasterColumnGrid" Grid.Column="0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
 
-        <ContentPresenter
-            x:Name="DetailContentPresenter"
-            Grid.Column="1"
-            BorderThickness="1,0,0,0"
-            Padding="24,0"
-            HorizontalAlignment="Stretch"
-            VerticalAlignment="Stretch"
-            BorderBrush="{ThemeResource SystemControlForegroundBaseLowBrush}"
-            DataContextChanged="DetailContentPresenter_DataContextChanged">
-        </ContentPresenter>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <TextBlock x:Name="MasterTopBar" 
+                       Margin="12,0"
+                       Text="Top bar" 
+                       Style="{ThemeResource TitleTextBlockStyle}" />
+
+            <ListView x:Name="MasterListView"  Grid.Row="1"
+                ItemTemplate="{StaticResource SubmissionItemTemplate}"
+                IsItemClickEnabled="True"
+                ItemClick="MasterListView_ItemClick">
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="ListViewItem">
+                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                    </Style>
+                </ListView.ItemContainerStyle>
+            </ListView>
+
+            <CommandBar x:Name="MasterCommandBar" Grid.Row="2">
+                <CommandBar.Content>
+                    <TextBlock Text="Sort by: Hot" Margin="12,14"/>
+                </CommandBar.Content>
+
+                <AppBarButton Icon="Back" Label="Back" Tag="Back" Click="MasterCommandBarButton_Click"/>
+                <AppBarButton Icon="Sort" Label="Sort">
+                    <AppBarButton.Flyout>
+                        <MenuFlyout>
+                            <MenuFlyoutItem Text="Hot" Tag="hot" Click="SortItem_Click"/>
+                            <MenuFlyoutItem Text="New" Tag="new" Click="SortItem_Click"/>
+                            <MenuFlyoutItem Text="Top" Tag="top" Click="SortItem_Click"/>
+                        </MenuFlyout>
+                    </AppBarButton.Flyout>
+                </AppBarButton>
+
+                <AppBarButton Icon="Refresh" Label="Refresh" Tag="refresh" Click="MasterCommandBarButton_Click"/>
+
+                <!--<CommandBar.SecondaryCommands>
+                    <AppBarButton Icon="Like" Label="Like" Click="AppBarButton_Click"/>
+                    <AppBarButton Icon="Dislike" Label="Dislike" Click="AppBarButton_Click"/>
+                </CommandBar.SecondaryCommands>-->
+            </CommandBar>
+        </Grid>
+
+        <Grid x:Name="DetailColumnGrid" Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <ContentPresenter
+                x:Name="DetailContentPresenter"
+                Grid.Row="0"
+                BorderThickness="1,0,0,0"
+                Padding="24,0"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                BorderBrush="{ThemeResource SystemControlForegroundBaseLowBrush}"
+                DataContextChanged="DetailContentPresenter_DataContextChanged">
+            </ContentPresenter>
+
+            <CommandBar x:Name="DetailCommandBar" Grid.Row="1">
+                <CommandBar.Content>
+                    <TextBlock Text="Some space." Margin="12,14"/>
+                </CommandBar.Content>
+                
+                <AppBarButton Icon="Back" Label="Back" Tag="back" Click="DetailCommandBarButton_Click"/>
+                <AppBarButton Icon="Forward" Label="Forward" Tag="forward" Click="DetailCommandBarButton_Click"/>
+                
+                <AppBarSeparator/>
+
+                <AppBarButton Icon="Refresh" Label="Refresh" Tag="refresh" Click="DetailCommandBarButton_Click"/>
+                <AppBarButton Icon="Save" Label="Save" Tag="save" Click="DetailCommandBarButton_Click"/>
+                <AppBarButton Icon="ReShare"  Label="Share" Tag="share" Click="DetailCommandBarButton_Click"/>
+
+                <!--<CommandBar.SecondaryCommands>
+                    <AppBarButton Icon="Dislike" Label="Dislike" Tag="dislike" Click="DetailCommandBarButton_Click"/>
+                </CommandBar.SecondaryCommands>-->
+            </CommandBar>
+        </Grid>
 
         <!--DataTemplate is favored over programmatically changing values-->
         <!--<Grid Grid.Column="1" 
