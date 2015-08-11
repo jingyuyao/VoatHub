@@ -111,6 +111,7 @@
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
     <Compile Include="Models\IOauthToken.cs" />
+    <Compile Include="Models\VoatHub\CommentSubmission.cs" />
     <Compile Include="Models\Voat\FormattedContentContainer.cs" />
     <Compile Include="Models\Voat\Score.cs" />
     <Compile Include="Models\Voat\v1\ApiBadge.cs" />

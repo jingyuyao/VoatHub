@@ -102,7 +102,7 @@ namespace VoatHub.Models.Voat.v1
         /// </summary>
         [JsonProperty("type")]
         [DataMember(Name = "type")]
-        public int Type { get; set; }
+        public ApiSubmissionType Type { get; set; }
 
         /// <summary>
         /// The url for the submission if present.
@@ -111,5 +111,14 @@ namespace VoatHub.Models.Voat.v1
         [DataMember(Name = "url")]
         public string Url { get; set; }
 
+        public override string ToString()
+        {
+            return string.Format("ID:{0} Type:{1} Date:{2} UserName:{3} Url:{4} Content:{5}", ID, Type, Date, UserName, Url, Content);
+        }
+    }
+
+    public enum ApiSubmissionType
+    {
+        Self = 1, Link = 2
     }
 }

@@ -14,7 +14,7 @@ namespace VoatHubTests.Api
     public class VoatApiTests
     {
         private static VoatApi api = new VoatApi(TestSettings.ApiKey, TestSettings.Scheme, TestSettings.Host, TestSettings.ApiPath, TestSettings.TokenUri);
-        private static string testSub = "Test";
+        private static string testSub = "swampfire100";
         private static UserSubmission sampleSubmission = new UserSubmission
         {
             Title = "Test test test test!!!",
@@ -70,14 +70,14 @@ namespace VoatHubTests.Api
         public async Task Submissions()
         {
             assertResponse(await api.GetSubmissionList(testSub, null));
-            var title = assertResponse(await api.GetSubmission(testSub, 1)).data.Title;
+            var title = assertResponse(await api.GetSubmission(testSub, 1)).Data.Title;
             Assert.AreEqual("Wow, Voat on Azure is a pain in the...", title);
             assertResponse(await api.GetSubmission(1));
-            var id = assertResponse(await api.PostSubmission(testSub, sampleSubmission)).data.ID;
-            var updatedTitle = assertResponse(await api.PutSubmission(testSub, id, updatedSubmission)).data.Title;
+            var id = assertResponse(await api.PostSubmission(testSub, sampleSubmission)).Data.ID;
+            var updatedTitle = assertResponse(await api.PutSubmission(testSub, id, updatedSubmission)).Data.Title;
             Assert.AreEqual(updatedSubmission.Title, updatedTitle);
-            var id2 = assertResponse(await api.PostSubmission(testSub, sampleSubmission)).data.ID;
-            var updatedTitle2 = assertResponse(await api.PutSubmission(testSub, id2, updatedSubmission)).data.Title;
+            var id2 = assertResponse(await api.PostSubmission(testSub, sampleSubmission)).Data.ID;
+            var updatedTitle2 = assertResponse(await api.PutSubmission(testSub, id2, updatedSubmission)).Data.Title;
             Assert.AreEqual(updatedSubmission.Title, updatedTitle2);
             assertResponse(await api.DeleteSubmission(testSub, id));
             assertResponse(await api.DeleteSubmission(testSub, id2));
@@ -95,13 +95,13 @@ namespace VoatHubTests.Api
         [TestMethod]
         public async Task Comments()
         {
-            var submissionId = assertResponse(await api.PostSubmission(testSub, sampleSubmission)).data.ID;
-            var commentId = assertResponse(await api.PostComment(testSub, submissionId, sampleComment)).data.ID;
-            var commentId2 = assertResponse(await api.PostCommentReply(testSub, submissionId, commentId, sampleComment)).data.ID;
+            var submissionId = assertResponse(await api.PostSubmission(testSub, sampleSubmission)).Data.ID;
+            var commentId = assertResponse(await api.PostComment(testSub, submissionId, sampleComment)).Data.ID;
+            var commentId2 = assertResponse(await api.PostCommentReply(testSub, submissionId, commentId, sampleComment)).Data.ID;
             assertResponse(await api.PostCommentReply(commentId, sampleComment));
-            var numComments = assertResponse(await api.GetComment(commentId)).data.ChildCount;
+            var numComments = assertResponse(await api.GetComment(commentId)).Data.ChildCount;
             //Assert.AreEqual(2, numComments);  // Bugged API
-            var updatedContent = assertResponse(await api.PutComment(commentId2, updatedComment)).data.Content;
+            var updatedContent = assertResponse(await api.PutComment(commentId2, updatedComment)).Data.Content;
             Assert.AreEqual(updatedComment.Value, updatedContent);
             assertResponse(await api.GetCommentList(testSub, submissionId, null));
             assertResponse(await api.GetCommentList(testSub, submissionId, commentId, null));
@@ -124,8 +124,8 @@ namespace VoatHubTests.Api
         [TestMethod]
         public async Task Vote()
         {
-            var submissionId = assertResponse(await api.PostSubmission(testSub, sampleSubmission)).data.ID;
-            var commentId = assertResponse(await api.PostComment(testSub, submissionId, sampleComment)).data.ID;
+            var submissionId = assertResponse(await api.PostSubmission(testSub, sampleSubmission)).Data.ID;
+            var commentId = assertResponse(await api.PostComment(testSub, submissionId, sampleComment)).Data.ID;
             assertResponse(await api.PostVote("submission", submissionId, 1));
             assertResponse(await api.PostVote("comment", commentId, 1));
             assertResponse(await api.PostVoteRevokeOnRevote("submission", submissionId, 1, true));
@@ -135,8 +135,8 @@ namespace VoatHubTests.Api
         [TestMethod]
         public async Task Save()
         {
-            var submissionId = assertResponse(await api.PostSubmission(testSub, sampleSubmission)).data.ID;
-            var commentId = assertResponse(await api.PostComment(testSub, submissionId, sampleComment)).data.ID;
+            var submissionId = assertResponse(await api.PostSubmission(testSub, sampleSubmission)).Data.ID;
+            var commentId = assertResponse(await api.PostComment(testSub, submissionId, sampleComment)).Data.ID;
             assertResponse(await api.PostSubmissionsSave(submissionId));
             assertResponse(await api.DeleteSubmissionsSave(submissionId));
             assertResponse(await api.PostCommentsSave(commentId));
@@ -146,15 +146,15 @@ namespace VoatHubTests.Api
         private ApiResponse assertResponse(ApiResponse response)
         {
             Assert.IsNotNull(response);
-            Assert.IsTrue(response.success);
+            Assert.IsTrue(response.Success);
             return response;
         }
 
         private ApiResponse<T> assertResponse<T>(ApiResponse<T> response)
         {
             Assert.IsNotNull(response);
-            Assert.IsTrue(response.success);
-            Assert.IsNotNull(response.data);
+            Assert.IsTrue(response.Success);
+            Assert.IsNotNull(response.Data);
             return response;
         }
     }

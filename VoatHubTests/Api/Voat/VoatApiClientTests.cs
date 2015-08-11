@@ -16,7 +16,7 @@ namespace VoatHubTests.Api.Voat
     [TestClass]
     public class VoatApiClientTests
     {
-        private Uri submissionListUri = new Uri(TestSettings.FullApiPath + "v/Test");
+        private Uri submissionListUri = new Uri(TestSettings.FullApiPath + "v/swampfire100");
         private UserSubmission submission;
         private HttpStringContent serializedSubmission;
         private VoatApiClient apiClient = new VoatApiClient(TestSettings.ApiKey, TestSettings.TokenUri);
@@ -68,12 +68,12 @@ namespace VoatHubTests.Api.Voat
         public async Task PostAsync()
         {
             var data = await apiClient.PostAsync<ApiResponse<ApiSubmission>>(submissionListUri, serializedSubmission);
-            Assert.IsFalse(data.success);
+            Assert.IsFalse(data.Success);
 
             await Login();
 
             data = await apiClient.PostAsync<ApiResponse<ApiSubmission>>(submissionListUri, serializedSubmission);
-            Assert.IsTrue(data.success);
+            Assert.IsTrue(data.Success);
 
         }
 
@@ -82,8 +82,8 @@ namespace VoatHubTests.Api.Voat
         {
             await Login();
             var data = await apiClient.PostAsync<ApiResponse<ApiSubmission>>(submissionListUri, serializedSubmission);
-            Assert.IsNotNull(data.data);
-            int submissionId = data.data.ID;
+            Assert.IsNotNull(data.Data);
+            int submissionId = data.Data.ID;
 
             submission.Content = "Update content test";
             serializedSubmission = new HttpStringContent(JsonConvert.SerializeObject(submission));
@@ -91,8 +91,8 @@ namespace VoatHubTests.Api.Voat
             var submissionUri = new Uri(TestSettings.FullApiPath + "v/Test/" + submissionId);
 
             var putData = await apiClient.PutAsync<ApiResponse<ApiSubmission>>(submissionUri, serializedSubmission);
-            Assert.IsNotNull(putData.data);
-            Assert.AreEqual("Update content test", putData.data.Content);
+            Assert.IsNotNull(putData.Data);
+            Assert.AreEqual("Update content test", putData.Data.Content);
         }
 
         [TestMethod]
@@ -100,11 +100,11 @@ namespace VoatHubTests.Api.Voat
         {
             await Login();
             var data = await apiClient.PostAsync<ApiResponse<ApiSubmission>>(submissionListUri, serializedSubmission);
-            Assert.IsNotNull(data.data);
-            int submissionId = data.data.ID;
+            Assert.IsNotNull(data.Data);
+            int submissionId = data.Data.ID;
             var submissionUri = new Uri(TestSettings.FullApiPath + "v/Test/" + submissionId);
             var deleteData = await apiClient.DeleteAsync<ApiResponse>(submissionUri);
-            Assert.IsTrue(deleteData.success);
+            Assert.IsTrue(deleteData.Success);
         }
     }
 }

@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Runtime.Serialization;
+using Newtonsoft.Json;
 
 namespace VoatHub.Models.Voat
 {
@@ -13,9 +10,17 @@ namespace VoatHub.Models.Voat
     /// <typeparam name="T"></typeparam>
     public class ApiResponse<T>
     {
-        public T data { get; set; }
-        public bool success { get; set; }
-        public ErrorInfo error { get; set; }
+        [JsonProperty("data")]
+        [DataMember(Name = "data")]
+        public T Data { get; set; }
+
+        [JsonProperty("success")]
+        [DataMember(Name = "success")]
+        public bool Success { get; set; }
+
+        [JsonProperty("error")]
+        [DataMember(Name = "error")]
+        public ErrorInfo Error { get; set; }
     }
 
     /// <summary>
@@ -23,7 +28,12 @@ namespace VoatHub.Models.Voat
     /// </summary>
     public class ApiResponse
     {
-        public bool success { get; set; }
-        public ErrorInfo error { get; set; }
+        [JsonProperty("success")]
+        [DataMember(Name = "success")]
+        public bool Success { get; set; }
+
+        [JsonProperty("error")]
+        [DataMember(Name = "error")]
+        public ErrorInfo Error { get; set; }
     }
 }

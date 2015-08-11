@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.UI.Xaml;
@@ -18,6 +19,7 @@ using Windows.UI.Xaml.Navigation;
 
 using VoatHub.Api.Voat;
 using VoatHub.Models.Voat.v1;
+using VoatHub.Models.VoatHub;
 
 namespace VoatHub
 {
@@ -26,14 +28,23 @@ namespace VoatHub
     /// </summary>
     public sealed partial class MainPage : Page
     {
+        // Xaml resources
+        private DataTemplate linkSubmissionTemplate;
+        private DataTemplate commentSubmissionTemplate;
+
+        // Page data
         private VoatApi voatApi;
 
         public MainPage()
         {
             this.InitializeComponent();
+
+            linkSubmissionTemplate = Resources["LinkSubmissionTemplate"] as DataTemplate;
+            commentSubmissionTemplate = Resources["CommentSubmissionTemplate"] as DataTemplate;
+
             voatApi = new VoatApi("ZbDlC73ndD6TB84WQmKvMA==", "https", "fakevout.azurewebsites.net", "api/v1/", "https://fakevout.azurewebsites.net/api/token");
         }
-
+        
         protected override async void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
@@ -42,7 +53,7 @@ namespace VoatHub
 
             if (response != null)
             {
-                var items = response.data;
+                var items = response.Data;
                 SubmissionListView.ItemsSource = items;
             }
         }
@@ -90,26 +101,58 @@ namespace VoatHub
         /// <param name="e"></param>
         private void SubmissionListView_ItemClick(object sender, ItemClickEventArgs e)
         {
-
             if (e == null || e.ClickedItem == null || !(e.ClickedItem is ApiSubmission)) return;
 
             var submission = e.ClickedItem as ApiSubmission;
 
-            if (submission != null)
+            if (submission.Type == ApiSubmissionType.Link)
             {
-                if (submission.Type == 2)
-                {
-                    SubmissionContentPresenter.ContentTemplate = Resources["SubmissionWebViewTemplate"] as DataTemplate;
-
-                    Debug.WriteLine("SubmissionWebViewTemplate");
-                }
-                else
-                {
-                    SubmissionContentPresenter.ContentTemplate = Resources["SubmissionContentTemplate"] as DataTemplate;
-
-                    Debug.WriteLine("SubmissionWebViewTemplate");
-                }
+                setContentPresenterToLink(submission);
             }
+            else
+            {
+                setContentPresenterToComment(submission);
+            }
+        }
+
+        /// <summary>
+        /// Set <see cref="SubmissionContentPresenter"/> to display a web link.
+        /// </summary>
+        /// <param name="submission"></param>
+        private void setContentPresenterToLink(ApiSubmission submission)
+        {
+            SubmissionContentPresenter.Content = submission;
+            SubmissionContentPresenter.ContentTemplate = linkSubmissionTemplate;
+            Debug.WriteLine("LinkSubmissionTemplate");
+        }
+
+        /// <summary>
+        /// Set <see cref="SubmissionContentPresenter"/> to display a comment thread.
+        /// <para>The Content is set twice. Once initialy with the submission content and once
+        /// when the comments are retrieved from the API.</para>
+        /// </summary>
+        /// <param name="submission"></param>
+        private async void setContentPresenterToComment(ApiSubmission submission)
+        {
+            var submissionWithComment = new CommentSubmission();
+            submissionWithComment.Submission = submission;
+
+            // Set content before list to comments is retrieved to show things faster.
+            SubmissionContentPresenter.Content = submissionWithComment;
+            SubmissionContentPresenter.ContentTemplate = commentSubmissionTemplate;
+
+            var response = await voatApi.GetCommentList(submission.Subverse, submission.ID, null);
+
+            if (response.Success)
+            {
+                submissionWithComment.Comments = response.Data;
+            }
+
+            // Set the content again to show comments.
+            // NOTE: changing a property of the content does not redraw the content. We must
+            // Set the content property again to notify the event listeners of the change.
+            SubmissionContentPresenter.Content = submissionWithComment;
+            Debug.WriteLine("SubmissionWebViewTemplate");
         }
 
         /// <summary>
@@ -121,35 +164,6 @@ namespace VoatHub
         private void SubmissionContentPresenter_DataContextChanged(FrameworkElement sender, DataContextChangedEventArgs args)
         {
             Debug.WriteLine(args.NewValue, "Data context change");
-            
-            //    if (sender != null && sender is ContentPresenter)
-            //    {
-            //        var presenter = sender as ContentPresenter;
-            //        var newValue = args.NewValue;
-
-            //        if (newValue != null && newValue is ApiSubmission)
-            //        {
-            //            var submission = args.NewValue as ApiSubmission;
-
-            //            if (submission != null)
-            //            {
-            //                if (submission.Type == 2)
-            //                {
-            //                    presenter.ContentTemplate = Resources["SubmissionWebViewTemplate"] as DataTemplate;
-
-            //                    Debug.WriteLine("SubmissionWebViewTemplate");
-            //                }
-            //                else
-            //                {
-            //                    presenter.ContentTemplate = Resources["SubmissionContentTemplate"] as DataTemplate;
-
-            //                    Debug.WriteLine("SubmissionWebViewTemplate");
-            //                }
-            //            }
-
-            //            Debug.WriteLine(submission.Content);
-            //        }
-            //    }
         }
     }
 }

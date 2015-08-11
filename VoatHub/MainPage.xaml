@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:VoatHub"
     xmlns:voatModels="using:VoatHub.Models.Voat.v1"
+    xmlns:voatHubModels="using:VoatHub.Models.VoatHub"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
@@ -36,17 +37,31 @@
             </Grid>
         </DataTemplate>
 
-        <DataTemplate x:Key="SubmissionContentTemplate" x:DataType="voatModels:ApiSubmission">
-            <StackPanel>
-                <TextBlock Margin="0,8" Style="{ThemeResource TitleTextBlockStyle}"
-                           HorizontalAlignment="Left" Text="{x:Bind Title}"/>
-
-                <TextBlock Margin="0,9" HorizontalAlignment="Left" MaxWidth="560"
-                           Style="{ThemeResource BodyTextBlockStyle}" Text="{x:Bind Content}" />
-            </StackPanel>
+        <DataTemplate x:Key="CommentItemTemplate" x:DataType="voatModels:ApiComment">
+            <TextBlock Text="{x:Bind Content}"
+                       Foreground="{ThemeResource SystemControlForegroundBaseHighBrush}"
+                       HorizontalAlignment="Center"
+                       Style="{ThemeResource BodyTextBlockStyle}" />
         </DataTemplate>
 
-        <DataTemplate x:Key="SubmissionWebViewTemplate" x:DataType="voatModels:ApiSubmission">
+        <DataTemplate x:Key="CommentSubmissionTemplate" x:DataType="voatHubModels:CommentSubmission">
+            <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+                <StackPanel>
+                    <TextBlock Margin="0,8" Style="{ThemeResource TitleTextBlockStyle}"
+                           HorizontalAlignment="Left" Text="{x:Bind Submission.Title}"/>
+
+                    <TextBlock Margin="0,9" HorizontalAlignment="Left" MaxWidth="560"
+                           Style="{ThemeResource BodyTextBlockStyle}" Text="{x:Bind Submission.Content}" />
+                    <ListView x:Name="CommentListView" 
+                          ItemTemplate="{StaticResource CommentItemTemplate}"
+                          ItemsSource="{x:Bind Comments}"
+                          IsItemClickEnabled="True">
+                    </ListView>
+                </StackPanel>
+            </ScrollViewer>
+        </DataTemplate>
+
+        <DataTemplate x:Key="LinkSubmissionTemplate" x:DataType="voatModels:ApiSubmission">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="Auto" />
@@ -88,6 +103,17 @@
             </ListView.ItemContainerStyle>
         </ListView>
 
+        <ContentPresenter
+            x:Name="SubmissionContentPresenter"
+            Grid.Column="1"
+            BorderThickness="1,0,0,0"
+            Padding="24,0"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch"
+            BorderBrush="{ThemeResource SystemControlForegroundBaseLowBrush}"
+            DataContextChanged="SubmissionContentPresenter_DataContextChanged">
+        </ContentPresenter>
+
         <!--DataTemplate is favored over programmatically changing values-->
         <!--<Grid Grid.Column="1" 
               BorderThickness="1,0,0,0" Padding="24,0" 
@@ -118,18 +144,5 @@
                        Style="{ThemeResource TitleTextBlockStyle}" 
                        HorizontalAlignment="Left"/>
         </Grid>-->
-
-        <ContentPresenter
-            x:Name="SubmissionContentPresenter"
-            Grid.Column="1"
-            BorderThickness="1,0,0,0"
-            Padding="24,0"
-            HorizontalAlignment="Stretch"
-            VerticalAlignment="Stretch"
-            BorderBrush="{ThemeResource SystemControlForegroundBaseLowBrush}"
-            Content="{x:Bind SubmissionListView.SelectedItem, Mode=OneWay}"
-            DataContextChanged="SubmissionContentPresenter_DataContextChanged">
-        </ContentPresenter>
-
     </Grid>
 </Page>

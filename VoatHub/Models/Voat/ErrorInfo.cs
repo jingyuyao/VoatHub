@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Runtime.Serialization;
+using Newtonsoft.Json;
 
 namespace VoatHub.Models.Voat
 {
@@ -12,7 +9,12 @@ namespace VoatHub.Models.Voat
     /// <remarks>http://fakevout.azurewebsites.net/api/help/resourcemodel?modelName=ErrorInfo</remarks>
     public class ErrorInfo
     {
-        public string type { get; set; }
-        public string message { get; set; }
+        [JsonProperty("type")]
+        [DataMember(Name = "type")]
+        public string Type { get; set; }
+
+        [JsonProperty("message")]
+        [DataMember(Name = "message")]
+        public string Message { get; set; }
     }
 }
