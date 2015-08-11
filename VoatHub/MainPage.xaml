@@ -91,10 +91,10 @@
             <ColumnDefinition x:Name="DetailColumn" Width="*" />
         </Grid.ColumnDefinitions>
 
-        <ListView x:Name="SubmissionListView" 
+        <ListView x:Name="MasterListView" 
                   ItemTemplate="{StaticResource SubmissionItemTemplate}"
                   IsItemClickEnabled="True"
-                  ItemClick="SubmissionListView_ItemClick"
+                  ItemClick="MasterListView_ItemClick"
                   Grid.Column="0">
             <ListView.ItemContainerStyle>
                 <Style TargetType="ListViewItem">
@@ -104,14 +104,14 @@
         </ListView>
 
         <ContentPresenter
-            x:Name="SubmissionContentPresenter"
+            x:Name="DetailContentPresenter"
             Grid.Column="1"
             BorderThickness="1,0,0,0"
             Padding="24,0"
             HorizontalAlignment="Stretch"
             VerticalAlignment="Stretch"
             BorderBrush="{ThemeResource SystemControlForegroundBaseLowBrush}"
-            DataContextChanged="SubmissionContentPresenter_DataContextChanged">
+            DataContextChanged="DetailContentPresenter_DataContextChanged">
         </ContentPresenter>
 
         <!--DataTemplate is favored over programmatically changing values-->

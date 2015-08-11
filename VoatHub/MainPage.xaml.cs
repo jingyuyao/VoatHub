@@ -32,6 +32,12 @@ namespace VoatHub
         private DataTemplate linkSubmissionTemplate;
         private DataTemplate commentSubmissionTemplate;
 
+        // Xaml state
+        /// <summary>
+        /// Invariant: Should always equal to the submission id of <see cref="SubmissionContentPresenter"/>.
+        /// </summary>
+        private int presenterContentId;
+
         // Page data
         private VoatApi voatApi;
 
@@ -41,7 +47,7 @@ namespace VoatHub
 
             linkSubmissionTemplate = Resources["LinkSubmissionTemplate"] as DataTemplate;
             commentSubmissionTemplate = Resources["CommentSubmissionTemplate"] as DataTemplate;
-
+            
             voatApi = new VoatApi("ZbDlC73ndD6TB84WQmKvMA==", "https", "fakevout.azurewebsites.net", "api/v1/", "https://fakevout.azurewebsites.net/api/token");
         }
         
@@ -54,10 +60,88 @@ namespace VoatHub
             if (response != null)
             {
                 var items = response.Data;
-                SubmissionListView.ItemsSource = items;
+                MasterListView.ItemsSource = items;
             }
         }
 
+        /// <summary>
+        /// Changes which DataTempalte the ContentPresenter uses based on the type of the submission.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void MasterListView_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            if (e == null || e.ClickedItem == null || !(e.ClickedItem is ApiSubmission)) return;
+
+            var submission = e.ClickedItem as ApiSubmission;
+            presenterContentId = submission.ID;
+
+            if (submission.Type == ApiSubmissionType.Link)
+            {
+                setContentPresenterToLink(submission);
+            }
+            else
+            {
+                setContentPresenterToComment(submission);
+            }
+        }
+
+        /// <summary>
+        /// Set <see cref="SubmissionContentPresenter"/> to display a web link.
+        /// </summary>
+        /// <param name="submission"></param>
+        private void setContentPresenterToLink(ApiSubmission submission)
+        {
+            Debug.WriteLine("setContentPresenterToLink");
+            DetailContentPresenter.Content = submission;
+            DetailContentPresenter.ContentTemplate = linkSubmissionTemplate;
+        }
+
+        /// <summary>
+        /// Set <see cref="SubmissionContentPresenter"/> to display a comment thread.
+        /// <para>The Content is set twice. Once initialy with the submission content and once
+        /// when the comments are retrieved from the API.</para>
+        /// </summary>
+        /// <param name="submission"></param>
+        private async void setContentPresenterToComment(ApiSubmission submission)
+        {
+            Debug.WriteLine("setContentPresenterToComment");
+            var submissionWithComment = new CommentSubmission();
+            submissionWithComment.Submission = submission;
+
+            // Set content before comments are retrieved to show things faster.
+            DetailContentPresenter.Content = submissionWithComment;
+            DetailContentPresenter.ContentTemplate = commentSubmissionTemplate;
+
+            var response = await voatApi.GetCommentList(submission.Subverse, submission.ID, null);
+
+            if (response.Success)
+            {
+                submissionWithComment.Comments = response.Data;
+            }
+
+            // Set the content again to show comments.
+            // NOTE: changing a property of the content does not redraw the content. We must
+            // Set the content property again to notify the event listeners of the change.
+            // NOTE2: Since seconds can go by before we receive response from server we have to
+            // make sure the content in the presenter is still the same submission we are retrieving
+            // comments for before we refresh it.
+            if (presenterContentId == submission.ID)
+                DetailContentPresenter.Content = submissionWithComment;
+        }
+
+        /// <summary>
+        /// This is fired AFTER DataTemplate is set for the content. So it is not useful to update the data template since it will
+        /// not affect the current selected item.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="args"></param>
+        private void DetailContentPresenter_DataContextChanged(FrameworkElement sender, DataContextChangedEventArgs args)
+        {
+            Debug.WriteLine(args.NewValue, "Data context change");
+        }
+
+        // Not used
         /// <summary>
         /// Sets the data to the UI elements based on the clicked ApiSubmission.
         /// </summary>
@@ -93,77 +177,5 @@ namespace VoatHub
 
         //    Debug.WriteLine(submission.Content);
         //}
-
-        /// <summary>
-        /// Changes which DataTempalte the ContentPresenter uses based on the type of the submission.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void SubmissionListView_ItemClick(object sender, ItemClickEventArgs e)
-        {
-            if (e == null || e.ClickedItem == null || !(e.ClickedItem is ApiSubmission)) return;
-
-            var submission = e.ClickedItem as ApiSubmission;
-
-            if (submission.Type == ApiSubmissionType.Link)
-            {
-                setContentPresenterToLink(submission);
-            }
-            else
-            {
-                setContentPresenterToComment(submission);
-            }
-        }
-
-        /// <summary>
-        /// Set <see cref="SubmissionContentPresenter"/> to display a web link.
-        /// </summary>
-        /// <param name="submission"></param>
-        private void setContentPresenterToLink(ApiSubmission submission)
-        {
-            SubmissionContentPresenter.Content = submission;
-            SubmissionContentPresenter.ContentTemplate = linkSubmissionTemplate;
-            Debug.WriteLine("LinkSubmissionTemplate");
-        }
-
-        /// <summary>
-        /// Set <see cref="SubmissionContentPresenter"/> to display a comment thread.
-        /// <para>The Content is set twice. Once initialy with the submission content and once
-        /// when the comments are retrieved from the API.</para>
-        /// </summary>
-        /// <param name="submission"></param>
-        private async void setContentPresenterToComment(ApiSubmission submission)
-        {
-            var submissionWithComment = new CommentSubmission();
-            submissionWithComment.Submission = submission;
-
-            // Set content before list to comments is retrieved to show things faster.
-            SubmissionContentPresenter.Content = submissionWithComment;
-            SubmissionContentPresenter.ContentTemplate = commentSubmissionTemplate;
-
-            var response = await voatApi.GetCommentList(submission.Subverse, submission.ID, null);
-
-            if (response.Success)
-            {
-                submissionWithComment.Comments = response.Data;
-            }
-
-            // Set the content again to show comments.
-            // NOTE: changing a property of the content does not redraw the content. We must
-            // Set the content property again to notify the event listeners of the change.
-            SubmissionContentPresenter.Content = submissionWithComment;
-            Debug.WriteLine("SubmissionWebViewTemplate");
-        }
-
-        /// <summary>
-        /// This is fired AFTER DataTemplate is set for the content. So it is not useful to update the data template since it will
-        /// not affect the current selected item.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="args"></param>
-        private void SubmissionContentPresenter_DataContextChanged(FrameworkElement sender, DataContextChangedEventArgs args)
-        {
-            Debug.WriteLine(args.NewValue, "Data context change");
-        }
     }
 }
