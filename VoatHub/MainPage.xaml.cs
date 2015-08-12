@@ -18,6 +18,7 @@ using Windows.UI.Xaml.Navigation;
 // The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
 using VoatHub.Api.Voat;
+using VoatHub.Models.Voat;
 using VoatHub.Models.Voat.v1;
 using VoatHub.Models.VoatHub;
 
@@ -25,45 +26,44 @@ namespace VoatHub
 {
     /// <summary>
     /// An empty page that can be used on its own or navigated to within a Frame.
+    /// <para>Contain mostly event handlers.</para>
     /// </summary>
     public sealed partial class MainPage : Page
     {
         // Xaml resources
         private DataTemplate linkSubmissionTemplate;
         private DataTemplate commentSubmissionTemplate;
+        private Flyout notFoundFlyout;
 
-        // Xaml state
-        /// <summary>
-        /// Invariant: Should always equal to the submission id of <see cref="SubmissionContentPresenter"/>.
-        /// </summary>
-        private int presenterContentId;
-
-        // Page data
+        // Page view model
+        public MainPageViewModel ViewModel { get; set; }
+        
+        // Api
         private VoatApi voatApi;
+        private SearchOptions submissionSearchOptions;
 
         public MainPage()
-        {
+        { 
             this.InitializeComponent();
 
             linkSubmissionTemplate = Resources["LinkSubmissionTemplate"] as DataTemplate;
             commentSubmissionTemplate = Resources["CommentSubmissionTemplate"] as DataTemplate;
-            
+            notFoundFlyout = Resources["NotFoundFlyout"] as Flyout;
+
+            ViewModel = new MainPageViewModel();
+
             voatApi = new VoatApi("ZbDlC73ndD6TB84WQmKvMA==", "https", "fakevout.azurewebsites.net", "api/v1/", "https://fakevout.azurewebsites.net/api/token");
+            submissionSearchOptions = new SearchOptions();
         }
         
         protected override async void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
-
-            var response = await voatApi.GetSubmissionList("Playground", null);
-
-            if (response != null)
-            {
-                var items = response.Data;
-                MasterListView.ItemsSource = items;
-            }
+            await setCurrentSubverse("_front");
         }
 
+        // Event handlers
+        
         /// <summary>
         /// Changes which DataTempalte the ContentPresenter uses based on the type of the submission.
         /// </summary>
@@ -74,7 +74,117 @@ namespace VoatHub
             if (e == null || e.ClickedItem == null || !(e.ClickedItem is ApiSubmission)) return;
 
             var submission = e.ClickedItem as ApiSubmission;
-            presenterContentId = submission.ID;
+
+            setContentPresenterToSubmission(submission);
+        }
+        
+        /// <summary>
+        /// This is fired AFTER DataTemplate is set for the content. So it is not useful to update the data template since it will
+        /// not affect the current selected item.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="args"></param>
+        private void DetailContentPresenter_DataContextChanged(FrameworkElement sender, DataContextChangedEventArgs args)
+        {
+            Debug.WriteLine(args.NewValue, "Data context change");
+        }
+
+        private void MasterCommandBarButton_Click(object sender, RoutedEventArgs e)
+        {
+            AppBarButton button = e.OriginalSource as AppBarButton;
+
+            Debug.WriteLine(button, "MasterBar");
+
+            switch (button.Tag.ToString())
+            {
+                case "refresh":
+                    refreshCurrentSubverse();
+                    break;
+            }
+        }
+
+        private void DetailCommandBarButton_Click(object sender, RoutedEventArgs e)
+        {
+            AppBarButton button = e.OriginalSource as AppBarButton;
+
+            Debug.WriteLine(button, "DetailBar");
+
+            switch (button.Tag.ToString())
+            {
+                case "refresh":
+                    refreshCurrentContentPresenter();
+                    break;
+            }
+        }
+
+        private void SortSubmissions_Click(object sender, RoutedEventArgs e)
+        {
+            Debug.WriteLine(e.OriginalSource, "SortItem");
+            var item = e.OriginalSource as MenuFlyoutItem;
+
+            switch (item.Tag.ToString())
+            {
+                case "hot":
+                    submissionSearchOptions.sort = SortAlgorithm.Hot;
+                    break;
+
+                case "new":
+                    submissionSearchOptions.sort = SortAlgorithm.New;
+                    break;
+
+                case "top":
+                    submissionSearchOptions.sort = SortAlgorithm.Top;
+                    break;
+            }
+
+            refreshCurrentSubverse();
+        }
+
+        private async void MasterSearchBox_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
+        {
+            var query = args.ChosenSuggestion != null ? args.ChosenSuggestion.ToString() : args.QueryText;
+
+            bool success = await setCurrentSubverse(query);
+
+            if (!success)
+                notFoundFlyout.ShowAt(sender);
+        }
+
+        // Helper methods
+
+        private async Task<bool> setCurrentSubverse(string subverse)
+        {
+            toggleMasterListState();
+
+            var response = await voatApi.GetSubmissionList(subverse, submissionSearchOptions);
+            if (response != null && response.Success)
+            {
+                ViewModel.CurrentSubverse = subverse;
+                MasterListView.ItemsSource = response.Data;
+
+                toggleMasterListState();
+                return true;
+            }
+
+            toggleMasterListState();
+            return false;
+        }
+
+        private void toggleMasterListState()
+        {
+            MasterProgressRing.IsActive = !MasterProgressRing.IsActive;
+            MasterProgressRing.Visibility = MasterProgressRing.Visibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
+            MasterListView.Visibility = MasterListView.Visibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
+        }
+
+        private async void refreshCurrentSubverse()
+        {
+            await setCurrentSubverse(ViewModel.CurrentSubverse);
+        }
+
+        private void setContentPresenterToSubmission(ApiSubmission submission)
+        {
+            ViewModel.CurrentPresentedSubmission = submission;
 
             if (submission.Type == ApiSubmissionType.Link)
             {
@@ -89,7 +199,7 @@ namespace VoatHub
         /// <summary>
         /// Set <see cref="SubmissionContentPresenter"/> to display a web link.
         /// </summary>
-        /// <param name="submission"></param>
+        /// <param name="submission">Can only be link post.</param>
         private void setContentPresenterToLink(ApiSubmission submission)
         {
             Debug.WriteLine("setContentPresenterToLink");
@@ -102,12 +212,13 @@ namespace VoatHub
         /// <para>The Content is set twice. Once initialy with the submission content and once
         /// when the comments are retrieved from the API.</para>
         /// </summary>
-        /// <param name="submission"></param>
+        /// <param name="submission">Can be both link and self post</param>
         private async void setContentPresenterToComment(ApiSubmission submission)
         {
             Debug.WriteLine("setContentPresenterToComment");
             var submissionWithComment = new CommentSubmission();
             submissionWithComment.Submission = submission;
+            submissionWithComment.LoadingComments = true;
 
             // Set content before comments are retrieved to show things faster.
             DetailContentPresenter.Content = submissionWithComment;
@@ -120,77 +231,21 @@ namespace VoatHub
                 submissionWithComment.Comments = response.Data;
             }
 
+            submissionWithComment.LoadingComments = false;
+
             // Set the content again to show comments.
             // NOTE: changing a property of the content does not redraw the content. We must
             // Set the content property again to notify the event listeners of the change.
             // NOTE2: Since seconds can go by before we receive response from server we have to
             // make sure the content in the presenter is still the same submission we are retrieving
             // comments for before we refresh it.
-            if (presenterContentId == submission.ID)
+            if (ViewModel.CurrentPresentedSubmission.ID == submission.ID)
                 DetailContentPresenter.Content = submissionWithComment;
         }
 
-        /// <summary>
-        /// This is fired AFTER DataTemplate is set for the content. So it is not useful to update the data template since it will
-        /// not affect the current selected item.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="args"></param>
-        private void DetailContentPresenter_DataContextChanged(FrameworkElement sender, DataContextChangedEventArgs args)
+        private void refreshCurrentContentPresenter()
         {
-            Debug.WriteLine(args.NewValue, "Data context change");
+            setContentPresenterToSubmission(ViewModel.CurrentPresentedSubmission);
         }
-
-        private void MasterCommandBarButton_Click(object sender, RoutedEventArgs e)
-        {
-            Debug.WriteLine(e.OriginalSource, "MasterBar");
-        }
-
-        private void DetailCommandBarButton_Click(object sender, RoutedEventArgs e)
-        {
-            Debug.WriteLine(e.OriginalSource, "DetailBar");
-        }
-
-        private void SortItem_Click(object sender, RoutedEventArgs e)
-        {
-            Debug.WriteLine(e.OriginalSource, "SortItem");
-        }
-
-        // Not used
-        /// <summary>
-        /// Sets the data to the UI elements based on the clicked ApiSubmission.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        //private void SubmissionListView_ItemClick(object sender, ItemClickEventArgs e)
-        //{
-        //    if (e == null || e.ClickedItem == null || !(e.ClickedItem is ApiSubmission)) return;
-
-        //    var submission = e.ClickedItem as ApiSubmission;
-
-        //    SubmissionTitleTextBlock.Text = submission.Title ?? "";
-        //    if (submission.Type == 2)
-        //    {
-        //        if (submission.Url != null)
-        //        {
-        //            Uri uri;
-        //            bool uriOk = Uri.TryCreate(submission.Url, UriKind.Absolute, out uri);
-        //            if (uriOk)
-        //            {
-        //                SubmissionWebView.Navigate(uri);
-        //                SubmissionWebView.Visibility = Visibility.Visible;
-        //            }
-        //        }
-        //    }
-        //    else
-        //    {
-        //        SubmissionWebView.Visibility = Visibility.Collapsed;
-        //    }
-
-        //    if (submission.Content == null) SubmissionContentTextBlock.Visibility = Visibility.Collapsed;
-        //    else SubmissionContentTextBlock.Text = submission.Content;
-
-        //    Debug.WriteLine(submission.Content);
-        //}
     }
 }

@@ -12,6 +12,7 @@ namespace VoatHub.Models.VoatHub
     {
         public ApiSubmission Submission { get; set; }
         public List<ApiComment> Comments { get; set; }
+        public bool LoadingComments { get; set; }
 
         public override string ToString()
         {

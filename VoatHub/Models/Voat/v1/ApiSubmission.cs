@@ -110,10 +110,10 @@ namespace VoatHub.Models.Voat.v1
         [JsonProperty("url", NullValueHandling = NullValueHandling.Include)]
         [DataMember(Name = "url")]
         public string Url { get; set; }
-
+        
         public override string ToString()
         {
-            return string.Format("ID:{0} Type:{1} Date:{2} UserName:{3} Url:{4} Content:{5}", ID, Type, Date, UserName, Url, Content);
+            return string.Format("ID:{0} Type:{1} Date:{2} UserName:{3} Url:{4} Thumbnail:{5} Content:{6}", ID, Type, Date, UserName, Url, Thumbnail, Content);
         }
     }
 
