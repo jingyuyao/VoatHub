@@ -11,12 +11,12 @@ namespace VoatHub.Models.VoatHub
     public class CommentSubmission
     {
         public ApiSubmission Submission { get; set; }
-        public List<ApiComment> Comments { get; set; }
+        public List<CommentTree> CommentTree { get; set; }
         public bool LoadingComments { get; set; }
 
         public override string ToString()
         {
-            var count = Comments == null ? 0 : Comments.Count;
+            var count = CommentTree == null ? 0 : CommentTree.Count;
             return Submission.ToString() + " Comment Count:" + count;
         }
     }

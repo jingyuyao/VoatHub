@@ -97,5 +97,17 @@ namespace VoatHub.Models.Voat.v1
         [JsonProperty("level")]
         [DataMember(Name = "level")]
         public int? Level { get; set; }
+
+        // Custom
+
+        [JsonIgnore]
+        [IgnoreDataMember]
+        public int TotalVotes
+        {
+            get
+            {
+                return UpVotes - DownVotes;
+            }
+        }
     }
 }

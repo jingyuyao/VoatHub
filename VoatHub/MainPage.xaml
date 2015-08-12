@@ -16,6 +16,56 @@
         <helpers:StringToUriConverter x:Key="StringToUriConverter" />
         <helpers:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
         
+        <!--Styles-->
+        <Style x:Key="ContentTreeItemStyle" TargetType="ListViewItem">
+            <Setter Property="FontFamily" Value="{ThemeResource ContentControlThemeFontFamily}" />
+            <Setter Property="FontSize" Value="{ThemeResource ControlContentThemeFontSize}" />
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="TabNavigation" Value="Local"/>
+            <Setter Property="IsHoldingEnabled" Value="True"/>
+            <Setter Property="Margin" Value="0,0,0,0"/>
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="VerticalContentAlignment" Value="Top"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListViewItem">
+                        <ContentPresenter 
+                            ContentTransitions="{TemplateBinding ContentTransitions}"
+                            HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                            VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                        
+                        <!--ListViewItemPresenter includes clicking animations by default which I don't want.-->
+                        <!--These are the default settings. Use as reference.-->
+                        <!--<ListViewItemPresenter
+                                ContentTransitions="{TemplateBinding ContentTransitions}"
+                                Padding="{TemplateBinding Padding}"
+                                SelectionCheckMarkVisualEnabled="False"
+                                CheckHintBrush="{ThemeResource ListViewItemCheckHintThemeBrush}"
+                                CheckSelectingBrush="{ThemeResource ListViewItemCheckSelectingThemeBrush}"
+                                CheckBrush="{ThemeResource ListViewItemCheckThemeBrush}"
+                                DragBackground="{ThemeResource ListViewItemDragBackgroundThemeBrush}"
+                                DragForeground="{ThemeResource ListViewItemDragForegroundThemeBrush}"
+                                FocusBorderBrush="{ThemeResource ListViewItemFocusBorderThemeBrush}"
+                                PlaceholderBackground="{ThemeResource ListViewItemPlaceholderBackgroundThemeBrush}"
+                                PointerOverBackground="{ThemeResource ListViewItemPointerOverBackgroundThemeBrush}"
+                                SelectedBorderThickness="{ThemeResource ListViewItemCompactSelectedBorderThemeThickness}"
+                                SelectedBackground="{ThemeResource ListViewItemSelectedBackgroundThemeBrush}"
+                                SelectedForeground="{ThemeResource ListViewItemSelectedForegroundThemeBrush}"
+                                SelectedPointerOverBackground="{ThemeResource ListViewItemSelectedPointerOverBackgroundThemeBrush}"
+                                SelectedPointerOverBorderBrush="{ThemeResource ListViewItemSelectedPointerOverBorderThemeBrush}"
+                                DisabledOpacity="{ThemeResource ListViewItemDisabledThemeOpacity}"
+                                DragOpacity="{ThemeResource ListViewItemDragThemeOpacity}"
+                                ReorderHintOffset="{ThemeResource ListViewItemReorderHintThemeOffset}"
+                                HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                                PointerOverBackgroundMargin="1"
+                                ContentMargin="4" />-->
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <!--Main templates-->
         <DataTemplate x:Key="SubmissionItemTemplate" x:DataType="voatModels:ApiSubmission">
             <Grid Margin="0,10">
@@ -43,7 +93,7 @@
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
-                    
+
                     <TextBlock Text="{x:Bind Title}"
                            Foreground="{ThemeResource SystemControlForegroundBaseHighBrush}"
                            Style="{ThemeResource BodyTextBlockStyle}" />
@@ -70,32 +120,69 @@
             </Grid>
         </DataTemplate>
 
-        <DataTemplate x:Key="CommentItemTemplate" x:DataType="voatModels:ApiComment">
-            <TextBlock Text="{x:Bind Content}"
-                       Foreground="{ThemeResource SystemControlForegroundBaseHighBrush}"
-                       HorizontalAlignment="Center"
-                       Style="{ThemeResource BodyTextBlockStyle}" />
+        <DataTemplate x:Key="CommentTreeTemplate" x:DataType="voatHubModels:CommentTree">
+            <StackPanel Padding="10,5,0,5">
+                <StackPanel Orientation="Vertical"
+                                Padding="10,0,0,0"
+                                BorderBrush="LightBlue"
+                                BorderThickness="1,0,0,0">
+                    
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Foreground="{ThemeResource SystemControlForegroundBaseMediumBrush}">
+                            <Run FontWeight="Bold">Votes:</Run> <Run Text="{x:Bind Comment.TotalVotes}"/> 
+                            <Run FontWeight="Bold">User:</Run> <Run Text="{x:Bind Comment.UserName}"/>
+                            <Run FontWeight="Bold">Date:</Run> <Run Text="{x:Bind Comment.Date}"/>
+                        </TextBlock>
+                    </StackPanel>
+
+                    <TextBlock Text="{x:Bind Comment.Content}"
+                               FontSize="{ThemeResource TextStyleLargeFontSize}"
+                               Foreground="{ThemeResource SystemControlForegroundBaseHighBrush}"
+                               HorizontalAlignment="Left"
+                               Style="{ThemeResource BodyTextBlockStyle}"
+                               IsTapEnabled="True"/>
+                </StackPanel>
+
+                <ListView SelectionMode="None"
+                          IsItemClickEnabled="False"
+                          ItemTemplate="{StaticResource CommentTreeTemplate}"
+                          ItemContainerStyle="{StaticResource ContentTreeItemStyle}"
+                          Visibility="{x:Bind HasChildren, Converter={StaticResource BoolToVisibilityConverter}}"
+                          ItemsSource="{x:Bind Children}"/>
+            </StackPanel>
         </DataTemplate>
 
         <DataTemplate x:Key="CommentSubmissionTemplate" x:DataType="voatHubModels:CommentSubmission">
             <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
                 <StackPanel>
                     <TextBlock Margin="0,8" Style="{ThemeResource TitleTextBlockStyle}"
-                           HorizontalAlignment="Left" Text="{x:Bind Submission.Title}"/>
+                               Foreground="{ThemeResource SystemControlForegroundBaseHighBrush}"
+                               FontWeight="Bold"
+                               FontSize="{ThemeResource TextStyleExtraLargeFontSize}"
+                               HorizontalAlignment="Left" Text="{x:Bind Submission.Title}"/>
+
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Foreground="{ThemeResource SystemControlForegroundBaseMediumBrush}">
+                            <Run FontWeight="Bold">Votes:</Run> <Run Text="{x:Bind Submission.TotalVotes}"/> 
+                            <Run FontWeight="Bold">User:</Run> <Run Text="{x:Bind Submission.UserName}"/>
+                            <Run FontWeight="Bold">Date:</Run> <Run Text="{x:Bind Submission.Date}"/>
+                        </TextBlock>
+                    </StackPanel>
 
                     <TextBlock Margin="0,9" HorizontalAlignment="Left" MaxWidth="560"
-                           Style="{ThemeResource BodyTextBlockStyle}" Text="{x:Bind Submission.Content}" />
+                               FontSize="{ThemeResource TextStyleLargeFontSize}"
+                               Foreground="{ThemeResource SystemControlForegroundBaseHighBrush}"
+                               Style="{ThemeResource SubtitleTextBlockStyle}" Text="{x:Bind Submission.Content}" />
 
-                    <ProgressRing x:Name="MasterProgressRing"
-                                  Margin="20,20" Width="50" Height="50"
+                    <ProgressRing Margin="0,50" Width="50" Height="50"
                                   Visibility="{x:Bind LoadingComments, Converter={StaticResource BoolToVisibilityConverter}}" 
                                   IsActive="{x:Bind LoadingComments}"/>
 
-                    <ListView x:Name="CommentListView" 
-                          ItemTemplate="{StaticResource CommentItemTemplate}"
-                          ItemsSource="{x:Bind Comments}"
-                          IsItemClickEnabled="True">
-                    </ListView>
+                    <ListView SelectionMode="None"
+                              IsItemClickEnabled="False"
+                              ItemContainerStyle="{StaticResource ContentTreeItemStyle}"
+                              ItemTemplate="{StaticResource CommentTreeTemplate}"
+                              ItemsSource="{x:Bind CommentTree}" />
                 </StackPanel>
             </ScrollViewer>
         </DataTemplate>
@@ -111,14 +198,27 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <TextBlock Margin="0,8" Style="{ThemeResource TitleTextBlockStyle}"
-                           HorizontalAlignment="Left" Text="{x:Bind Title}"/>
+                <StackPanel>
+                    <TextBlock Margin="0,8" Style="{ThemeResource TitleTextBlockStyle}"
+                               Foreground="{ThemeResource SystemControlForegroundBaseHighBrush}"
+                               FontWeight="Bold"
+                               FontSize="{ThemeResource TextStyleExtraLargeFontSize}"
+                               HorizontalAlignment="Left" Text="{x:Bind Title}"/>
+
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Foreground="{ThemeResource SystemControlForegroundBaseMediumBrush}">
+                            <Run FontWeight="Bold">Votes:</Run> <Run Text="{x:Bind TotalVotes}"/> 
+                            <Run FontWeight="Bold">User:</Run> <Run Text="{x:Bind UserName}"/>
+                            <Run FontWeight="Bold">Date:</Run> <Run Text="{x:Bind Date}"/>
+                        </TextBlock>
+                    </StackPanel>
+                </StackPanel>
 
                 <WebView x:Name="submissionWebView" Source="{x:Bind Url}"
                          Grid.Row="1"></WebView>
             </Grid>
         </DataTemplate>
-        
+
         <!--Misc resourec-->
         <Flyout x:Key="NotFoundFlyout">
             <TextBlock Text="Not Found."/>
@@ -149,18 +249,21 @@
             </Grid.ColumnDefinitions>
 
             <TextBlock x:Name="MasterTopBar" 
-                       Margin="12,0"
+                       Margin="12,5"
+                       Foreground="{ThemeResource SystemControlForegroundBaseHighBrush}"
+                       FontWeight="Bold"
+                       FontSize="{ThemeResource TextStyleExtraLargeFontSize}"
                        Text="{x:Bind ViewModel.CurrentSubverse, Mode=OneWay}"
                        Style="{ThemeResource TitleTextBlockStyle}" />
 
             <AutoSuggestBox x:Name="MasterSearchBox" Grid.Row="1"
-                            Margin="12,0"
+                            Margin="12,5"
                             QueryIcon="Find"
                             QuerySubmitted="MasterSearchBox_QuerySubmitted"
                             PlaceholderText="Search subverse..."/>
-            
+
             <ProgressRing x:Name="MasterProgressRing" Grid.Row="2"
-                          Margin="20,20" Width="50" Height="50"
+                          Margin="0,50" Width="50" Height="50"
                           Visibility="Collapsed" IsActive="False"/>
 
             <ListView x:Name="MasterListView" Grid.Row="3"
@@ -217,8 +320,7 @@
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Stretch"
                 BorderBrush="{ThemeResource SystemControlForegroundBaseLowBrush}"
-                DataContextChanged="DetailContentPresenter_DataContextChanged">
-            </ContentPresenter>
+                DataContextChanged="DetailContentPresenter_DataContextChanged"/>
 
             <CommandBar x:Name="DetailCommandBar" Grid.Row="1">
                 <CommandBar.Content>

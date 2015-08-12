@@ -145,7 +145,7 @@ namespace VoatHub
             var query = args.ChosenSuggestion != null ? args.ChosenSuggestion.ToString() : args.QueryText;
 
             bool success = await setCurrentSubverse(query);
-
+            
             if (!success)
                 notFoundFlyout.ShowAt(sender);
         }
@@ -228,7 +228,7 @@ namespace VoatHub
 
             if (response.Success)
             {
-                submissionWithComment.Comments = response.Data;
+                submissionWithComment.CommentTree = CommentTree.FromApiCommentList(response.Data, null);
             }
 
             submissionWithComment.LoadingComments = false;
