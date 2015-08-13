@@ -32,7 +32,7 @@ namespace VoatHub
     {
         // Xaml resources
         private DataTemplate linkSubmissionTemplate;
-        private DataTemplate commentSubmissionTemplate;
+        private DataTemplate submissionViewModelTemplate;
         private Flyout notFoundFlyout;
 
         // Page view model
@@ -47,7 +47,7 @@ namespace VoatHub
             this.InitializeComponent();
 
             linkSubmissionTemplate = Resources["LinkSubmissionTemplate"] as DataTemplate;
-            commentSubmissionTemplate = Resources["CommentSubmissionTemplate"] as DataTemplate;
+            submissionViewModelTemplate = Resources["SubmissionViewModelTemplate"] as DataTemplate;
             notFoundFlyout = Resources["NotFoundFlyout"] as Flyout;
 
             ViewModel = new MainPageViewModel();
@@ -154,7 +154,7 @@ namespace VoatHub
 
         private async Task<bool> setCurrentSubverse(string subverse)
         {
-            toggleMasterListState();
+            ViewModel.LoadingSubmissions = true;
 
             var response = await voatApi.GetSubmissionList(subverse, submissionSearchOptions);
             if (response != null && response.Success)
@@ -162,19 +162,12 @@ namespace VoatHub
                 ViewModel.CurrentSubverse = subverse;
                 MasterListView.ItemsSource = response.Data;
 
-                toggleMasterListState();
+                ViewModel.LoadingSubmissions = false;
                 return true;
             }
 
-            toggleMasterListState();
+            ViewModel.LoadingSubmissions = false;
             return false;
-        }
-
-        private void toggleMasterListState()
-        {
-            MasterProgressRing.IsActive = !MasterProgressRing.IsActive;
-            MasterProgressRing.Visibility = MasterProgressRing.Visibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
-            MasterListView.Visibility = MasterListView.Visibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
         }
 
         private async void refreshCurrentSubverse()
@@ -184,7 +177,7 @@ namespace VoatHub
 
         private void setContentPresenterToSubmission(ApiSubmission submission)
         {
-            ViewModel.CurrentPresentedSubmission = submission;
+            ViewModel.CurrentSubmission = submission;
 
             if (submission.Type == ApiSubmissionType.Link)
             {
@@ -216,13 +209,13 @@ namespace VoatHub
         private async void setContentPresenterToComment(ApiSubmission submission)
         {
             Debug.WriteLine("setContentPresenterToComment");
-            var submissionWithComment = new CommentSubmission();
+            var submissionWithComment = new SubmissionViewModel();
             submissionWithComment.Submission = submission;
             submissionWithComment.LoadingComments = true;
 
             // Set content before comments are retrieved to show things faster.
             DetailContentPresenter.Content = submissionWithComment;
-            DetailContentPresenter.ContentTemplate = commentSubmissionTemplate;
+            DetailContentPresenter.ContentTemplate = submissionViewModelTemplate;
 
             var response = await voatApi.GetCommentList(submission.Subverse, submission.ID, null);
 
@@ -239,13 +232,13 @@ namespace VoatHub
             // NOTE2: Since seconds can go by before we receive response from server we have to
             // make sure the content in the presenter is still the same submission we are retrieving
             // comments for before we refresh it.
-            if (ViewModel.CurrentPresentedSubmission.ID == submission.ID)
+            if (ViewModel.CurrentSubmission.ID == submission.ID)
                 DetailContentPresenter.Content = submissionWithComment;
         }
 
         private void refreshCurrentContentPresenter()
         {
-            setContentPresenterToSubmission(ViewModel.CurrentPresentedSubmission);
+            setContentPresenterToSubmission(ViewModel.CurrentSubmission);
         }
     }
 }

@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Data;
 
+using VoatHub.Utils;
+
 namespace VoatHub.Ui.Helpers
 {
     public class StringToUriConverter : IValueConverter
@@ -29,6 +31,48 @@ namespace VoatHub.Ui.Helpers
             // null or false
             if (value == null || !((bool)value)) return Visibility.Collapsed;
             return Visibility.Visible;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, string language)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class BoolToNegateVisibilityConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, string language)
+        {
+            // null or false
+            if (value == null || !((bool)value)) return Visibility.Visible;
+            return Visibility.Collapsed;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, string language)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class BoolNegateConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, string language)
+        {
+            if (value == null) return true;
+            return !((bool)value);
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, string language)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
+    public class TimeAgoConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, string language)
+        {
+            return TimeAgo.From((DateTime)value);
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, string language)

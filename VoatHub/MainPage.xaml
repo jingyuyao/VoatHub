@@ -14,7 +14,10 @@
     <Page.Resources>
         <!--Converter-->
         <helpers:StringToUriConverter x:Key="StringToUriConverter" />
+        <helpers:BoolToNegateVisibilityConverter x:Key="BoolToNegateVisibilityConverter" />
         <helpers:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+        <helpers:TimeAgoConverter x:Key="TimeAgoConverter" />
+        <helpers:BoolNegateConverter x:Key="BoolNegateConverter" />
         
         <!--Styles-->
         <Style x:Key="ContentTreeItemStyle" TargetType="ListViewItem">
@@ -112,12 +115,60 @@
                            Foreground="{ThemeResource SystemControlForegroundBaseMediumBrush}"
                            Style="{ThemeResource BodyTextBlockStyle}" />
 
-                        <TextBlock Text="{x:Bind Date}" Grid.Column="1" Grid.Row="1" Margin="12,2,0,0"
+                        <TextBlock Text="{x:Bind Date, Converter={StaticResource TimeAgoConverter}}" Grid.Column="1" Grid.Row="1" Margin="12,2,0,0"
                            Foreground="{ThemeResource SystemControlForegroundBaseMediumBrush}"
                            Style="{ThemeResource BodyTextBlockStyle}" />
                     </Grid>
                 </Grid>
             </Grid>
+        </DataTemplate>
+
+        <DataTemplate x:Key="SubmissionHeaderTemplate" x:DataType="voatModels:ApiSubmission">
+            <StackPanel>
+                <TextBlock Margin="0,8" Style="{ThemeResource TitleTextBlockStyle}"
+                               Foreground="{ThemeResource SystemControlForegroundBaseHighBrush}"
+                               FontWeight="Bold"
+                               FontSize="{ThemeResource TextStyleExtraLargeFontSize}"
+                               HorizontalAlignment="Left" Text="{x:Bind Title}"/>
+
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Foreground="{ThemeResource SystemControlForegroundBaseMediumBrush}">
+                            <Run FontWeight="Bold">Votes:</Run> <Run Text="{x:Bind TotalVotes}"/> 
+                            <Run FontWeight="Bold">User:</Run> <Run Text="{x:Bind UserName}"/>
+                            <Run FontWeight="Bold">Date:</Run> <Run Text="{x:Bind Date, Converter={StaticResource TimeAgoConverter}}"/>
+                    </TextBlock>
+                </StackPanel>
+            </StackPanel>
+        </DataTemplate>
+
+        <!--Why are CommentSubmission and LinkSubmission separated into two different data template you ask?
+        Well, WebView keep giving me exception when trying to bind its source to a null value. All self posts
+        does not have an url so seperate DetailContentPresenter into two data templates, one for self and one for
+        link posts just to accomdate the stupid WebView-->
+
+        <DataTemplate x:Key="SubmissionViewModelTemplate" x:DataType="voatHubModels:SubmissionViewModel">
+            <ScrollViewer HorizontalScrollBarVisibility="Disabled" 
+                          VerticalScrollBarVisibility="Auto">
+                <StackPanel>
+                    <!--Having the title scroll with rest of the comments looks better.-->
+                    <ContentPresenter ContentTemplate="{StaticResource SubmissionHeaderTemplate}" Content="{x:Bind Submission}" />
+
+                    <TextBlock Margin="0,9" HorizontalAlignment="Left" MaxWidth="560"
+                               FontSize="{ThemeResource TextStyleLargeFontSize}"
+                               Foreground="{ThemeResource SystemControlForegroundBaseHighBrush}"
+                               Style="{ThemeResource SubtitleTextBlockStyle}" Text="{x:Bind Submission.Content}" />
+
+                    <ProgressRing Margin="0,50" Width="50" Height="50"
+                                  Visibility="{x:Bind LoadingComments, Converter={StaticResource BoolToVisibilityConverter}}" 
+                                  IsActive="{x:Bind LoadingComments}"/>
+
+                    <ListView SelectionMode="None"
+                              IsItemClickEnabled="False"
+                              ItemContainerStyle="{StaticResource ContentTreeItemStyle}"
+                              ItemTemplate="{StaticResource CommentTreeTemplate}"
+                              ItemsSource="{x:Bind CommentTree}" />
+                </StackPanel>
+            </ScrollViewer>
         </DataTemplate>
 
         <DataTemplate x:Key="CommentTreeTemplate" x:DataType="voatHubModels:CommentTree">
@@ -126,12 +177,12 @@
                                 Padding="10,0,0,0"
                                 BorderBrush="LightBlue"
                                 BorderThickness="1,0,0,0">
-                    
+
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Foreground="{ThemeResource SystemControlForegroundBaseMediumBrush}">
                             <Run FontWeight="Bold">Votes:</Run> <Run Text="{x:Bind Comment.TotalVotes}"/> 
                             <Run FontWeight="Bold">User:</Run> <Run Text="{x:Bind Comment.UserName}"/>
-                            <Run FontWeight="Bold">Date:</Run> <Run Text="{x:Bind Comment.Date}"/>
+                            <Run FontWeight="Bold">Date:</Run> <Run Text="{x:Bind Comment.Date, Converter={StaticResource TimeAgoConverter}}"/>
                         </TextBlock>
                     </StackPanel>
 
@@ -152,41 +203,6 @@
             </StackPanel>
         </DataTemplate>
 
-        <DataTemplate x:Key="CommentSubmissionTemplate" x:DataType="voatHubModels:CommentSubmission">
-            <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
-                <StackPanel>
-                    <TextBlock Margin="0,8" Style="{ThemeResource TitleTextBlockStyle}"
-                               Foreground="{ThemeResource SystemControlForegroundBaseHighBrush}"
-                               FontWeight="Bold"
-                               FontSize="{ThemeResource TextStyleExtraLargeFontSize}"
-                               HorizontalAlignment="Left" Text="{x:Bind Submission.Title}"/>
-
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Foreground="{ThemeResource SystemControlForegroundBaseMediumBrush}">
-                            <Run FontWeight="Bold">Votes:</Run> <Run Text="{x:Bind Submission.TotalVotes}"/> 
-                            <Run FontWeight="Bold">User:</Run> <Run Text="{x:Bind Submission.UserName}"/>
-                            <Run FontWeight="Bold">Date:</Run> <Run Text="{x:Bind Submission.Date}"/>
-                        </TextBlock>
-                    </StackPanel>
-
-                    <TextBlock Margin="0,9" HorizontalAlignment="Left" MaxWidth="560"
-                               FontSize="{ThemeResource TextStyleLargeFontSize}"
-                               Foreground="{ThemeResource SystemControlForegroundBaseHighBrush}"
-                               Style="{ThemeResource SubtitleTextBlockStyle}" Text="{x:Bind Submission.Content}" />
-
-                    <ProgressRing Margin="0,50" Width="50" Height="50"
-                                  Visibility="{x:Bind LoadingComments, Converter={StaticResource BoolToVisibilityConverter}}" 
-                                  IsActive="{x:Bind LoadingComments}"/>
-
-                    <ListView SelectionMode="None"
-                              IsItemClickEnabled="False"
-                              ItemContainerStyle="{StaticResource ContentTreeItemStyle}"
-                              ItemTemplate="{StaticResource CommentTreeTemplate}"
-                              ItemsSource="{x:Bind CommentTree}" />
-                </StackPanel>
-            </ScrollViewer>
-        </DataTemplate>
-
         <DataTemplate x:Key="LinkSubmissionTemplate" x:DataType="voatModels:ApiSubmission">
             <Grid>
                 <Grid.RowDefinitions>
@@ -198,27 +214,14 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <StackPanel>
-                    <TextBlock Margin="0,8" Style="{ThemeResource TitleTextBlockStyle}"
-                               Foreground="{ThemeResource SystemControlForegroundBaseHighBrush}"
-                               FontWeight="Bold"
-                               FontSize="{ThemeResource TextStyleExtraLargeFontSize}"
-                               HorizontalAlignment="Left" Text="{x:Bind Title}"/>
-
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Foreground="{ThemeResource SystemControlForegroundBaseMediumBrush}">
-                            <Run FontWeight="Bold">Votes:</Run> <Run Text="{x:Bind TotalVotes}"/> 
-                            <Run FontWeight="Bold">User:</Run> <Run Text="{x:Bind UserName}"/>
-                            <Run FontWeight="Bold">Date:</Run> <Run Text="{x:Bind Date}"/>
-                        </TextBlock>
-                    </StackPanel>
-                </StackPanel>
+                <!--The {Binding} binds the content to the current DataContext. Same effect is not possible through x:Bind-->
+                <ContentPresenter ContentTemplate="{StaticResource SubmissionHeaderTemplate}" Content="{Binding}" />
 
                 <WebView x:Name="submissionWebView" Source="{x:Bind Url}"
                          Grid.Row="1"></WebView>
             </Grid>
         </DataTemplate>
-
+        
         <!--Misc resourec-->
         <Flyout x:Key="NotFoundFlyout">
             <TextBlock Text="Not Found."/>
@@ -264,10 +267,12 @@
 
             <ProgressRing x:Name="MasterProgressRing" Grid.Row="2"
                           Margin="0,50" Width="50" Height="50"
-                          Visibility="Collapsed" IsActive="False"/>
+                          Visibility="{x:Bind ViewModel.LoadingSubmissions, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}" 
+                          IsActive="{x:Bind ViewModel.LoadingSubmissions, Mode=OneWay}"/>
 
             <ListView x:Name="MasterListView" Grid.Row="3"
                       ItemTemplate="{StaticResource SubmissionItemTemplate}"
+                      Visibility="{x:Bind ViewModel.LoadingSubmissions, Converter={StaticResource BoolToNegateVisibilityConverter}, Mode=OneWay}"
                       IsItemClickEnabled="True"
                       ItemClick="MasterListView_ItemClick">
                 <ListView.ItemContainerStyle>
