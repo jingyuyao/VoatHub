@@ -40,6 +40,7 @@ namespace VoatHub
         // Api
         private VoatApi voatApi;
         private SearchOptions submissionSearchOptions;
+        private SearchOptions commentSearchOptions;
 
         public MainPage()
         { 
@@ -50,7 +51,10 @@ namespace VoatHub
             ViewModel = new MainPageViewModel();
 
             voatApi = new VoatApi("ZbDlC73ndD6TB84WQmKvMA==", "https", "fakevout.azurewebsites.net", "api/v1/", "https://fakevout.azurewebsites.net/api/token");
+
+            // TODO: Load from settings
             submissionSearchOptions = new SearchOptions();
+            commentSearchOptions = new SearchOptions();
         }
         
         protected override async void OnNavigatedTo(NavigationEventArgs e)
@@ -61,6 +65,8 @@ namespace VoatHub
 
         // Event handlers
         
+        // MasterColumnGrid
+
         /// <summary>
         /// Changes which DataTempalte the ContentPresenter uses based on the type of the submission.
         /// </summary>
@@ -73,17 +79,6 @@ namespace VoatHub
             var submission = e.ClickedItem as ApiSubmission;
 
             setContentPresenterToSubmission(submission, false);
-        }
-        
-        /// <summary>
-        /// This is fired AFTER DataTemplate is set for the content. So it is not useful to update the data template since it will
-        /// not affect the current selected item.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="args"></param>
-        private void DetailContentPresenter_DataContextChanged(FrameworkElement sender, DataContextChangedEventArgs args)
-        {
-            Debug.WriteLine(args.NewValue, "Data context change");
         }
 
         private void MasterCommandBarButton_Click(object sender, RoutedEventArgs e)
@@ -100,6 +95,50 @@ namespace VoatHub
             }
         }
 
+        private void SortSubmissions_Click(object sender, RoutedEventArgs e)
+        {
+            Debug.WriteLine(e.OriginalSource, "SortItem");
+            var item = e.OriginalSource as MenuFlyoutItem;
+
+            sortAlgorithmHelper(item.Tag.ToString(), submissionSearchOptions);
+
+            refreshCurrentSubverse();
+        }
+
+        private async void MasterSearchBox_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
+        {
+            var query = args.ChosenSuggestion != null ? args.ChosenSuggestion.ToString() : args.QueryText;
+
+            bool success = await setCurrentSubverse(query);
+
+            if (!success)
+                notFoundFlyout.ShowAt(sender);
+        }
+
+        private void SubmissionCommentsButton_Click(object sender, RoutedEventArgs e)
+        {
+            var button = e.OriginalSource as Button;
+            var submission = button.Tag as ApiSubmission;
+
+            // For the initial state where no submission was selected and user presses the comment icon in DetailCommandBar
+            if (submission == null) return;
+
+            setContentPresenterToSubmission(submission, true);
+        }
+
+        // DetailColumnGrid
+
+        /// <summary>
+        /// This is fired AFTER DataTemplate is set for the content. So it is not useful to update the data template since it will
+        /// not affect the current selected item.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="args"></param>
+        private void DetailContentPresenter_DataContextChanged(FrameworkElement sender, DataContextChangedEventArgs args)
+        {
+            Debug.WriteLine(args.NewValue, "Data context change");
+        }
+        
         private void DetailCommandBarButton_Click(object sender, RoutedEventArgs e)
         {
             AppBarButton button = e.OriginalSource as AppBarButton;
@@ -114,37 +153,37 @@ namespace VoatHub
             }
         }
 
-        private void SortSubmissions_Click(object sender, RoutedEventArgs e)
+        /// <summary>
+        /// This actually doesn't do shit. Voat returns the same thing no matter what sort options we send it...
+        /// <para>We actually have to do the sorting ourselves which kind of makes sense.</para>
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void SortComments_Click(object sender, RoutedEventArgs e)
         {
-            Debug.WriteLine(e.OriginalSource, "SortItem");
             var item = e.OriginalSource as MenuFlyoutItem;
 
-            switch (item.Tag.ToString())
-            {
-                case "hot":
-                    submissionSearchOptions.sort = SortAlgorithm.Hot;
-                    break;
+            sortAlgorithmHelper(item.Tag.ToString(), commentSearchOptions);
 
-                case "new":
-                    submissionSearchOptions.sort = SortAlgorithm.New;
-                    break;
-
-                case "top":
-                    submissionSearchOptions.sort = SortAlgorithm.Top;
-                    break;
-            }
-
-            refreshCurrentSubverse();
+            refreshCurrentContentPresenter();
         }
 
-        private async void MasterSearchBox_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
+        /// <summary>
+        /// Fixes WebView size not fit to grid issue.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void DetailContentViewer_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            var query = args.ChosenSuggestion != null ? args.ChosenSuggestion.ToString() : args.QueryText;
-
-            bool success = await setCurrentSubverse(query);
-            
-            if (!success)
-                notFoundFlyout.ShowAt(sender);
+            try
+            {
+                DetailWebView.Height = DetailContentViewer.ActualHeight - DetailTitleRow.ActualHeight;
+                DetailWebView.Width = DetailInnerColumn.ActualWidth;
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex);
+            }
         }
 
         // Helper methods
@@ -183,11 +222,13 @@ namespace VoatHub
                 submissionViewModel.LoadingComments = true;
                 ViewModel.CurrentSubmission = submissionViewModel;
 
-                var response = await voatApi.GetCommentList(submission.Subverse, submission.ID, null);
+                var response = await voatApi.GetCommentList(submission.Subverse, submission.ID, commentSearchOptions);
 
                 if (response.Success)
                 {
-                    submissionViewModel.CommentTree = CommentTree.FromApiCommentList(response.Data, null);
+                    var commentTreeList = CommentTree.FromApiCommentList(response.Data, null);
+                    commentTreeSorter(commentTreeList);
+                    submissionViewModel.CommentTree = commentTreeList;
                 }
 
                 submissionViewModel.LoadingComments = false;
@@ -212,25 +253,45 @@ namespace VoatHub
         }
 
         /// <summary>
-        /// Fixes WebView size not fit to grid issue.
+        /// Changes the sort parameter in options to the corresponding tag.
         /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void DetailContentViewer_SizeChanged(object sender, SizeChangedEventArgs e)
+        /// <param name="sortTag"></param>
+        /// <param name="options"></param>
+        private void sortAlgorithmHelper(string sortTag, SearchOptions options)
         {
-            DetailWebView.Height = DetailContentViewer.ActualHeight - DetailTitleRow.ActualHeight;
-            DetailWebView.Width = DetailInnerColumn.ActualWidth;
+            switch (sortTag)
+            {
+                case "hot":
+                    options.sort = SortAlgorithm.Hot;
+                    break;
+
+                case "new":
+                    options.sort = SortAlgorithm.New;
+                    break;
+
+                case "top":
+                    options.sort = SortAlgorithm.Top;
+                    break;
+            }
         }
 
-        private void SubmissionCommentsButton_Click(object sender, RoutedEventArgs e)
+        /// <summary>
+        /// Sorts the commentTreeList based on <see cref="commentSearchOptions"/>.
+        /// </summary>
+        /// <param name="commentTree"></param>
+        private void commentTreeSorter(List<CommentTree> commentTreeList)
         {
-            var button = e.OriginalSource as Button;
-            var submission = button.Tag as ApiSubmission;
+            switch (commentSearchOptions.sort)
+            {
+                case SortAlgorithm.New:
+                    CommentTree.SortNew(commentTreeList);
+                    break;
+                case SortAlgorithm.Top:
+                    CommentTree.SortTop(commentTreeList);
+                    break;
+            }
 
-            // For the initial state where no submission was selected and user presses the comment icon in DetailCommandBar
-            if (submission == null) return;
-
-            setContentPresenterToSubmission(submission, true);
+            Debug.WriteLine(commentTreeList);
         }
     }
 }

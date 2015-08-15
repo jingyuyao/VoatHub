@@ -101,7 +101,7 @@
 
                     <TextBlock Text="{x:Bind Title}"
                            Foreground="{ThemeResource SystemControlForegroundBaseHighBrush}"
-                           Style="{ThemeResource BodyTextBlockStyle}" />
+                           Style="{ThemeResource SubtitleTextBlockStyle}" />
 
                     <Grid Grid.Row="1">
                         <Grid.RowDefinitions>
@@ -113,21 +113,23 @@
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
 
-                        <TextBlock Text="{x:Bind UserName}" MaxLines="1"
-                           Foreground="{ThemeResource SystemControlForegroundBaseMediumBrush}"
-                           Style="{ThemeResource BodyTextBlockStyle}" />
+                        <TextBlock MaxLines="1"
+                                   Foreground="{ThemeResource SystemControlForegroundBaseMediumBrush}"
+                                   Style="{ThemeResource BodyTextBlockStyle}">
+                            <Run FontWeight="Bold" Text="{x:Bind UserName}"/>
+                            <Run Text="{x:Bind TotalVotes}"/> points.
+                        </TextBlock>
 
                         <TextBlock Text="{x:Bind Date, Converter={StaticResource TimeAgoConverter}}" Grid.Column="1" Grid.Row="1" Margin="12,2,0,0"
                            Foreground="{ThemeResource SystemControlForegroundBaseMediumBrush}"
                            Style="{ThemeResource BodyTextBlockStyle}" />
                     </Grid>
                 </Grid>
-                
-                <AppBarButton Icon="Comment" Grid.Column="2" Tag="{Binding}" Click="SubmissionCommentsButton_Click" />
 
-                <!--<Button Grid.Column="2" Click="SubmissionItemCommentButton_Click" Tag="{Binding}" Background="Transparent">
-                    <Image Source="Assets/bubble.png" />
-                </Button>-->
+                <Button Grid.Column="2" Click="SubmissionCommentsButton_Click" Tag="{Binding}" 
+                        Padding="10,10" BorderThickness="2" Background="Transparent">
+                    <SymbolIcon Symbol="Comment" Foreground="Blue" />
+                </Button>
             </Grid>
         </DataTemplate>
 
@@ -196,9 +198,8 @@
                        Margin="12,5"
                        Foreground="{ThemeResource SystemControlForegroundBaseHighBrush}"
                        FontWeight="Bold"
-                       FontSize="{ThemeResource TextStyleExtraLargeFontSize}"
                        Text="{x:Bind ViewModel.CurrentSubverse, Mode=OneWay}"
-                       Style="{ThemeResource TitleTextBlockStyle}" />
+                       Style="{ThemeResource HeaderTextBlockStyle}" />
 
             <AutoSuggestBox x:Name="MasterSearchBox" Grid.Row="1"
                             Margin="12,5"
@@ -282,10 +283,9 @@
                     </Grid.ColumnDefinitions>
 
                     <StackPanel Grid.Row="0">
-                        <TextBlock Margin="0,8" Style="{ThemeResource TitleTextBlockStyle}"
+                        <TextBlock Margin="0,8" Style="{ThemeResource SubheaderTextBlockStyle}"
                                     Foreground="{ThemeResource SystemControlForegroundBaseHighBrush}"
                                     FontWeight="Bold"
-                                    FontSize="{ThemeResource TextStyleExtraLargeFontSize}"
                                     HorizontalAlignment="Left" Text="{x:Bind ViewModel.CurrentSubmission.Submission.Title, Mode=OneWay}"/>
 
                         <StackPanel Orientation="Horizontal">
@@ -329,12 +329,24 @@
 
                 <AppBarButton Icon="Back" Label="Back" Tag="back" Click="DetailCommandBarButton_Click"/>
                 <AppBarButton Icon="Forward" Label="Forward" Tag="forward" Click="DetailCommandBarButton_Click"/>
+                <AppBarButton Icon="Refresh" Label="Refresh" Tag="refresh" Click="DetailCommandBarButton_Click"/>
 
                 <AppBarSeparator/>
 
-                <AppBarButton Icon="Comment" Grid.Column="2" Click="SubmissionCommentsButton_Click"
+                <AppBarButton Icon="Comment" Label="Comments" Click="SubmissionCommentsButton_Click"
                               Tag="{x:Bind ViewModel.CurrentSubmission.Submission, Mode=OneWay}"/>
-                <AppBarButton Icon="Refresh" Label="Refresh" Tag="refresh" Click="DetailCommandBarButton_Click"/>
+                
+                <AppBarButton Icon="Sort" Label="Sort">
+                    <AppBarButton.Flyout>
+                        <MenuFlyout>
+                            <MenuFlyoutItem Text="Hot" Tag="hot" Click="SortComments_Click"/>
+                            <MenuFlyoutItem Text="New" Tag="new" Click="SortComments_Click"/>
+                            <MenuFlyoutItem Text="Top" Tag="top" Click="SortComments_Click"/>
+                        </MenuFlyout>
+                    </AppBarButton.Flyout>
+                </AppBarButton>
+                
+                <AppBarSeparator/>
                 <AppBarButton Icon="Save" Label="Save" Tag="save" Click="DetailCommandBarButton_Click"/>
                 <AppBarButton Icon="ReShare"  Label="Share" Tag="share" Click="DetailCommandBarButton_Click"/>
 

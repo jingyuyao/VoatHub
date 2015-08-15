@@ -82,5 +82,51 @@ namespace VoatHub.Models.VoatHub
 
             return rootNestedComments;
         }
+
+        /// <summary>
+        /// Recursively sorts the list of <see cref="CommentTree"/> from oldest to newest.
+        /// <para>Sort so oldest goes first becaues list view displays the first item on the bottom</para>
+        /// </summary>
+        /// <param name="list"></param>
+        public static void SortNew(List<CommentTree> list)
+        {
+            list.Sort((x, y) =>
+            {
+                if (x.Comment.Date > y.Comment.Date)
+                    return -1;
+                else if (x.Comment.Date < y.Comment.Date)
+                    return 1;
+                else
+                    return 0;
+            });
+
+            foreach (var commentTree in list)
+            {
+                SortNew(commentTree.Children);
+            }
+        }
+
+        /// <summary>
+        /// Recursively sorts the list of <see cref="CommentTree"/> from least votes to most votes.
+        /// <para>Sort so least votes goes first becaues list view displays the first item on the bottom</para>
+        /// </summary>
+        /// <param name="list"></param>
+        public static void SortTop(List<CommentTree> list)
+        {
+            list.Sort((x, y) =>
+            {
+                if (x.Comment.TotalVotes > y.Comment.TotalVotes)
+                    return -1;
+                else if (x.Comment.TotalVotes < y.Comment.TotalVotes)
+                    return 1;
+                else
+                    return 0;
+            });
+
+            foreach (var commentTree in list)
+            {
+                SortNew(commentTree.Children);
+            }
+        }
     }
 }
