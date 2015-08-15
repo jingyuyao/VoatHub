@@ -171,7 +171,7 @@
         </Flyout>
     </Page.Resources>
 
-    <Grid x:Name="RootGrid">
+    <Grid x:Name="MainGrid">
         <Grid.RowDefinitions>
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
@@ -195,28 +195,28 @@
             </Grid.ColumnDefinitions>
 
             <TextBlock x:Name="MasterTitle" 
-                       Margin="12,5"
-                       Foreground="{ThemeResource SystemControlForegroundBaseHighBrush}"
-                       FontWeight="Bold"
-                       Text="{x:Bind ViewModel.CurrentSubverse, Mode=OneWay}"
-                       Style="{ThemeResource HeaderTextBlockStyle}" />
+                           Margin="12,5"
+                           Foreground="{ThemeResource SystemControlForegroundBaseHighBrush}"
+                           FontWeight="Bold"
+                           Text="{x:Bind ViewModel.CurrentSubverse, Mode=OneWay}"
+                           Style="{ThemeResource HeaderTextBlockStyle}" />
 
             <AutoSuggestBox x:Name="MasterSearchBox" Grid.Row="1"
-                            Margin="12,5"
-                            QueryIcon="Find"
-                            QuerySubmitted="MasterSearchBox_QuerySubmitted"
-                            PlaceholderText="Search subverse..."/>
+                                Margin="12,5"
+                                QueryIcon="Find"
+                                QuerySubmitted="MasterSearchBox_QuerySubmitted"
+                                PlaceholderText="Search subverse..."/>
 
             <ProgressRing x:Name="MasterProgressRing" Grid.Row="2"
-                          Margin="0,50" Width="50" Height="50"
-                          Visibility="{x:Bind ViewModel.LoadingSubmissions, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}" 
-                          IsActive="{x:Bind ViewModel.LoadingSubmissions, Mode=OneWay}"/>
+                              Margin="0,50" Width="50" Height="50"
+                              Visibility="{x:Bind ViewModel.LoadingSubmissions, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}" 
+                              IsActive="{x:Bind ViewModel.LoadingSubmissions, Mode=OneWay}"/>
 
             <ListView x:Name="MasterListView" Grid.Row="3"
-                      ItemTemplate="{StaticResource SubmissionItemTemplate}"
-                      Visibility="{x:Bind ViewModel.LoadingSubmissions, Converter={StaticResource BoolToNegateVisibilityConverter}, Mode=OneWay}"
-                      IsItemClickEnabled="True"
-                      ItemClick="MasterListView_ItemClick">
+                          ItemTemplate="{StaticResource SubmissionItemTemplate}"
+                          Visibility="{x:Bind ViewModel.LoadingSubmissions, Converter={StaticResource BoolToNegateVisibilityConverter}, Mode=OneWay}"
+                          IsItemClickEnabled="True"
+                          ItemClick="MasterListView_ItemClick">
                 <ListView.ItemContainerStyle>
                     <Style TargetType="ListViewItem">
                         <Setter Property="HorizontalContentAlignment" Value="Stretch" />
@@ -243,16 +243,16 @@
                 <AppBarButton Icon="Refresh" Label="Refresh" Tag="refresh" Click="MasterCommandBarButton_Click"/>
 
                 <!--<CommandBar.SecondaryCommands>
-                    <AppBarButton Icon="Like" Label="Like" Click="MasterCommandBarButton_Click"/>
-                    <AppBarButton Icon="Dislike" Label="Dislike" Click="MasterCommandBarButton_Click"/>
-                </CommandBar.SecondaryCommands>-->
+                        <AppBarButton Icon="Like" Label="Like" Click="MasterCommandBarButton_Click"/>
+                        <AppBarButton Icon="Dislike" Label="Dislike" Click="MasterCommandBarButton_Click"/>
+                    </CommandBar.SecondaryCommands>-->
             </CommandBar>
         </Grid>
 
         <Grid x:Name="DetailColumnGrid"
-              BorderThickness="1,0,0,0"
-              BorderBrush="{ThemeResource SystemControlForegroundBaseLowBrush}"
-              Grid.Column="1">
+                  BorderThickness="1,0,0,0"
+                  BorderBrush="{ThemeResource SystemControlForegroundBaseLowBrush}"
+                  Grid.Column="1">
             <Grid.RowDefinitions>
                 <RowDefinition x:Name="DetailContentRow" Height="*" />
                 <RowDefinition x:Name="DetailCommandBarRow" Height="Auto" />
@@ -264,12 +264,12 @@
 
             <!--Wraps Title, WebView, Content and Comments-->
             <ScrollViewer Grid.Row="0"
-                          x:Name="DetailContentViewer"
-                          SizeChanged="DetailContentViewer_SizeChanged"
-                          Visibility="{x:Bind ViewModel.CurrentSubmission, Converter={StaticResource NullToVisibilityConverter}, Mode=OneWay}"
-                          HorizontalScrollBarVisibility="Disabled" 
-                          VerticalScrollBarVisibility="Auto"
-                          Padding="24,0">
+                              x:Name="DetailContentViewer"
+                              SizeChanged="DetailContentViewer_SizeChanged"
+                              Visibility="{x:Bind ViewModel.CurrentSubmission, Converter={StaticResource NullToVisibilityConverter}, Mode=OneWay}"
+                              HorizontalScrollBarVisibility="Disabled" 
+                              VerticalScrollBarVisibility="Auto"
+                              Padding="24,0">
 
                 <Grid x:Name="DetailContentGrid">
                     <Grid.RowDefinitions>
@@ -284,40 +284,40 @@
 
                     <StackPanel Grid.Row="0">
                         <TextBlock Margin="0,8" Style="{ThemeResource SubheaderTextBlockStyle}"
-                                    Foreground="{ThemeResource SystemControlForegroundBaseHighBrush}"
-                                    FontWeight="Bold"
-                                    HorizontalAlignment="Left" Text="{x:Bind ViewModel.CurrentSubmission.Submission.Title, Mode=OneWay}"/>
+                                        Foreground="{ThemeResource SystemControlForegroundBaseHighBrush}"
+                                        FontWeight="Bold"
+                                        HorizontalAlignment="Left" Text="{x:Bind ViewModel.CurrentSubmission.Submission.Title, Mode=OneWay}"/>
 
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Foreground="{ThemeResource SystemControlForegroundBaseMediumBrush}">
-                            <Run FontWeight="Bold" Text="{x:Bind ViewModel.CurrentSubmission.Submission.UserName, Mode=OneWay}"/>
-                            <Run Text="{x:Bind ViewModel.CurrentSubmission.Submission.TotalVotes, Mode=OneWay}"/> points
-                            <Run Text="{x:Bind ViewModel.CurrentSubmission.Submission.Date, Converter={StaticResource TimeAgoConverter}, Mode=OneWay}"/>
+                                <Run FontWeight="Bold" Text="{x:Bind ViewModel.CurrentSubmission.Submission.UserName, Mode=OneWay}"/>
+                                <Run Text="{x:Bind ViewModel.CurrentSubmission.Submission.TotalVotes, Mode=OneWay}"/> points
+                                <Run Text="{x:Bind ViewModel.CurrentSubmission.Submission.Date, Converter={StaticResource TimeAgoConverter}, Mode=OneWay}"/>
                             </TextBlock>
                         </StackPanel>
                     </StackPanel>
 
                     <WebView Grid.Row="1"
-                             x:Name="DetailWebView"
-                             Visibility="{x:Bind ViewModel.CurrentSubmission.ShowComments, Converter={StaticResource BoolToNegateVisibilityConverter}, Mode=OneWay}"/>
+                                 x:Name="DetailWebView"
+                                 Visibility="{x:Bind ViewModel.CurrentSubmission.ShowComments, Converter={StaticResource BoolToNegateVisibilityConverter}, Mode=OneWay}"/>
 
                     <StackPanel Grid.Row="2"
-                                Visibility="{x:Bind ViewModel.CurrentSubmission.ShowComments, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}">
+                                    Visibility="{x:Bind ViewModel.CurrentSubmission.ShowComments, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}">
                         <TextBlock Margin="0,9" HorizontalAlignment="Left" MaxWidth="560"
-                                FontSize="{ThemeResource TextStyleLargeFontSize}"
-                                Foreground="{ThemeResource SystemControlForegroundBaseHighBrush}"
-                                Style="{ThemeResource SubtitleTextBlockStyle}" 
-                                Text="{x:Bind ViewModel.CurrentSubmission.Submission.Content, Mode=OneWay}" />
+                                    FontSize="{ThemeResource TextStyleLargeFontSize}"
+                                    Foreground="{ThemeResource SystemControlForegroundBaseHighBrush}"
+                                    Style="{ThemeResource SubtitleTextBlockStyle}" 
+                                    Text="{x:Bind ViewModel.CurrentSubmission.Submission.Content, Mode=OneWay}" />
 
                         <ProgressRing Margin="0,50" Width="50" Height="50"
-                                  Visibility="{x:Bind ViewModel.CurrentSubmission.LoadingComments, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}" 
-                                  IsActive="{x:Bind ViewModel.CurrentSubmission.LoadingComments, Mode=OneWay}"/>
+                                      Visibility="{x:Bind ViewModel.CurrentSubmission.LoadingComments, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}" 
+                                      IsActive="{x:Bind ViewModel.CurrentSubmission.LoadingComments, Mode=OneWay}"/>
 
                         <ListView SelectionMode="None"
-                              IsItemClickEnabled="False"
-                              ItemContainerStyle="{StaticResource ContentTreeItemStyle}"
-                              ItemTemplate="{StaticResource CommentTreeTemplate}"
-                              ItemsSource="{x:Bind ViewModel.CurrentSubmission.CommentTree, Mode=OneWay}" />
+                                  IsItemClickEnabled="False"
+                                  ItemContainerStyle="{StaticResource ContentTreeItemStyle}"
+                                  ItemTemplate="{StaticResource CommentTreeTemplate}"
+                                  ItemsSource="{x:Bind ViewModel.CurrentSubmission.CommentTree, Mode=OneWay}" />
                     </StackPanel>
                 </Grid>
             </ScrollViewer>
@@ -334,8 +334,8 @@
                 <AppBarSeparator/>
 
                 <AppBarButton Icon="Comment" Label="Comments" Click="SubmissionCommentsButton_Click"
-                              Tag="{x:Bind ViewModel.CurrentSubmission.Submission, Mode=OneWay}"/>
-                
+                                  Tag="{x:Bind ViewModel.CurrentSubmission.Submission, Mode=OneWay}"/>
+
                 <AppBarButton Icon="Sort" Label="Sort">
                     <AppBarButton.Flyout>
                         <MenuFlyout>
@@ -345,14 +345,14 @@
                         </MenuFlyout>
                     </AppBarButton.Flyout>
                 </AppBarButton>
-                
+
                 <AppBarSeparator/>
                 <AppBarButton Icon="Save" Label="Save" Tag="save" Click="DetailCommandBarButton_Click"/>
                 <AppBarButton Icon="ReShare"  Label="Share" Tag="share" Click="DetailCommandBarButton_Click"/>
 
                 <!--<CommandBar.SecondaryCommands>
-                    <AppBarButton Icon="Dislike" Label="Dislike" Tag="dislike" Click="DetailCommandBarButton_Click"/>
-                </CommandBar.SecondaryCommands>-->
+                        <AppBarButton Icon="Dislike" Label="Dislike" Tag="dislike" Click="DetailCommandBarButton_Click"/>
+                    </CommandBar.SecondaryCommands>-->
             </CommandBar>
         </Grid>
     </Grid>

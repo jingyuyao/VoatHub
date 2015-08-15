@@ -50,6 +50,14 @@ namespace VoatHubTests.Api.Voat
         }
 
         [TestMethod]
+        public async Task BadLogin()
+        {
+            bool success = await apiClient.Login("sgasdafsdfas", "fasdfasofanf");
+            Assert.IsFalse(success);
+            Assert.IsFalse(apiClient.LoggedIn);
+        }
+
+        [TestMethod]
         public async Task Logout()
         {
             await Login();

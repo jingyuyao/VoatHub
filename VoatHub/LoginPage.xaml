@@ -1,0 +1,33 @@
+﻿<Page
+    x:Class="VoatHub.LoginPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:VoatHub"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <StackPanel x:Name="LoginPanel" Visibility="Collapsed" VerticalAlignment="Center" HorizontalAlignment="Center">
+            <TextBlock HorizontalAlignment="Left" Text="Login to Voat:" Margin="10" />
+            
+            <TextBlock x:Name="LoginErrorBlock" HorizontalAlignment="Left" Visibility="Collapsed" Margin="10" />
+
+            <StackPanel HorizontalAlignment="Left" Orientation="Horizontal" Margin="10">
+                <TextBlock Text="Username:" Margin="10,0" />
+                <TextBox x:Name="UsernameField" Width="300" />
+            </StackPanel>
+
+            <StackPanel HorizontalAlignment="Left" Orientation="Horizontal" Margin="10">
+                <TextBlock Text="Password:" Margin="10,0" />
+                <PasswordBox x:Name="PasswordField" Width="300" />
+            </StackPanel>
+
+            <StackPanel HorizontalAlignment="Left" Orientation="Horizontal" Margin="10">
+                <Button x:Name="Login" Content="Login" Click="Login_Click"/>
+            </StackPanel>
+            
+            <ProgressRing x:Name="LoginProgressRing" Height="50" IsActive="False" Margin="50,50" />
+        </StackPanel>
+    </Grid>
+</Page>

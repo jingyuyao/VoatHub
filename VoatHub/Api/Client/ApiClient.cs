@@ -72,7 +72,7 @@ namespace VoatHub.Api.Client
             // Normal login in process
             var token = await retrieveToken(username, password);
 
-            if (token != null)
+            if (token.access_token != null)
             {
                 tokenManager.SetToken(token);
                 credentialManager.Login(username, password);

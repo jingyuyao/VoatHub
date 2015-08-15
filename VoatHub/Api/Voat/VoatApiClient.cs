@@ -18,7 +18,7 @@ namespace VoatHub.Api.Voat
     /// </summary>
     public sealed class VoatApiClient : JsonApiClient
     {
-        private readonly string _clientName = "voatClient";
+        public static readonly string CLIENT_NAME = "voatClient";
         private Uri tokenUri;
 
         public VoatApiClient(string apiKey, string tokenUri)
@@ -31,7 +31,7 @@ namespace VoatHub.Api.Voat
         {
             get
             {
-                return _clientName;
+                return CLIENT_NAME;
             }
         }
 

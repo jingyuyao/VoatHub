@@ -15,6 +15,12 @@ namespace VoatHub.Models.VoatHub
         private bool loadingComments;
         private bool showComments;
 
+        public SubmissionViewModel()
+        {
+            // Fixes item source null binding errors.
+            commentTree = new List<CommentTree>();
+        }
+
         public ApiSubmission Submission
         {
             get { return submission; }

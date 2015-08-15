@@ -24,6 +24,12 @@ namespace VoatHub.Models.VoatHub
         private string currentSubverse;
         private SubmissionViewModel currentSubmission;
         private bool loadingSubmissions;
+
+        public MainPageViewModel()
+        {
+            // Fixes item source null binding errors.
+            currentSubmission = new SubmissionViewModel();
+        }
         
         public string CurrentSubverse
         {

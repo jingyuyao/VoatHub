@@ -45,12 +45,11 @@ namespace VoatHub
         public MainPage()
         { 
             this.InitializeComponent();
+
             notFoundFlyout = Resources["NotFoundFlyout"] as Flyout;
-            //DetailWebView.NavigationCompleted += (sender, args) => sender.ResizeToContent();
 
             ViewModel = new MainPageViewModel();
-
-            voatApi = new VoatApi("ZbDlC73ndD6TB84WQmKvMA==", "https", "fakevout.azurewebsites.net", "api/v1/", "https://fakevout.azurewebsites.net/api/token");
+            ViewModel.CurrentSubmission = new SubmissionViewModel();
 
             // TODO: Load from settings
             submissionSearchOptions = new SearchOptions();
@@ -60,6 +59,7 @@ namespace VoatHub
         protected override async void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
+            voatApi = e.Parameter as VoatApi;
             await setCurrentSubverse("_front");
         }
 
@@ -213,6 +213,9 @@ namespace VoatHub
 
         private async void setContentPresenterToSubmission(ApiSubmission submission, bool forceShowComments)
         {
+            // Clears the webview
+            DetailWebView.Navigate(new Uri("about:blank"));
+
             var submissionViewModel = new SubmissionViewModel();
             submissionViewModel.Submission = submission;
             
