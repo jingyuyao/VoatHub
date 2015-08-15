@@ -186,6 +186,26 @@ namespace VoatHub
             }
         }
 
+        private void SubmissionUpVote_Click(object sender, RoutedEventArgs e)
+        {
+            submissionVotingHelper(e.OriginalSource as Button, 1);
+        }
+
+        private void SubmissionDownVote_Click(object sender, RoutedEventArgs e)
+        {
+            submissionVotingHelper(e.OriginalSource as Button, -1);
+        }
+
+        private void CommentUpVote_Click(object sender, RoutedEventArgs e)
+        {
+            commentVotingHelper(e.OriginalSource as Button, 1);
+        }
+
+        private void CommentDownVote_Click(object sender, RoutedEventArgs e)
+        {
+            commentVotingHelper(e.OriginalSource as Button, -1);
+        }
+
         // Helper methods
 
         private async Task<bool> setCurrentSubverse(string subverse)
@@ -295,6 +315,19 @@ namespace VoatHub
             }
 
             Debug.WriteLine(commentTreeList);
+        }
+
+        private async void commentVotingHelper(Button button, int vote)
+        {
+            var comment = button.Tag as ApiComment;
+            var result = await voatApi.PostVoteRevokeOnRevote("comment", comment.ID, vote, true);
+            Debug.WriteLine(result.Data);
+        }
+
+        private async void submissionVotingHelper(Button button, int vote)
+        {
+            var submission = button.Tag as ApiSubmission;
+            var result = await voatApi.PostVoteRevokeOnRevote("submission", submission.ID, vote, true);
         }
     }
 }

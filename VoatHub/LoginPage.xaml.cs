@@ -69,5 +69,30 @@ namespace VoatHub
                 LoginErrorBlock.Visibility = Visibility.Visible;
             }
         }
+
+        private async void PasswordField_KeyUp(object sender, KeyRoutedEventArgs e)
+        {
+            if (e.Key == Windows.System.VirtualKey.Enter)
+            {
+                var username = UsernameField.Text;
+                var password = PasswordField.Password;
+
+                LoginProgressRing.IsActive = true;
+
+                bool loggedIn = await voatApi.Login(username, password);
+
+                if (loggedIn)
+                {
+                    Frame.Navigate(typeof(MainPage), voatApi);
+                }
+                else
+                {
+                    PasswordField.Password = "";
+                    LoginProgressRing.IsActive = false;
+                    LoginErrorBlock.Text = "Login Error. Please try again.";
+                    LoginErrorBlock.Visibility = Visibility.Visible;
+                }
+            }
+        }
     }
 }

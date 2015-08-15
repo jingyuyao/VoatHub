@@ -146,6 +146,16 @@
                             <Run Text="{x:Bind Comment.TotalVotes}"/> points
                             <Run Text="{x:Bind Comment.Date, Converter={StaticResource TimeAgoConverter}}"/>
                         </TextBlock>
+                        <Button Click="CommentUpVote_Click" Tag="{x:Bind Comment}" Background="Transparent">
+                            <SymbolIcon Symbol="Up" Foreground="Blue" />
+                        </Button>
+                        <Button Click="CommentDownVote_Click" Tag="{x:Bind Comment}" Background="Transparent">
+                            <SymbolIcon Symbol="Up" RenderTransformOrigin="0.5,0.5" Foreground="Blue">
+                                <SymbolIcon.RenderTransform>
+                                    <ScaleTransform ScaleY="-1" />
+                                </SymbolIcon.RenderTransform>
+                            </SymbolIcon>
+                        </Button>
                     </StackPanel>
 
                     <TextBlock Text="{x:Bind Comment.Content}"
@@ -266,7 +276,7 @@
             <ScrollViewer Grid.Row="0"
                               x:Name="DetailContentViewer"
                               SizeChanged="DetailContentViewer_SizeChanged"
-                              Visibility="{x:Bind ViewModel.CurrentSubmission, Converter={StaticResource NullToVisibilityConverter}, Mode=OneWay}"
+                              Visibility="{x:Bind ViewModel.CurrentSubmission.Submission, Converter={StaticResource NullToVisibilityConverter}, Mode=OneWay}"
                               HorizontalScrollBarVisibility="Disabled" 
                               VerticalScrollBarVisibility="Auto"
                               Padding="24,0">
@@ -294,6 +304,16 @@
                                 <Run Text="{x:Bind ViewModel.CurrentSubmission.Submission.TotalVotes, Mode=OneWay}"/> points
                                 <Run Text="{x:Bind ViewModel.CurrentSubmission.Submission.Date, Converter={StaticResource TimeAgoConverter}, Mode=OneWay}"/>
                             </TextBlock>
+                            <Button Click="SubmissionUpVote_Click"  Tag="{x:Bind ViewModel.CurrentSubmission.Submission, Mode=OneWay}" Background="Transparent">
+                                <SymbolIcon Symbol="Up" Foreground="Blue" />
+                            </Button>
+                            <Button Click="SubmissionDownVote_Click"  Tag="{x:Bind ViewModel.CurrentSubmission.Submission, Mode=OneWay}" Background="Transparent">
+                                <SymbolIcon Symbol="Up" RenderTransformOrigin="0.5,0.5" Foreground="Blue">
+                                    <SymbolIcon.RenderTransform>
+                                        <ScaleTransform ScaleY="-1" />
+                                    </SymbolIcon.RenderTransform>
+                                </SymbolIcon>
+                            </Button>
                         </StackPanel>
                     </StackPanel>
 
