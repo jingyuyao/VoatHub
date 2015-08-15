@@ -14,11 +14,12 @@
     <Page.Resources>
         <!--Converter-->
         <helpers:StringToUriConverter x:Key="StringToUriConverter" />
-        <helpers:BoolToNegateVisibilityConverter x:Key="BoolToNegateVisibilityConverter" />
         <helpers:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+        <helpers:BoolToNegateVisibilityConverter x:Key="BoolToNegateVisibilityConverter" />
+        <helpers:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
         <helpers:TimeAgoConverter x:Key="TimeAgoConverter" />
         <helpers:BoolNegateConverter x:Key="BoolNegateConverter" />
-        
+
         <!--Styles-->
         <Style x:Key="ContentTreeItemStyle" TargetType="ListViewItem">
             <Setter Property="FontFamily" Value="{ThemeResource ContentControlThemeFontFamily}" />
@@ -37,7 +38,7 @@
                             ContentTransitions="{TemplateBinding ContentTransitions}"
                             HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
                             VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"/>
-                        
+
                         <!--ListViewItemPresenter includes clicking animations by default which I don't want.-->
                         <!--These are the default settings. Use as reference.-->
                         <!--<ListViewItemPresenter
@@ -123,54 +124,6 @@
             </Grid>
         </DataTemplate>
 
-        <DataTemplate x:Key="SubmissionHeaderTemplate" x:DataType="voatModels:ApiSubmission">
-            <StackPanel>
-                <TextBlock Margin="0,8" Style="{ThemeResource TitleTextBlockStyle}"
-                               Foreground="{ThemeResource SystemControlForegroundBaseHighBrush}"
-                               FontWeight="Bold"
-                               FontSize="{ThemeResource TextStyleExtraLargeFontSize}"
-                               HorizontalAlignment="Left" Text="{x:Bind Title}"/>
-
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Foreground="{ThemeResource SystemControlForegroundBaseMediumBrush}">
-                        <Run FontWeight="Bold" Text="{x:Bind UserName}"/>
-                        <Run Text="{x:Bind TotalVotes}"/> points
-                        <Run Text="{x:Bind Date, Converter={StaticResource TimeAgoConverter}}"/>
-                    </TextBlock>
-                </StackPanel>
-            </StackPanel>
-        </DataTemplate>
-
-        <!--Why are CommentSubmission and LinkSubmission separated into two different data template you ask?
-        Well, WebView keep giving me exception when trying to bind its source to a null value. All self posts
-        does not have an url so seperate DetailContentPresenter into two data templates, one for self and one for
-        link posts just to accomdate the stupid WebView-->
-
-        <DataTemplate x:Key="SubmissionViewModelTemplate" x:DataType="voatHubModels:SubmissionViewModel">
-            <ScrollViewer HorizontalScrollBarVisibility="Disabled" 
-                          VerticalScrollBarVisibility="Auto">
-                <StackPanel>
-                    <!--Having the title scroll with rest of the comments looks better.-->
-                    <ContentPresenter ContentTemplate="{StaticResource SubmissionHeaderTemplate}" Content="{x:Bind Submission}" />
-
-                    <TextBlock Margin="0,9" HorizontalAlignment="Left" MaxWidth="560"
-                               FontSize="{ThemeResource TextStyleLargeFontSize}"
-                               Foreground="{ThemeResource SystemControlForegroundBaseHighBrush}"
-                               Style="{ThemeResource SubtitleTextBlockStyle}" Text="{x:Bind Submission.Content}" />
-
-                    <ProgressRing Margin="0,50" Width="50" Height="50"
-                                  Visibility="{x:Bind LoadingComments, Converter={StaticResource BoolToVisibilityConverter}}" 
-                                  IsActive="{x:Bind LoadingComments}"/>
-
-                    <ListView SelectionMode="None"
-                              IsItemClickEnabled="False"
-                              ItemContainerStyle="{StaticResource ContentTreeItemStyle}"
-                              ItemTemplate="{StaticResource CommentTreeTemplate}"
-                              ItemsSource="{x:Bind CommentTree}" />
-                </StackPanel>
-            </ScrollViewer>
-        </DataTemplate>
-
         <DataTemplate x:Key="CommentTreeTemplate" x:DataType="voatHubModels:CommentTree">
             <StackPanel Padding="10,5,0,5">
                 <StackPanel Orientation="Vertical"
@@ -203,25 +156,6 @@
             </StackPanel>
         </DataTemplate>
 
-        <DataTemplate x:Key="LinkSubmissionTemplate" x:DataType="voatModels:ApiSubmission">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="*" />
-                </Grid.RowDefinitions>
-
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-
-                <!--The {Binding} binds the content to the current DataContext. Same effect is not possible through x:Bind-->
-                <ContentPresenter ContentTemplate="{StaticResource SubmissionHeaderTemplate}" Content="{Binding}" />
-
-                <WebView x:Name="submissionWebView" Source="{x:Bind Url}"
-                         Grid.Row="1"></WebView>
-            </Grid>
-        </DataTemplate>
-        
         <!--Misc resourec-->
         <Flyout x:Key="NotFoundFlyout">
             <TextBlock Text="Not Found."/>
@@ -234,7 +168,7 @@
         </Grid.RowDefinitions>
 
         <Grid.ColumnDefinitions>
-            <ColumnDefinition x:Name="MasterColumn" Width="400" />
+            <ColumnDefinition x:Name="MasterColumn" Width="500" />
             <ColumnDefinition x:Name="DetailColumn" Width="*" />
         </Grid.ColumnDefinitions>
 
@@ -251,7 +185,7 @@
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
-            <TextBlock x:Name="MasterTopBar" 
+            <TextBlock x:Name="MasterTitle" 
                        Margin="12,5"
                        Foreground="{ThemeResource SystemControlForegroundBaseHighBrush}"
                        FontWeight="Bold"
@@ -307,25 +241,79 @@
             </CommandBar>
         </Grid>
 
-        <Grid x:Name="DetailColumnGrid" Grid.Column="1">
+        <Grid x:Name="DetailColumnGrid"
+              BorderThickness="1,0,0,0"
+              BorderBrush="{ThemeResource SystemControlForegroundBaseLowBrush}"
+              Grid.Column="1">
             <Grid.RowDefinitions>
-                <RowDefinition Height="*" />
-                <RowDefinition Height="Auto" />
+                <RowDefinition x:Name="DetailContentRow" Height="*" />
+                <RowDefinition x:Name="DetailCommandBarRow" Height="Auto" />
             </Grid.RowDefinitions>
 
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
+                <ColumnDefinition x:Name="DetailOuterColumn" Width="*" />
             </Grid.ColumnDefinitions>
 
-            <ContentPresenter
-                x:Name="DetailContentPresenter"
-                Grid.Row="0"
-                BorderThickness="1,0,0,0"
-                Padding="24,0"
-                HorizontalAlignment="Stretch"
-                VerticalAlignment="Stretch"
-                BorderBrush="{ThemeResource SystemControlForegroundBaseLowBrush}"
-                DataContextChanged="DetailContentPresenter_DataContextChanged"/>
+            <!--Wraps Title, WebView, Content and Comments-->
+            <ScrollViewer Grid.Row="0"
+                          x:Name="DetailContentViewer"
+                          SizeChanged="DetailContentViewer_SizeChanged"
+                          Visibility="{x:Bind ViewModel.CurrentSubmission, Converter={StaticResource NullToVisibilityConverter}, Mode=OneWay}"
+                          HorizontalScrollBarVisibility="Disabled" 
+                          VerticalScrollBarVisibility="Auto"
+                          Padding="24,0">
+
+                <Grid x:Name="DetailContentGrid">
+                    <Grid.RowDefinitions>
+                        <RowDefinition x:Name="DetailTitleRow" Height="Auto" />
+                        <RowDefinition x:Name="DetailWebViewRow" Height="Auto" />
+                        <RowDefinition x:Name="DetailCommentsRow" Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition x:Name="DetailInnerColumn" Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Row="0">
+                        <TextBlock Margin="0,8" Style="{ThemeResource TitleTextBlockStyle}"
+                                    Foreground="{ThemeResource SystemControlForegroundBaseHighBrush}"
+                                    FontWeight="Bold"
+                                    FontSize="{ThemeResource TextStyleExtraLargeFontSize}"
+                                    HorizontalAlignment="Left" Text="{x:Bind ViewModel.CurrentSubmission.Submission.Title, Mode=OneWay}"/>
+
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Foreground="{ThemeResource SystemControlForegroundBaseMediumBrush}">
+                            <Run FontWeight="Bold" Text="{x:Bind ViewModel.CurrentSubmission.Submission.UserName, Mode=OneWay}"/>
+                            <Run Text="{x:Bind ViewModel.CurrentSubmission.Submission.TotalVotes, Mode=OneWay}"/> points
+                            <Run Text="{x:Bind ViewModel.CurrentSubmission.Submission.Date, Converter={StaticResource TimeAgoConverter}, Mode=OneWay}"/>
+                            </TextBlock>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <WebView Grid.Row="1"
+                             x:Name="DetailWebView"
+                             Visibility="{x:Bind ViewModel.CurrentSubmission.ShowComments, Converter={StaticResource BoolToNegateVisibilityConverter}, Mode=OneWay}"/>
+
+                    <StackPanel Grid.Row="2"
+                                Visibility="{x:Bind ViewModel.CurrentSubmission.ShowComments, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}">
+                        <TextBlock Margin="0,9" HorizontalAlignment="Left" MaxWidth="560"
+                                FontSize="{ThemeResource TextStyleLargeFontSize}"
+                                Foreground="{ThemeResource SystemControlForegroundBaseHighBrush}"
+                                Style="{ThemeResource SubtitleTextBlockStyle}" 
+                                Text="{x:Bind ViewModel.CurrentSubmission.Submission.Content, Mode=OneWay}" />
+
+                        <ProgressRing Margin="0,50" Width="50" Height="50"
+                                  Visibility="{x:Bind ViewModel.CurrentSubmission.LoadingComments, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}" 
+                                  IsActive="{x:Bind ViewModel.CurrentSubmission.LoadingComments, Mode=OneWay}"/>
+
+                        <ListView SelectionMode="None"
+                              IsItemClickEnabled="False"
+                              ItemContainerStyle="{StaticResource ContentTreeItemStyle}"
+                              ItemTemplate="{StaticResource CommentTreeTemplate}"
+                              ItemsSource="{x:Bind ViewModel.CurrentSubmission.CommentTree, Mode=OneWay}" />
+                    </StackPanel>
+                </Grid>
+            </ScrollViewer>
 
             <CommandBar x:Name="DetailCommandBar" Grid.Row="1">
                 <CommandBar.Content>

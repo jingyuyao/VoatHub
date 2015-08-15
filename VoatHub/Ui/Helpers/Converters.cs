@@ -24,12 +24,26 @@ namespace VoatHub.Ui.Helpers
         }
     }
 
+    public class NullToVisibilityConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, string language)
+        {
+            if (value == null) return Visibility.Collapsed;
+            return Visibility.Visible;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, string language)
+        {
+            throw new NotImplementedException();
+        }
+    }
+
     public class BoolToVisibilityConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, string language)
         {
-            // null or false
-            if (value == null || !((bool)value)) return Visibility.Collapsed;
+            //  false
+            if (!((bool)value)) return Visibility.Collapsed;
             return Visibility.Visible;
         }
 
@@ -43,9 +57,9 @@ namespace VoatHub.Ui.Helpers
     {
         public object Convert(object value, Type targetType, object parameter, string language)
         {
-            // null or false
-            if (value == null || !((bool)value)) return Visibility.Visible;
-            return Visibility.Collapsed;
+            // true
+            if ((bool)value) return Visibility.Collapsed;
+            return Visibility.Visible;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, string language)

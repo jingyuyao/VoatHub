@@ -13,6 +13,7 @@ namespace VoatHub.Models.VoatHub
         private ApiSubmission submission;
         private List<CommentTree> commentTree;
         private bool loadingComments;
+        private bool showComments;
 
         public ApiSubmission Submission
         {
@@ -28,6 +29,11 @@ namespace VoatHub.Models.VoatHub
         {
             get { return loadingComments; }
             set { SetProperty(ref loadingComments, value); }
+        }
+        public bool ShowComments
+        {
+            get { return showComments; }
+            set { SetProperty(ref showComments, value); }
         }
 
         public override string ToString()

@@ -21,6 +21,7 @@ using VoatHub.Api.Voat;
 using VoatHub.Models.Voat;
 using VoatHub.Models.Voat.v1;
 using VoatHub.Models.VoatHub;
+using VoatHub.Ui;
 
 namespace VoatHub
 {
@@ -31,8 +32,6 @@ namespace VoatHub
     public sealed partial class MainPage : Page
     {
         // Xaml resources
-        private DataTemplate linkSubmissionTemplate;
-        private DataTemplate submissionViewModelTemplate;
         private Flyout notFoundFlyout;
 
         // Page view model
@@ -45,10 +44,8 @@ namespace VoatHub
         public MainPage()
         { 
             this.InitializeComponent();
-
-            linkSubmissionTemplate = Resources["LinkSubmissionTemplate"] as DataTemplate;
-            submissionViewModelTemplate = Resources["SubmissionViewModelTemplate"] as DataTemplate;
             notFoundFlyout = Resources["NotFoundFlyout"] as Flyout;
+            //DetailWebView.NavigationCompleted += (sender, args) => sender.ResizeToContent();
 
             ViewModel = new MainPageViewModel();
 
@@ -75,7 +72,7 @@ namespace VoatHub
 
             var submission = e.ClickedItem as ApiSubmission;
 
-            setContentPresenterToSubmission(submission);
+            setContentPresenterToSubmission(submission, false);
         }
         
         /// <summary>
@@ -175,70 +172,49 @@ namespace VoatHub
             await setCurrentSubverse(ViewModel.CurrentSubverse);
         }
 
-        private void setContentPresenterToSubmission(ApiSubmission submission)
+        private async void setContentPresenterToSubmission(ApiSubmission submission, bool forceShowComments)
         {
-            ViewModel.CurrentSubmission = submission;
-
-            if (submission.Type == ApiSubmissionType.Link)
+            var submissionViewModel = new SubmissionViewModel();
+            submissionViewModel.Submission = submission;
+            
+            if (submission.Type == ApiSubmissionType.Self || forceShowComments)
             {
-                setContentPresenterToLink(submission);
+                submissionViewModel.ShowComments = true;
+                submissionViewModel.LoadingComments = true;
+                ViewModel.CurrentSubmission = submissionViewModel;
+
+                var response = await voatApi.GetCommentList(submission.Subverse, submission.ID, null);
+
+                if (response.Success)
+                {
+                    submissionViewModel.CommentTree = CommentTree.FromApiCommentList(response.Data, null);
+                }
+
+                submissionViewModel.LoadingComments = false;
             }
             else
             {
-                setContentPresenterToComment(submission);
+                ViewModel.CurrentSubmission = submissionViewModel;
+
+                Uri uri;
+                bool success = Uri.TryCreate(submission.Url, UriKind.Absolute, out uri);
+
+                if (success)
+                {
+                    DetailWebView.Navigate(uri);
+                }
             }
-        }
-
-        /// <summary>
-        /// Set <see cref="SubmissionContentPresenter"/> to display a web link.
-        /// </summary>
-        /// <param name="submission">Can only be link post.</param>
-        private void setContentPresenterToLink(ApiSubmission submission)
-        {
-            Debug.WriteLine("setContentPresenterToLink");
-            DetailContentPresenter.Content = submission;
-            DetailContentPresenter.ContentTemplate = linkSubmissionTemplate;
-        }
-
-        /// <summary>
-        /// Set <see cref="SubmissionContentPresenter"/> to display a comment thread.
-        /// <para>The Content is set twice. Once initialy with the submission content and once
-        /// when the comments are retrieved from the API.</para>
-        /// </summary>
-        /// <param name="submission">Can be both link and self post</param>
-        private async void setContentPresenterToComment(ApiSubmission submission)
-        {
-            Debug.WriteLine("setContentPresenterToComment");
-            var submissionWithComment = new SubmissionViewModel();
-            submissionWithComment.Submission = submission;
-            submissionWithComment.LoadingComments = true;
-
-            // Set content before comments are retrieved to show things faster.
-            DetailContentPresenter.Content = submissionWithComment;
-            DetailContentPresenter.ContentTemplate = submissionViewModelTemplate;
-
-            var response = await voatApi.GetCommentList(submission.Subverse, submission.ID, null);
-
-            if (response.Success)
-            {
-                submissionWithComment.CommentTree = CommentTree.FromApiCommentList(response.Data, null);
-            }
-
-            submissionWithComment.LoadingComments = false;
-
-            // Set the content again to show comments.
-            // NOTE: changing a property of the content does not redraw the content. We must
-            // Set the content property again to notify the event listeners of the change.
-            // NOTE2: Since seconds can go by before we receive response from server we have to
-            // make sure the content in the presenter is still the same submission we are retrieving
-            // comments for before we refresh it.
-            if (ViewModel.CurrentSubmission.ID == submission.ID)
-                DetailContentPresenter.Content = submissionWithComment;
         }
 
         private void refreshCurrentContentPresenter()
         {
-            setContentPresenterToSubmission(ViewModel.CurrentSubmission);
+            setContentPresenterToSubmission(ViewModel.CurrentSubmission.Submission, ViewModel.CurrentSubmission.ShowComments);
+        }
+
+        private void DetailContentViewer_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            DetailWebView.Height = DetailContentViewer.ActualHeight - DetailTitleRow.ActualHeight;
+            DetailWebView.Width = DetailInnerColumn.ActualWidth;
         }
     }
 }

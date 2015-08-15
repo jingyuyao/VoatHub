@@ -22,7 +22,7 @@ namespace VoatHub.Models.VoatHub
     public class MainPageViewModel : BindableBase
     {
         private string currentSubverse;
-        private ApiSubmission currentSubmission;
+        private SubmissionViewModel currentSubmission;
         private bool loadingSubmissions;
         
         public string CurrentSubverse
@@ -31,7 +31,7 @@ namespace VoatHub.Models.VoatHub
             set { SetProperty(ref currentSubverse, value); }
         }
 
-        public ApiSubmission CurrentSubmission
+        public SubmissionViewModel CurrentSubmission
         {
             get { return currentSubmission; }
             set { SetProperty(ref currentSubmission, value); }
