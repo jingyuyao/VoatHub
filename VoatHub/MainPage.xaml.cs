@@ -211,10 +211,26 @@ namespace VoatHub
             setContentPresenterToSubmission(ViewModel.CurrentSubmission.Submission, ViewModel.CurrentSubmission.ShowComments);
         }
 
+        /// <summary>
+        /// Fixes WebView size not fit to grid issue.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void DetailContentViewer_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             DetailWebView.Height = DetailContentViewer.ActualHeight - DetailTitleRow.ActualHeight;
             DetailWebView.Width = DetailInnerColumn.ActualWidth;
+        }
+
+        private void SubmissionCommentsButton_Click(object sender, RoutedEventArgs e)
+        {
+            var button = e.OriginalSource as Button;
+            var submission = button.Tag as ApiSubmission;
+
+            // For the initial state where no submission was selected and user presses the comment icon in DetailCommandBar
+            if (submission == null) return;
+
+            setContentPresenterToSubmission(submission, true);
         }
     }
 }
