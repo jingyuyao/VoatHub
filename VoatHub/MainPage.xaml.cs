@@ -246,14 +246,18 @@ namespace VoatHub
 
                 var response = await voatApi.GetCommentList(submission.Subverse, submission.ID, commentSearchOptions);
 
-                if (response.Success)
+                // If the current submission changes, then we released control over the loading icon.
+                if (ViewModel.CurrentSubmission.Submission.ID == submission.ID)
                 {
-                    var commentTreeList = CommentTree.FromApiCommentList(response.Data, null);
-                    commentTreeSorter(commentTreeList);
-                    submissionViewModel.CommentTree = commentTreeList;
-                }
+                    if (response.Success)
+                    {
+                        var commentTreeList = CommentTree.FromApiCommentList(response.Data, null);
+                        commentTreeSorter(commentTreeList);
+                        submissionViewModel.CommentTree = commentTreeList;
+                    }
 
-                submissionViewModel.LoadingComments = false;
+                    submissionViewModel.LoadingComments = false;
+                }
             }
             else
             {

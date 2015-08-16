@@ -15,6 +15,7 @@ namespace VoatHub.Api.Client
     {
         private static readonly TimeSpan DEFAULT_RATE_LIMIT = TimeSpan.FromSeconds(3);
 
+        private bool makingCall;
         private DateTime lastCall;
         private TimeSpan rateLimit;
         private ApplicationDataContainer roamingSettings;
@@ -59,6 +60,13 @@ namespace VoatHub.Api.Client
         /// </summary>
         public async Task Wait()
         {
+            while (makingCall)
+            {
+                await Task.Delay(100);
+            }
+
+            makingCall = true;
+
             var dt = DateTime.Now.Subtract(lastCall);
             var ddt = rateLimit - dt;
 
@@ -67,6 +75,7 @@ namespace VoatHub.Api.Client
 
         public void MadeCall()
         {
+            makingCall = false;
             lastCall = DateTime.Now;
         }
     }
