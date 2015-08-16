@@ -32,7 +32,7 @@ namespace VoatHub
             this.InitializeComponent();
         }
 
-        protected override void OnNavigatedTo(NavigationEventArgs e)
+        protected async override void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
 
@@ -40,7 +40,13 @@ namespace VoatHub
 
             if (voatApi.LoggedIn)
             {
-                Frame.Navigate(typeof(MainPage), voatApi);
+                // Some scheduling bullshit workaround.
+                // https://social.msdn.microsoft.com/Forums/en-US/af8f62e6-3c0d-4257-adac-4cecf1e8e23c/onnavigatedto-wont-navigate-to-another-page?forum=winappswithcsharp
+                // http://stackoverflow.com/questions/25942567/automatically-navigate-to-another-page
+                await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                {
+                    Frame.Navigate(typeof(MainPage), voatApi);
+                });
             }
             else
             {

@@ -45,7 +45,10 @@ namespace VoatHub
         public MainPage()
         { 
             this.InitializeComponent();
-
+        }
+        
+        protected override async void OnNavigatedTo(NavigationEventArgs e)
+        {
             notFoundFlyout = Resources["NotFoundFlyout"] as Flyout;
 
             ViewModel = new MainPageViewModel();
@@ -54,11 +57,7 @@ namespace VoatHub
             // TODO: Load from settings
             submissionSearchOptions = new SearchOptions();
             commentSearchOptions = new SearchOptions();
-        }
-        
-        protected override async void OnNavigatedTo(NavigationEventArgs e)
-        {
-            base.OnNavigatedTo(e);
+
             voatApi = e.Parameter as VoatApi;
             await setCurrentSubverse("_front");
         }

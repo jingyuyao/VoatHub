@@ -18,7 +18,7 @@ namespace VoatHub.Api.Client
         {
             vault = new PasswordVault();
             this.clientName = clientName;
-            credential = null;
+            credential = retrieveCredentialFromSettings();
         }
 
         /// <summary>
@@ -75,24 +75,25 @@ namespace VoatHub.Api.Client
         {
             get
             {
-                if (credential == null)
-                {
-                    var allCredentials = vault.RetrieveAll();
-
-                    foreach (var credential in allCredentials)
-                    {
-                        if(credential.Resource == clientName)
-                        {
-                            credential.RetrievePassword();
-                            return credential;
-                        }
-                    }
-
-                    return null;
-                }
-
+                Debug.WriteLine(credential, "CredentialManager");
                 return credential;
             }
+        }
+
+        private PasswordCredential retrieveCredentialFromSettings()
+        {
+            var allCredentials = vault.RetrieveAll();
+
+            foreach (var credential in allCredentials)
+            {
+                if (credential.Resource == clientName)
+                {
+                    credential.RetrievePassword();
+                    return credential;
+                }
+            }
+
+            return null;
         }
     }
 }

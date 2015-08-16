@@ -138,7 +138,7 @@
                 <StackPanel Orientation="Vertical"
                                 Padding="10,0,0,0"
                                 BorderBrush="LightBlue"
-                                BorderThickness="1,0,0,0">
+                                BorderThickness="1.5,0,0,0">
 
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Foreground="{ThemeResource SystemControlForegroundBaseMediumBrush}">
@@ -147,10 +147,10 @@
                             <Run Text="{x:Bind Comment.Date, Converter={StaticResource TimeAgoConverter}}"/>
                         </TextBlock>
                         <Button Click="CommentUpVote_Click" Tag="{x:Bind Comment}" Background="Transparent">
-                            <SymbolIcon Symbol="Up" Foreground="Blue" />
+                            <SymbolIcon Symbol="Up" />
                         </Button>
                         <Button Click="CommentDownVote_Click" Tag="{x:Bind Comment}" Background="Transparent">
-                            <SymbolIcon Symbol="Up" RenderTransformOrigin="0.5,0.5" Foreground="Blue">
+                            <SymbolIcon Symbol="Up" RenderTransformOrigin="0.5,0.5">
                                 <SymbolIcon.RenderTransform>
                                     <ScaleTransform ScaleY="-1" />
                                 </SymbolIcon.RenderTransform>
@@ -305,10 +305,10 @@
                                 <Run Text="{x:Bind ViewModel.CurrentSubmission.Submission.Date, Converter={StaticResource TimeAgoConverter}, Mode=OneWay}"/>
                             </TextBlock>
                             <Button Click="SubmissionUpVote_Click"  Tag="{x:Bind ViewModel.CurrentSubmission.Submission, Mode=OneWay}" Background="Transparent">
-                                <SymbolIcon Symbol="Up" Foreground="Blue" />
+                                <SymbolIcon Symbol="Up" />
                             </Button>
                             <Button Click="SubmissionDownVote_Click"  Tag="{x:Bind ViewModel.CurrentSubmission.Submission, Mode=OneWay}" Background="Transparent">
-                                <SymbolIcon Symbol="Up" RenderTransformOrigin="0.5,0.5" Foreground="Blue">
+                                <SymbolIcon Symbol="Up" RenderTransformOrigin="0.5,0.5">
                                     <SymbolIcon.RenderTransform>
                                         <ScaleTransform ScaleY="-1" />
                                     </SymbolIcon.RenderTransform>
