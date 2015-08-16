@@ -175,7 +175,34 @@
             </StackPanel>
         </DataTemplate>
 
-        <!--Misc resourec-->
+        <DataTemplate x:Key="SubmissionsListTemplate" x:DataType="voatHubModels:MasterColumnViewModel">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <ProgressRing x:Name="MasterProgressRing" Grid.Row="0"
+                              Margin="0,50" Width="50" Height="50"
+                              Visibility="{x:Bind LoadingSubmissions, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}" 
+                              IsActive="{x:Bind LoadingSubmissions, Mode=OneWay}"/>
+
+                <ListView x:Name="MasterListView" Grid.Row="1"
+                          ItemTemplate="{StaticResource SubmissionItemTemplate}"
+                          Visibility="{x:Bind LoadingSubmissions, Converter={StaticResource BoolToNegateVisibilityConverter}, Mode=OneWay}"
+                          ItemsSource="{x:Bind CurrentSubmissionsList, Mode=OneWay}"
+                          IsItemClickEnabled="True"
+                          ItemClick="MasterListView_ItemClick">
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="ListViewItem">
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                        </Style>
+                    </ListView.ItemContainerStyle>
+                </ListView>
+            </Grid>
+        </DataTemplate>
+
+        <!--Misc resources-->
         <Flyout x:Key="NotFoundFlyout">
             <TextBlock Text="Not Found."/>
         </Flyout>
@@ -191,6 +218,13 @@
             <ColumnDefinition x:Name="DetailColumn" Width="*" />
         </Grid.ColumnDefinitions>
 
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="48" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+        </Grid>
+
         <Grid x:Name="MasterColumnGrid" Grid.Column="0">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
@@ -204,35 +238,44 @@
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
 
-            <TextBlock x:Name="MasterTitle" 
-                           Margin="12,5"
-                           Foreground="{ThemeResource SystemControlForegroundBaseHighBrush}"
-                           FontWeight="Bold"
-                           Text="{x:Bind ViewModel.CurrentSubverse, Mode=OneWay}"
-                           Style="{ThemeResource HeaderTextBlockStyle}" />
+            <CommandBar x:Name="MasterTopCommandBar">
+                <CommandBar.Content>
+                    <TextBlock Margin="12,14"
+                               Text="{x:Bind ViewModel.MasterColumn.CurrentSubverse, Mode=OneWay}" />
+                </CommandBar.Content>
 
-            <AutoSuggestBox x:Name="MasterSearchBox" Grid.Row="1"
-                                Margin="12,5"
-                                QueryIcon="Find"
+                <AppBarButton Icon="Home" Label="FrontPage"/>
+                <AppBarSeparator />
+                <AppBarToggleButton Icon="List" Label="Subscriptions" IsChecked="{Binding IsOpen, ElementName=SubscriptionsPopup, Mode=TwoWay}" />
+                <AppBarButton Icon="Favorite" Label="Subscribe" />
+                <AppBarSeparator />
+                <AppBarButton Icon="Add" Label="New Post" />
+            </CommandBar>
+
+            <StackPanel Grid.Row="1">
+                <Popup x:Name="SubscriptionsPopup">
+                    <Border BorderBrush="{StaticResource ApplicationForegroundThemeBrush}" 
+                            Background="{StaticResource ApplicationPageBackgroundThemeBrush}"
+                            BorderThickness="2" Width="200" Height="200">
+                        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <TextBlock Text="Simple Popup" FontSize="24.667" HorizontalAlignment="Center" />
+                            <Button Content="Close" Click="ClosePopup_Click" Tag="{Binding ElementName=SubscriptionsPopup}" HorizontalAlignment="Center" />
+                        </StackPanel>
+                    </Border>
+                </Popup>
+            </StackPanel>
+
+            <AutoSuggestBox x:Name="MasterSearchBox"
+                            Grid.Row="2"
+                                    QueryIcon="Find"
+                                    Margin="0,5"
                                 QuerySubmitted="MasterSearchBox_QuerySubmitted"
-                                PlaceholderText="Search subverse..."/>
+                                PlaceholderText="Go to Subverse..."/>
 
-            <ProgressRing x:Name="MasterProgressRing" Grid.Row="2"
-                              Margin="0,50" Width="50" Height="50"
-                              Visibility="{x:Bind ViewModel.LoadingSubmissions, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}" 
-                              IsActive="{x:Bind ViewModel.LoadingSubmissions, Mode=OneWay}"/>
-
-            <ListView x:Name="MasterListView" Grid.Row="3"
-                          ItemTemplate="{StaticResource SubmissionItemTemplate}"
-                          Visibility="{x:Bind ViewModel.LoadingSubmissions, Converter={StaticResource BoolToNegateVisibilityConverter}, Mode=OneWay}"
-                          IsItemClickEnabled="True"
-                          ItemClick="MasterListView_ItemClick">
-                <ListView.ItemContainerStyle>
-                    <Style TargetType="ListViewItem">
-                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                    </Style>
-                </ListView.ItemContainerStyle>
-            </ListView>
+            <ContentPresenter x:Name="MasterColumnContentPresenter"
+                                Grid.Row="3"
+                            Content="{x:Bind ViewModel.MasterColumn}"
+                            ContentTemplate="{StaticResource SubmissionsListTemplate}" />
 
             <CommandBar x:Name="MasterCommandBar" Grid.Row="4">
                 <CommandBar.Content>

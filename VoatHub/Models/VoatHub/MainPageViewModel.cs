@@ -21,32 +21,26 @@ namespace VoatHub.Models.VoatHub
     /// </summary>
     public class MainPageViewModel : BindableBase
     {
-        private string currentSubverse;
+        private MasterColumnViewModel masterColumn;
         private SubmissionViewModel currentSubmission;
-        private bool loadingSubmissions;
 
         public MainPageViewModel()
         {
+            masterColumn = new MasterColumnViewModel();
             // Fixes item source null binding errors.
             currentSubmission = new SubmissionViewModel();
         }
-        
-        public string CurrentSubverse
-        {
-            get { return currentSubverse; }
-            set { SetProperty(ref currentSubverse, value); }
-        }
 
+        public MasterColumnViewModel MasterColumn
+        {
+            get { return masterColumn; }
+            set { SetProperty(ref masterColumn, value); }
+        }
+        
         public SubmissionViewModel CurrentSubmission
         {
             get { return currentSubmission; }
             set { SetProperty(ref currentSubmission, value); }
-        }
-
-        public bool LoadingSubmissions
-        {
-            get { return loadingSubmissions; }
-            set { SetProperty(ref loadingSubmissions, value); }
         }
     }
 }

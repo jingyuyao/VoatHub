@@ -62,9 +62,9 @@ namespace VoatHub
             await setCurrentSubverse("_front");
         }
 
-        // Event handlers
-        
-        // MasterColumnGrid
+        #region EventHandlers
+
+        #region MasterColumn
 
         /// <summary>
         /// Changes which DataTempalte the ContentPresenter uses based on the type of the submission.
@@ -112,6 +112,8 @@ namespace VoatHub
 
             if (!success)
                 notFoundFlyout.ShowAt(sender);
+
+            sender.Text = "";
         }
 
         private void SubmissionCommentsButton_Click(object sender, RoutedEventArgs e)
@@ -125,7 +127,14 @@ namespace VoatHub
             setContentPresenterToSubmission(submission, true);
         }
 
-        // DetailColumnGrid
+        private void SubscriptionsList_Click(object sender, RoutedEventArgs e)
+        {
+            SubscriptionsPopup.IsOpen = !SubscriptionsPopup.IsOpen;
+        }
+
+        #endregion MasterColumn
+
+        #region DetailColumn
 
         /// <summary>
         /// This is fired AFTER DataTemplate is set for the content. So it is not useful to update the data template since it will
@@ -205,29 +214,32 @@ namespace VoatHub
             commentVotingHelper(e.OriginalSource as Button, -1);
         }
 
-        // Helper methods
+        #endregion DetailColumn
+
+        #endregion EventHandler
+
+        #region Helpers
 
         private async Task<bool> setCurrentSubverse(string subverse)
         {
-            ViewModel.LoadingSubmissions = true;
+            ViewModel.MasterColumn.LoadingSubmissions = true;
 
             var response = await voatApi.GetSubmissionList(subverse, submissionSearchOptions);
             if (response != null && response.Success)
             {
-                ViewModel.CurrentSubverse = subverse;
-                MasterListView.ItemsSource = response.Data;
-
-                ViewModel.LoadingSubmissions = false;
+                ViewModel.MasterColumn.CurrentSubverse = subverse;
+                ViewModel.MasterColumn.CurrentSubmissionsList = response.Data;
+                ViewModel.MasterColumn.LoadingSubmissions = false;
                 return true;
             }
 
-            ViewModel.LoadingSubmissions = false;
+            ViewModel.MasterColumn.LoadingSubmissions = false;
             return false;
         }
 
         private async void refreshCurrentSubverse()
         {
-            await setCurrentSubverse(ViewModel.CurrentSubverse);
+            await setCurrentSubverse(ViewModel.MasterColumn.CurrentSubverse);
         }
 
         private async void setContentPresenterToSubmission(ApiSubmission submission, bool forceShowComments)
@@ -332,5 +344,18 @@ namespace VoatHub
             var submission = button.Tag as ApiSubmission;
             var result = await voatApi.PostVoteRevokeOnRevote("submission", submission.ID, vote, true);
         }
+
+        /// <summary>
+        /// Assumes the button has the popup in its tag property.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ClosePopup_Click(object sender, RoutedEventArgs e)
+        {
+            var button = e.OriginalSource as Button;
+            var popup = button.Tag as Popup;
+            popup.IsOpen = false;
+        }
+        #endregion Helpers
     }
 }
