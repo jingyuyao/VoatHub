@@ -42,27 +42,89 @@ namespace VoatHub
         private SearchOptions submissionSearchOptions;
         private SearchOptions commentSearchOptions;
 
+        // SplitView
+        public Rect TogglePaneButtonRect
+        {
+            get;
+            private set;
+        }
+
+        /// <summary>
+        /// An event to notify listeners when the hamburger button may occlude other content in the app.
+        /// The custom "PageHeader" user control is using this.
+        /// </summary>
+        public event TypedEventHandler<MainPage, Rect> TogglePaneButtonRectChanged;
+
         public MainPage()
         { 
             this.InitializeComponent();
-        }
-        
-        protected override async void OnNavigatedTo(NavigationEventArgs e)
-        {
-            notFoundFlyout = Resources["NotFoundFlyout"] as Flyout;
-
             ViewModel = new MainPageViewModel();
-            ViewModel.CurrentSubmission = new SubmissionViewModel();
+
+            notFoundFlyout = Resources["NotFoundFlyout"] as Flyout;
 
             // TODO: Load from settings
             submissionSearchOptions = new SearchOptions();
             commentSearchOptions = new SearchOptions();
-
+        }
+        
+        protected override async void OnNavigatedTo(NavigationEventArgs e)
+        {
             voatApi = e.Parameter as VoatApi;
+            
             await setCurrentSubverse("_front");
+
+            // TODO: We really need a queue type of thing for the API calls.
+            var userInfo = await voatApi.UserInfo(voatApi.UserName);
+            if (userInfo.Success)
+                ViewModel.User.UserInfo = userInfo.Data;
+
+            var subscriptions = await voatApi.UserSubscriptions(voatApi.UserName);
+            if (subscriptions.Success)
+                ViewModel.User.Subscriptions = subscriptions.Data;
         }
 
         #region EventHandlers
+
+        #region SplitView
+
+        /// <summary>
+        /// Callback when the SplitView's Pane is toggled open or close.  When the Pane is not visible
+        /// then the floating hamburger may be occluding other content in the app unless it is aware.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void TogglePaneButton_Checked(object sender, RoutedEventArgs e)
+        {
+            this.CheckTogglePaneButtonSizeChanged();
+        }
+
+        /// <summary>
+        /// Check for the conditions where the navigation pane does not occupy the space under the floating
+        /// hamburger button and trigger the event.
+        /// </summary>
+        private void CheckTogglePaneButtonSizeChanged()
+        {
+            if (this.RootSplitView.DisplayMode == SplitViewDisplayMode.Inline ||
+                this.RootSplitView.DisplayMode == SplitViewDisplayMode.Overlay)
+            {
+                var transform = this.TogglePaneButton.TransformToVisual(this);
+                var rect = transform.TransformBounds(new Rect(0, 0, this.TogglePaneButton.ActualWidth, this.TogglePaneButton.ActualHeight));
+                this.TogglePaneButtonRect = rect;
+            }
+            else
+            {
+                this.TogglePaneButtonRect = new Rect();
+            }
+
+            var handler = this.TogglePaneButtonRectChanged;
+            if (handler != null)
+            {
+                // handler(this, this.TogglePaneButtonRect);
+                handler.DynamicInvoke(this, this.TogglePaneButtonRect);
+            }
+        }
+
+        #endregion SplitView
 
         #region MasterColumn
 

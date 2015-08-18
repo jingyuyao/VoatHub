@@ -23,18 +23,53 @@ namespace VoatHub.Models.VoatHub
     {
         private MasterColumnViewModel masterColumn;
         private SubmissionViewModel currentSubmission;
+        private UserViewModel user;
+        private List<NavMenuItem> navlist;
 
         public MainPageViewModel()
         {
             masterColumn = new MasterColumnViewModel();
+            user = new UserViewModel();
             // Fixes item source null binding errors.
             currentSubmission = new SubmissionViewModel();
+
+            navlist = new List<NavMenuItem>(
+                new[]
+                {
+                    new NavMenuItem()
+                    {
+                        Symbol = Symbol.Contact,
+                        Label = "Basic Page"
+                    },
+                    new NavMenuItem()
+                    {
+                        Symbol = Symbol.Edit,
+                        Label = "CommandBar Page"
+                    },
+                    new NavMenuItem()
+                    {
+                        Symbol = Symbol.Favorite,
+                        Label = "Drill In Page"
+                    },
+                });
+        }
+
+        public List<NavMenuItem> Navlist
+        {
+            get { return navlist; }
+            set { SetProperty(ref navlist, value); }
         }
 
         public MasterColumnViewModel MasterColumn
         {
             get { return masterColumn; }
             set { SetProperty(ref masterColumn, value); }
+        }
+
+        public UserViewModel User
+        {
+            get { return user; }
+            set { SetProperty(ref user, value); }
         }
         
         public SubmissionViewModel CurrentSubmission

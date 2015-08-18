@@ -40,6 +40,18 @@ namespace VoatHub.Api.Client
             throttleManager = new ThrottleManager(ClientName);
         }
 
+        public string UserName
+        {
+            get
+            {
+                var creds = credentialManager.Credential;
+                if (creds != null)
+                    return creds.UserName;
+                else
+                    return null;
+            }
+        }
+
         /// <summary>
         /// Login in the given user.
         /// </summary>

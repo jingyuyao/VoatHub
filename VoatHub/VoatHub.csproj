@@ -116,9 +116,11 @@
     <Compile Include="Models\IOauthToken.cs" />
     <Compile Include="Models\VoatHub\BindableBase.cs" />
     <Compile Include="Models\VoatHub\MasterColumnViewModel.cs" />
+    <Compile Include="Models\VoatHub\NavMenuItem.cs" />
     <Compile Include="Models\VoatHub\SubmissionViewModel.cs" />
     <Compile Include="Models\VoatHub\MainPageViewModel.cs" />
     <Compile Include="Models\VoatHub\CommentTree.cs" />
+    <Compile Include="Models\VoatHub\UserViewModel.cs" />
     <Compile Include="Models\Voat\FormattedContentContainer.cs" />
     <Compile Include="Models\Voat\Score.cs" />
     <Compile Include="Models\Voat\v1\ApiBadge.cs" />
@@ -175,6 +177,13 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Styles\Styles.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Ui\Controls\" />
   </ItemGroup>
   <PropertyGroup Condition=" '$(VisualStudioVersion)' == '' or '$(VisualStudioVersion)' &lt; '14.0' ">
     <VisualStudioVersion>14.0</VisualStudioVersion>

@@ -18,6 +18,10 @@ namespace VoatHub.Api.Client
         /// Must be unique accross application.
         /// </summary>
         string ClientName { get; }
+        /// <summary>
+        /// Stupid API like Voat's cannot identify user by auth token.
+        /// </summary>
+        string UserName { get; }
 
         Task<bool> Login(string username, string password);
         void Logout();

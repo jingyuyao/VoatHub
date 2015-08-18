@@ -60,6 +60,14 @@ namespace VoatHub.Api.Voat
             uriBuilder = new ApiUriBuilder(scheme, host, apiPath);
         }
 
+        public string UserName
+        {
+            get
+            {
+                return apiClient.UserName;
+            }
+        }
+
         public async Task<bool> Login(string username, string password)
         {
             return await apiClient.Login(username, password);
