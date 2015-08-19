@@ -262,7 +262,9 @@
                         <AppBarButton Icon="Refresh" Label="Refresh" Tag="refresh" Click="MasterCommandBarButton_Click"/>
 
                         <CommandBar.SecondaryCommands>
-                            <AppBarButton Icon="Favorite" Label="Subscribe" />
+                            <AppBarToggleButton Icon="Favorite" Label="Subscribe" 
+                                                IsChecked="{x:Bind ViewModel.MasterColumn.CurrentlySubscribed, Mode=TwoWay}"
+                                                Click="SubscribeButton_Click"/>
                             <AppBarButton Icon="Add" Label="New Post" />
                         </CommandBar.SecondaryCommands>
                         

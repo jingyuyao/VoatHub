@@ -221,6 +221,18 @@ namespace VoatHub
         //    SubscriptionsPopup.IsOpen = !SubscriptionsPopup.IsOpen;
         //}
 
+        private void SubscribeButton_Click(object sender, RoutedEventArgs e)
+        {
+            var toggleButton = e.OriginalSource as AppBarToggleButton;
+
+            // TODO: This is the part where we subscribe and unsubscribe the subverse.
+            // Currently the feature is not available in the v1 api as of 8/19/15
+            //if (toggleButton.IsChecked == true)
+            //{
+
+            //}
+        }
+
         #endregion MasterColumn
 
         #region DetailColumn
@@ -312,6 +324,8 @@ namespace VoatHub
 
         private async void setCurrentSubverse(string subverse)
         {
+            ViewModel.MasterColumn.CurrentlySubscribed = isSubscribed(subverse);
+
             ViewModel.MasterColumn.CurrentSubverse = subverse;
             ViewModel.MasterColumn.CurrentSubmissions = new LoadingList<ApiSubmission>();
             
@@ -322,6 +336,25 @@ namespace VoatHub
             }
 
             ViewModel.MasterColumn.CurrentSubmissions.Loading = false;
+        }
+
+        private bool isSubscribed(string subverse)
+        {
+            if (subverse == "_front" || subverse == "_all")
+            {
+                return true;
+            }
+            else if (ViewModel.User.Subscriptions != null)
+            {
+                foreach (var sub in ViewModel.User.Subscriptions.List)
+                {
+                    if (string.Equals(subverse, sub.Name, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
 
         private void refreshCurrentSubverse()
