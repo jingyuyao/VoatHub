@@ -25,6 +25,8 @@ namespace VoatHub.Models.VoatHub
         private SubmissionViewModel currentSubmission;
         private UserViewModel user;
         private List<NavMenuItem> navlist;
+        private string submissionSort;
+        private string commentSort;
 
         public MainPageViewModel()
         {
@@ -33,20 +35,21 @@ namespace VoatHub.Models.VoatHub
             // Fixes item source null binding errors.
             currentSubmission = new SubmissionViewModel();
 
-            navlist = new List<NavMenuItem>(
-                new[]
+            navlist = new List<NavMenuItem>(new[]
+            {
+                new NavMenuItem()
                 {
-                    new NavMenuItem()
-                    {
-                        Symbol = Symbol.Home,
-                        Label = "Front Page"
-                    },
-                    new NavMenuItem()
-                    {
-                        Symbol = Symbol.AllApps,
-                        Label = "All"
-                    }
-                });
+                    Symbol = Symbol.Home,
+                    Label = "Front Page"
+                },
+                new NavMenuItem()
+                {
+                    Symbol = Symbol.AllApps,
+                    Label = "All"
+                }
+            });
+
+            submissionSort = commentSort = "Hot";
         }
 
         public List<NavMenuItem> Navlist
@@ -72,5 +75,9 @@ namespace VoatHub.Models.VoatHub
             get { return currentSubmission; }
             set { SetProperty(ref currentSubmission, value); }
         }
+        
+        public string SubmissionSort { get { return submissionSort; } set { SetProperty(ref submissionSort, value); } }
+
+        public string CommentSort { get { return commentSort; } set { SetProperty(ref commentSort, value); } }
     }
 }

@@ -191,7 +191,7 @@
 
                     <AutoSuggestBox x:Name="MasterSearchBox" Grid.Row="0"
                                     VerticalAlignment="Center"
-                                    Margin="48,0,0,0"
+                                     Margin="48,0,0,0"
                                     QueryIcon="Find"
                                     QuerySubmitted="MasterSearchBox_QuerySubmitted"
                                     PlaceholderText="Go to Subverse..."/>
@@ -242,17 +242,19 @@
                     
                     <CommandBar Grid.Row="0" x:Name="MasterCommandBar">
                         <CommandBar.Content>
-                            <TextBlock Style="{StaticResource MasterColumnTitleStyle}"
-                                        Text="{x:Bind ViewModel.MasterColumn.CurrentSubverse, Mode=OneWay}" />
+                            <TextBlock HorizontalAlignment="Left" Margin="12,14">
+                                <Run FontWeight="Bold" Text="{x:Bind ViewModel.MasterColumn.CurrentSubverse, Mode=OneWay}" /> 
+                                :: <Run Text="{x:Bind ViewModel.SubmissionSort, Mode=OneWay}"/>
+                            </TextBlock>
                         </CommandBar.Content>
 
                         <AppBarButton Icon="Back" Label="Back" Tag="Back" Click="MasterCommandBarButton_Click"/>
                         <AppBarButton Icon="Sort" Label="Sort">
                             <AppBarButton.Flyout>
                                 <MenuFlyout>
-                                    <MenuFlyoutItem Text="Hot" Tag="hot" Click="SortSubmissions_Click"/>
-                                    <MenuFlyoutItem Text="New" Tag="new" Click="SortSubmissions_Click"/>
-                                    <MenuFlyoutItem Text="Top" Tag="top" Click="SortSubmissions_Click"/>
+                                    <MenuFlyoutItem Text="Hot" Click="SortSubmissions_Click"/>
+                                    <MenuFlyoutItem Text="New" Click="SortSubmissions_Click"/>
+                                    <MenuFlyoutItem Text="Top" Click="SortSubmissions_Click"/>
                                 </MenuFlyout>
                             </AppBarButton.Flyout>
                         </AppBarButton>
@@ -318,16 +320,18 @@
 
                     <CommandBar x:Name="DetailCommandBar" Grid.Row="0">
                         <CommandBar.Content>
-                            <TextBlock Text="Some space." Margin="12,14"/>
+                            <TextBlock Margin="12,14">
+                                Sort By: <Run Text="{x:Bind ViewModel.CommentSort, Mode=OneWay}" />
+                            </TextBlock>
                         </CommandBar.Content>
 
                         <AppBarButton Icon="Back" Label="Back" Tag="back" Click="DetailCommandBarButton_Click"/>
                         <AppBarButton Icon="Sort" Label="Sort">
                             <AppBarButton.Flyout>
                                 <MenuFlyout>
-                                    <MenuFlyoutItem Text="Hot" Tag="hot" Click="SortComments_Click"/>
-                                    <MenuFlyoutItem Text="New" Tag="new" Click="SortComments_Click"/>
-                                    <MenuFlyoutItem Text="Top" Tag="top" Click="SortComments_Click"/>
+                                    <MenuFlyoutItem Text="Hot" Click="SortComments_Click"/>
+                                    <MenuFlyoutItem Text="New" Click="SortComments_Click"/>
+                                    <MenuFlyoutItem Text="Top" Click="SortComments_Click"/>
                                 </MenuFlyout>
                             </AppBarButton.Flyout>
                         </AppBarButton>

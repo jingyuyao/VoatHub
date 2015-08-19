@@ -78,9 +78,9 @@ namespace VoatHub
                 ViewModel.User.Subscriptions.List = subscriptions.Data;
             ViewModel.User.Subscriptions.Loading = false;
 
-            var userInfo = await voatApi.UserInfo(voatApi.UserName);
-            if (userInfo.Success)
-                ViewModel.User.UserInfo = userInfo.Data;
+            //var userInfo = await voatApi.UserInfo(voatApi.UserName);
+            //if (userInfo.Success)
+            //    ViewModel.User.UserInfo = userInfo.Data;
         }
 
         #region EventHandlers
@@ -188,7 +188,8 @@ namespace VoatHub
             Debug.WriteLine(e.OriginalSource, "SortItem");
             var item = e.OriginalSource as MenuFlyoutItem;
 
-            sortAlgorithmHelper(item.Tag.ToString(), submissionSearchOptions);
+            submissionSearchOptions.sort = (SortAlgorithm)Enum.Parse(typeof(SortAlgorithm), item.Text);
+            ViewModel.SubmissionSort = item.Text;
 
             refreshCurrentSubverse();
         }
@@ -259,7 +260,8 @@ namespace VoatHub
         {
             var item = e.OriginalSource as MenuFlyoutItem;
 
-            sortAlgorithmHelper(item.Tag.ToString(), commentSearchOptions);
+            commentSearchOptions.sort = (SortAlgorithm)Enum.Parse(typeof(SortAlgorithm), item.Text);
+            ViewModel.CommentSort = item.Text;
 
             refreshCurrentContentPresenter();
         }
@@ -372,30 +374,8 @@ namespace VoatHub
 
         private void refreshCurrentContentPresenter()
         {
-            setContentPresenterToSubmission(ViewModel.CurrentSubmission.Submission, ViewModel.CurrentSubmission.ShowComments);
-        }
-
-        /// <summary>
-        /// Changes the sort parameter in options to the corresponding tag.
-        /// </summary>
-        /// <param name="sortTag"></param>
-        /// <param name="options"></param>
-        private void sortAlgorithmHelper(string sortTag, SearchOptions options)
-        {
-            switch (sortTag)
-            {
-                case "hot":
-                    options.sort = SortAlgorithm.Hot;
-                    break;
-
-                case "new":
-                    options.sort = SortAlgorithm.New;
-                    break;
-
-                case "top":
-                    options.sort = SortAlgorithm.Top;
-                    break;
-            }
+            if (ViewModel.CurrentSubmission != null && ViewModel.CurrentSubmission.Submission != null)
+                setContentPresenterToSubmission(ViewModel.CurrentSubmission.Submission, ViewModel.CurrentSubmission.ShowComments);
         }
 
         /// <summary>
