@@ -153,6 +153,29 @@
     </Page.Resources>
 
     <Grid>
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup>
+                <VisualState>
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="720" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="RootSplitView.DisplayMode" Value="CompactInline"/>
+                    </VisualState.Setters>
+                </VisualState>
+                <VisualState>
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="0" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="RootSplitView.DisplayMode" Value="Overlay"/>
+                        <!--This prevents the hamberger button from overlapping with the title-->
+                        <Setter Target="MasterCommandBar.Padding" Value="48,0,0,0"/>
+                    </VisualState.Setters>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
+        
         <SplitView x:Name="RootSplitView" 
                    DisplayMode="CompactInline"
                    OpenPaneLength="256">
@@ -217,7 +240,7 @@
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
                     
-                    <CommandBar Grid.Row="0" x:Name="MasterTopCommandBar">
+                    <CommandBar Grid.Row="0" x:Name="MasterCommandBar">
                         <CommandBar.Content>
                             <TextBlock Style="{StaticResource MasterColumnTitleStyle}"
                                         Text="{x:Bind ViewModel.MasterColumn.CurrentSubverse, Mode=OneWay}" />
@@ -401,7 +424,6 @@
                       Style="{StaticResource SplitViewTogglePaneButtonStyle}"
                       IsChecked="{Binding IsPaneOpen, ElementName=RootSplitView, Mode=TwoWay}"
                       Unchecked="TogglePaneButton_Checked"
-                      AutomationProperties.Name="Menu"
                       ToolTipService.ToolTip="Menu" />
     </Grid>
 </Page>
