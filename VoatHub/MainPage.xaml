@@ -153,26 +153,43 @@
     <Grid>
         <SplitView x:Name="RootSplitView" 
                    DisplayMode="CompactInline"
-                   OpenPaneLength="400">
+                   OpenPaneLength="256">
             <SplitView.Pane>
-                <!-- A custom ListView to display the items in the pane.  The automation Name is set in the ContainerContentChanging event. -->
-                <ListView x:Name="NavMenuList"
-                        Margin="0,48,0,0"
-                        ItemContainerStyle="{StaticResource NavMenuItemContainerStyle}"
-                          ItemsSource="{x:Bind ViewModel.Navlist, Mode=OneWay}"
-                        ItemTemplate="{StaticResource NavMenuItemTemplate}">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="48" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
 
-                    <!-- Using this custom back navigation button until the system-provided back button is enabled. -->
-                    <!--<ListView.Header>
-                        <Button x:Name="BackButton"
-                                TabIndex="2"
-                                Style="{StaticResource NavigationBackButtonStyle}"
-                                IsEnabled="{Binding AppFrame.CanGoBack, ElementName=Root}"
-                                Width="{Binding ItemsPanelRoot.Width, ElementName=NavMenuList}"
-                                HorizontalAlignment="{Binding ItemsPanelRoot.HorizontalAlignment, ElementName=NavMenuList}"
-                                Click="BackButton_Click"/>
-                    </ListView.Header>-->
-                </ListView>
+                    <AutoSuggestBox x:Name="MasterSearchBox" Grid.Row="0"
+                                    VerticalAlignment="Center"
+                                    Margin="48,0,0,0"
+                                    QueryIcon="Find"
+                                    QuerySubmitted="MasterSearchBox_QuerySubmitted"
+                                    PlaceholderText="Go to Subverse..."/>
+
+                    <ListView x:Name="NavMenuList" Grid.Row="1"
+                            ItemContainerStyle="{StaticResource NavMenuItemContainerStyle}"
+                            ItemsSource="{x:Bind ViewModel.Navlist, Mode=OneWay}"
+                            ItemTemplate="{StaticResource NavMenuItemTemplate}"
+                              IsItemClickEnabled="True"
+                              SelectionMode="None"
+                              ItemClick="NavMenuList_ItemClick"/>
+
+                    <ListView x:Name="SubscriptionsListView" Grid.Row="2"
+                              SelectionMode="None"
+                              IsItemClickEnabled="True"
+                              ItemClick="SubscriptionsListView_ItemClick"
+                              Visibility="{Binding IsPaneOpen, ElementName=RootSplitView, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
+                              ItemTemplate="{StaticResource SubscriptionItemTemplate}"
+                              ItemsSource="{x:Bind ViewModel.User.Subscriptions, Mode=OneWay}">
+                        <ListView.Header>
+                            <TextBlock Text="Subscriptions"/>
+                        </ListView.Header>
+                    </ListView>
+                </Grid>
             </SplitView.Pane>
 
             <Grid x:Name="MainGrid">
@@ -187,7 +204,6 @@
 
                 <Grid x:Name="MasterColumnGrid" Grid.Column="0">
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
                         <RowDefinition Height="Auto" />
@@ -204,24 +220,11 @@
                                Text="{x:Bind ViewModel.MasterColumn.CurrentSubverse, Mode=OneWay}" />
                             </CommandBar.Content>
 
-                            <AppBarButton Icon="Home" Label="FrontPage"/>
-                            <AppBarToggleButton Icon="List" Label="Subscriptions" IsChecked="{Binding IsOpen, ElementName=SubscriptionsPopup, Mode=TwoWay}" />
                             <AppBarButton Icon="Favorite" Label="Subscribe" />
                             <AppBarButton Icon="Add" Label="New Post" />
-                            <AppBarButton Icon="Find" Label="Search">
-                                <AppBarButton.Flyout>
-                                    <Flyout>
-                                        <AutoSuggestBox x:Name="MasterSearchBox"
-                                    QueryIcon="Find"
-                                    Margin="0,5"
-                                    QuerySubmitted="MasterSearchBox_QuerySubmitted"
-                                    PlaceholderText="Go to Subverse..."/>
-                                    </Flyout>
-                                </AppBarButton.Flyout>
-                            </AppBarButton>
                         </CommandBar>
 
-                        <Popup x:Name="SubscriptionsPopup">
+                        <!--<Popup x:Name="SubscriptionsPopup">
                             <Grid HorizontalAlignment="Stretch">
                                 <ListView x:Name="SubscriptionsListView"
                               Background="Pink"
@@ -234,7 +237,7 @@
                                     </ListView.ItemContainerStyle>
                                 </ListView>
                             </Grid>
-                        </Popup>
+                        </Popup>-->
                     </StackPanel>
 
                     <ContentPresenter x:Name="MasterColumnContent" Grid.Row="1">
@@ -264,9 +267,10 @@
                         </Grid>
                     </ContentPresenter>
 
-                    <CommandBar x:Name="MasterCommandBar" Grid.Row="3">
+                    <CommandBar x:Name="MasterCommandBar" Grid.Row="2">
                         <CommandBar.Content>
-                            <TextBlock Text="Sort by: Hot" Margin="12,14"/>
+                            <!--TODO: Bind mode one way-->
+                            <TextBlock Text="Sort by: Hot" Margin="12,14" />
                         </CommandBar.Content>
 
                         <AppBarButton Icon="Back" Label="Back" Tag="Back" Click="MasterCommandBarButton_Click"/>

@@ -38,19 +38,14 @@ namespace VoatHub.Models.VoatHub
                 {
                     new NavMenuItem()
                     {
-                        Symbol = Symbol.Contact,
-                        Label = "Basic Page"
+                        Symbol = Symbol.Home,
+                        Label = "Front Page"
                     },
                     new NavMenuItem()
                     {
-                        Symbol = Symbol.Edit,
-                        Label = "CommandBar Page"
-                    },
-                    new NavMenuItem()
-                    {
-                        Symbol = Symbol.Favorite,
-                        Label = "Drill In Page"
-                    },
+                        Symbol = Symbol.AllApps,
+                        Label = "All"
+                    }
                 });
         }
 

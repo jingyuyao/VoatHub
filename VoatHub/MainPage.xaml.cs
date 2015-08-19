@@ -61,7 +61,6 @@ namespace VoatHub
             ViewModel = new MainPageViewModel();
 
             notFoundFlyout = Resources["NotFoundFlyout"] as Flyout;
-
             // TODO: Load from settings
             submissionSearchOptions = new SearchOptions();
             commentSearchOptions = new SearchOptions();
@@ -189,10 +188,10 @@ namespace VoatHub
             setContentPresenterToSubmission(submission, true);
         }
 
-        private void SubscriptionsList_Click(object sender, RoutedEventArgs e)
-        {
-            SubscriptionsPopup.IsOpen = !SubscriptionsPopup.IsOpen;
-        }
+        //private void SubscriptionsList_Click(object sender, RoutedEventArgs e)
+        //{
+        //    SubscriptionsPopup.IsOpen = !SubscriptionsPopup.IsOpen;
+        //}
 
         #endregion MasterColumn
 
@@ -419,5 +418,32 @@ namespace VoatHub
             popup.IsOpen = false;
         }
         #endregion Helpers
+
+        private async void NavMenuList_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            // Close the pane
+            RootSplitView.IsPaneOpen = false;
+
+            var item = e.ClickedItem as NavMenuItem;
+            switch (item.Label)
+            {
+                case "Front Page":
+                    // Can't fail
+                    await setCurrentSubverse("_front");
+                    break;
+
+                case "All":
+                    await setCurrentSubverse("_all");
+                    break;
+            }
+        }
+
+        private async void SubscriptionsListView_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            RootSplitView.IsPaneOpen = false;
+
+            var subscription = e.ClickedItem as ApiSubscription;
+            await setCurrentSubverse(subscription.Name);
+        }
     }
 }
