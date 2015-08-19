@@ -70,16 +70,17 @@ namespace VoatHub
         {
             voatApi = e.Parameter as VoatApi;
             
-            await setCurrentSubverse("_front");
+            setCurrentSubverse("_front");
 
             // TODO: We really need a queue type of thing for the API calls.
+            var subscriptions = await voatApi.UserSubscriptions(voatApi.UserName);
+            if (subscriptions.Success)
+                ViewModel.User.Subscriptions.List = subscriptions.Data;
+            ViewModel.User.Subscriptions.Loading = false;
+
             var userInfo = await voatApi.UserInfo(voatApi.UserName);
             if (userInfo.Success)
                 ViewModel.User.UserInfo = userInfo.Data;
-
-            var subscriptions = await voatApi.UserSubscriptions(voatApi.UserName);
-            if (subscriptions.Success)
-                ViewModel.User.Subscriptions = subscriptions.Data;
         }
 
         #region EventHandlers
@@ -121,6 +122,33 @@ namespace VoatHub
                 // handler(this, this.TogglePaneButtonRect);
                 handler.DynamicInvoke(this, this.TogglePaneButtonRect);
             }
+        }
+
+        private void NavMenuList_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            // Close the pane
+            RootSplitView.IsPaneOpen = false;
+
+            var item = e.ClickedItem as NavMenuItem;
+            switch (item.Label)
+            {
+                case "Front Page":
+                    // Can't fail
+                    setCurrentSubverse("_front");
+                    break;
+
+                case "All":
+                    setCurrentSubverse("_all");
+                    break;
+            }
+        }
+
+        private void SubscriptionsListView_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            RootSplitView.IsPaneOpen = false;
+
+            var subscription = e.ClickedItem as ApiSubscription;
+            setCurrentSubverse(subscription.Name);
         }
 
         #endregion SplitView
@@ -165,15 +193,14 @@ namespace VoatHub
             refreshCurrentSubverse();
         }
 
-        private async void MasterSearchBox_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
+        private void MasterSearchBox_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
         {
+            RootSplitView.IsPaneOpen = false;
+
             var query = args.ChosenSuggestion != null ? args.ChosenSuggestion.ToString() : args.QueryText;
 
-            bool success = await setCurrentSubverse(query);
-
-            if (!success)
-                notFoundFlyout.ShowAt(sender);
-
+            setCurrentSubverse(query);
+            
             sender.Text = "";
         }
 
@@ -281,26 +308,23 @@ namespace VoatHub
 
         #region Helpers
 
-        private async Task<bool> setCurrentSubverse(string subverse)
+        private async void setCurrentSubverse(string subverse)
         {
-            ViewModel.MasterColumn.LoadingSubmissions = true;
-
+            ViewModel.MasterColumn.CurrentSubverse = subverse;
+            ViewModel.MasterColumn.CurrentSubmissions = new LoadingList<ApiSubmission>();
+            
             var response = await voatApi.GetSubmissionList(subverse, submissionSearchOptions);
             if (response != null && response.Success)
             {
-                ViewModel.MasterColumn.CurrentSubverse = subverse;
-                ViewModel.MasterColumn.CurrentSubmissionsList = response.Data;
-                ViewModel.MasterColumn.LoadingSubmissions = false;
-                return true;
+                ViewModel.MasterColumn.CurrentSubmissions.List = response.Data;
             }
 
-            ViewModel.MasterColumn.LoadingSubmissions = false;
-            return false;
+            ViewModel.MasterColumn.CurrentSubmissions.Loading = false;
         }
 
-        private async void refreshCurrentSubverse()
+        private void refreshCurrentSubverse()
         {
-            await setCurrentSubverse(ViewModel.MasterColumn.CurrentSubverse);
+            setCurrentSubverse(ViewModel.MasterColumn.CurrentSubverse);
         }
 
         private async void setContentPresenterToSubmission(ApiSubmission submission, bool forceShowComments)
@@ -418,32 +442,5 @@ namespace VoatHub
             popup.IsOpen = false;
         }
         #endregion Helpers
-
-        private async void NavMenuList_ItemClick(object sender, ItemClickEventArgs e)
-        {
-            // Close the pane
-            RootSplitView.IsPaneOpen = false;
-
-            var item = e.ClickedItem as NavMenuItem;
-            switch (item.Label)
-            {
-                case "Front Page":
-                    // Can't fail
-                    await setCurrentSubverse("_front");
-                    break;
-
-                case "All":
-                    await setCurrentSubverse("_all");
-                    break;
-            }
-        }
-
-        private async void SubscriptionsListView_ItemClick(object sender, ItemClickEventArgs e)
-        {
-            RootSplitView.IsPaneOpen = false;
-
-            var subscription = e.ClickedItem as ApiSubscription;
-            await setCurrentSubverse(subscription.Name);
-        }
     }
 }

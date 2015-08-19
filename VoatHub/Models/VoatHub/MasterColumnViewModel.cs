@@ -12,12 +12,11 @@ namespace VoatHub.Models.VoatHub
     public class MasterColumnViewModel : BindableBase
     {
         private string currentSubverse;
-        private List<ApiSubmission> currentSubmissionsList;
-        private bool loadingSubmissions;
+        private LoadingList<ApiSubmission> currentSubmissions;
 
         public MasterColumnViewModel()
         {
-            currentSubmissionsList = new List<ApiSubmission>();
+            currentSubmissions = new LoadingList<ApiSubmission>();
             currentSubverse = "Loading...";
         }
 
@@ -27,16 +26,10 @@ namespace VoatHub.Models.VoatHub
             set { SetProperty(ref currentSubverse, value); }
         }
 
-        public bool LoadingSubmissions
+        public LoadingList<ApiSubmission> CurrentSubmissions
         {
-            get { return loadingSubmissions; }
-            set { SetProperty(ref loadingSubmissions, value); }
-        }
-
-        public List<ApiSubmission> CurrentSubmissionsList
-        {
-            get { return currentSubmissionsList; }
-            set { SetProperty(ref currentSubmissionsList, value); }
+            get { return currentSubmissions; }
+            set { SetProperty(ref currentSubmissions, value); }
         }
     }
 }

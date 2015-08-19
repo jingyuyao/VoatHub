@@ -43,7 +43,7 @@ namespace VoatHub.Ui.Helpers
         public object Convert(object value, Type targetType, object parameter, string language)
         {
             //  false
-            if (!((bool)value)) return Visibility.Collapsed;
+            if (value == null || !((bool)value)) return Visibility.Collapsed;
             return Visibility.Visible;
         }
 
@@ -58,7 +58,7 @@ namespace VoatHub.Ui.Helpers
         public object Convert(object value, Type targetType, object parameter, string language)
         {
             // true
-            if ((bool)value) return Visibility.Collapsed;
+            if (value != null && (bool)value) return Visibility.Collapsed;
             return Visibility.Visible;
         }
 

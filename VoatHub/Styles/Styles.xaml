@@ -3,6 +3,12 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:VoatHub">
 
+    <Style x:Key="MasterColumnTitleStyle" TargetType="TextBlock">
+        <Setter Property="HorizontalAlignment" Value="Left"/>
+        <Setter Property="Margin" Value="12,14"/>
+        <Setter Property="FontWeight" Value="Bold"/>
+    </Style>
+
     <Style x:Key="ContentTreeItemStyle" TargetType="ListViewItem">
         <Setter Property="FontFamily" Value="{ThemeResource ContentControlThemeFontFamily}" />
         <Setter Property="FontSize" Value="{ThemeResource ControlContentThemeFontSize}" />
@@ -149,4 +155,5 @@
         <Setter Property="Height" Value="48"/>
         <Setter Property="Padding" Value="0"/>
     </Style>
+
 </ResourceDictionary>

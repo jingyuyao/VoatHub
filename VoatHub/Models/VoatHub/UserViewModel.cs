@@ -11,7 +11,12 @@ namespace VoatHub.Models.VoatHub
     public class UserViewModel : BindableBase
     {
         private ApiUserInfo userInfo;
-        private List<ApiSubscription> subscriptions;
+        private LoadingList<ApiSubscription> subscriptions;
+
+        public UserViewModel()
+        {
+            subscriptions = new LoadingList<ApiSubscription>();
+        }
 
         public ApiUserInfo UserInfo
         {
@@ -19,7 +24,7 @@ namespace VoatHub.Models.VoatHub
             set { SetProperty(ref userInfo, value); }
         }
 
-        public List<ApiSubscription> Subscriptions
+        public LoadingList<ApiSubscription> Subscriptions
         {
             get { return subscriptions; }
             set { SetProperty(ref subscriptions, value); }
