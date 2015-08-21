@@ -157,5 +157,4 @@
         <Setter Property="IsActive" Value="False"/>
         <Setter Property="Margin" Value="20,20"/>
     </Style>
-    
 </ResourceDictionary>

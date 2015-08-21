@@ -22,6 +22,7 @@ using VoatHub.Models.Voat;
 using VoatHub.Models.Voat.v1;
 using VoatHub.Models.VoatHub;
 using VoatHub.Ui;
+using System.Collections.ObjectModel;
 
 namespace VoatHub
 {
@@ -400,6 +401,66 @@ namespace VoatHub
             commentVotingHelper(e.OriginalSource as Button, -1);
         }
 
+        private void OpenCommentReply_Click(object sender, RoutedEventArgs e)
+        {
+            var button = e.OriginalSource as Button;
+            var commentTree = button.DataContext as CommentTree;
+            commentTree.ReplyOpen = true;
+        }
+
+        private void CloseCommentReply_Click(object sender, RoutedEventArgs e)
+        {
+            var button = e.OriginalSource as Button;
+            var commentTree = button.DataContext as CommentTree;
+            commentTree.ReplyOpen = false;
+        }
+
+        private async void SendCommentReply_Click(object sender, RoutedEventArgs e)
+        {
+            var button = e.OriginalSource as Button;
+            var commentTree = button.DataContext as CommentTree;
+            var comment = commentTree.Comment;
+
+            commentTree.ReplyOpen = false;
+
+            var value = new UserValue { Value = commentTree.ReplyText };
+            var r = await voatApi.PostCommentReply(comment.Subverse, (int)comment.SubmissionID, comment.ID, value);
+
+            if (r.Success)
+            {
+                var ct = new CommentTree(r.Data);
+                commentTree.Children.Add(ct);
+            }
+        }
+
+        private void OpenSubmissionReply_Click(object sender, RoutedEventArgs e)
+        {
+            ViewModel.CurrentSubmission.ReplyOpen = true;
+        }
+
+        private void CloseSubmissionReply_Click(object sender, RoutedEventArgs e)
+        {
+            ViewModel.CurrentSubmission.ReplyOpen = false;
+        }
+
+        private async void SendSubmissionReply_Click(object sender, RoutedEventArgs e)
+        {
+            var button = e.OriginalSource as Button;
+            var submissionViewModel = ViewModel.CurrentSubmission;
+            var submission = submissionViewModel.Submission;
+
+            submissionViewModel.ReplyOpen = false;
+
+            var value = new UserValue { Value = submissionViewModel.ReplyText };
+            var r = await voatApi.PostComment(submission.Subverse, submission.ID, value);
+
+            if (r.Success)
+            {
+                var ct = new CommentTree(r.Data);
+                submissionViewModel.CommentTree.Add(ct);
+            }
+        }
+
         #endregion DetailColumn
 
         #endregion EventHandler
@@ -468,8 +529,8 @@ namespace VoatHub
                     if (response.Success)
                     {
                         var commentTreeList = CommentTree.FromApiCommentList(response.Data, null);
-                        commentTreeSorter(commentTreeList);
-                        submissionViewModel.CommentTree = commentTreeList;
+                        var sortedList = commentTreeSorter(commentTreeList);
+                        submissionViewModel.CommentTree = sortedList;
                     }
 
                     submissionViewModel.LoadingComments = false;
@@ -499,24 +560,23 @@ namespace VoatHub
         /// Sorts the commentTreeList based on <see cref="commentSearchOptions"/>.
         /// </summary>
         /// <param name="commentTree"></param>
-        private void commentTreeSorter(List<CommentTree> commentTreeList)
+        private ObservableCollection<CommentTree> commentTreeSorter(ObservableCollection<CommentTree> commentTreeList)
         {
             switch (commentSearchOptions.sort)
             {
                 case SortAlgorithm.New:
-                    CommentTree.SortNew(commentTreeList);
-                    break;
+                    return CommentTree.SortNew(commentTreeList);
                 case SortAlgorithm.Top:
-                    CommentTree.SortTop(commentTreeList);
-                    break;
+                    return CommentTree.SortTop(commentTreeList);
             }
 
-            Debug.WriteLine(commentTreeList);
+            return commentTreeList;;
         }
 
         private async void commentVotingHelper(Button button, int vote)
         {
-            var comment = button.Tag as ApiComment;
+            var commentTree = button.DataContext as CommentTree;
+            var comment = commentTree.Comment;
             var result = await voatApi.PostVoteRevokeOnRevote("comment", comment.ID, vote, true);
             Debug.WriteLine(result.Data);
         }
@@ -603,6 +663,33 @@ namespace VoatHub
             return true;
         }
 
+        private DependencyObject FindChildControl<T>(DependencyObject control, string ctrlName)
+        {
+            int childNumber = VisualTreeHelper.GetChildrenCount(control);
+            for (int i = 0; i < childNumber; i++)
+            {
+                DependencyObject child = VisualTreeHelper.GetChild(control, i);
+                FrameworkElement fe = child as FrameworkElement;
+                // Not a framework element or is null
+                if (fe == null) return null;
+
+                if (child is T && fe.Name == ctrlName)
+                {
+                    // Found the control so return
+                    return child;
+                }
+                else
+                {
+                    // Not found it - search children
+                    DependencyObject nextLevel = FindChildControl<T>(child, ctrlName);
+                    if (nextLevel != null)
+                        return nextLevel;
+                }
+            }
+            return null;
+        }
+
         #endregion Helpers
+
     }
 }

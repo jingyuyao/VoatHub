@@ -86,7 +86,7 @@ namespace VoatHub.Api.Voat
             }
         }
 
-        // SUBMISSIONS
+        #region Submissions
 
         public async Task<ApiResponse<List<ApiSubmission>>> GetSubmissionList(string subverse, SearchOptions searchOptions)
         {
@@ -141,7 +141,9 @@ namespace VoatHub.Api.Voat
             return await apiClient.DeleteAsync<ApiResponse>(uri);
         }
 
-        // SUBVERSE
+        #endregion Submissions
+
+        #region Subverse
 
         public async Task<ApiResponse<ApiSubverseInfo>> GetSubverseInfo(string subverse)
         {
@@ -164,8 +166,10 @@ namespace VoatHub.Api.Voat
         //    Uri uri = uriBuilder.Uri(string.Format(SUBVERSE_BLOCK, subverse));
         //    return await apiClient.DeleteAsync<ApiResponse>(uri);
         //}
-        
-        // COMMENTS
+
+        #endregion Subverse
+
+        #region Comments
 
         public async Task<ApiResponse<List<ApiComment>>> GetCommentList(string subverse, int submissionId, SearchOptions searchOptions)
         {
@@ -192,6 +196,12 @@ namespace VoatHub.Api.Voat
             return await apiClient.PostAsync<ApiResponse<ApiComment>>(uri, Utility.serializeJson(comment));
         }
 
+        /// <summary>
+        /// User this method for inbox comment replies.
+        /// </summary>
+        /// <param name="commentid"></param>
+        /// <param name="comment"></param>
+        /// <returns></returns>
         public async Task<ApiResponse<ApiComment>> PostCommentReply(int commentid, UserValue comment)
         {
             apiClient.EnsureLoggedIn();
@@ -199,6 +209,14 @@ namespace VoatHub.Api.Voat
             return await apiClient.PostAsync<ApiResponse<ApiComment>>(uri, Utility.serializeJson(comment));
         }
 
+        /// <summary>
+        /// Use this for normal comment replies.
+        /// </summary>
+        /// <param name="subverse"></param>
+        /// <param name="submissionId"></param>
+        /// <param name="commentid"></param>
+        /// <param name="comment"></param>
+        /// <returns></returns>
         public async Task<ApiResponse<ApiComment>> PostCommentReply(string subverse, int submissionId, int commentid, UserValue comment)
         {
             apiClient.EnsureLoggedIn();
@@ -219,8 +237,10 @@ namespace VoatHub.Api.Voat
             Uri uri = uriBuilder.Uri(string.Format(COMMENTS, commentid));
             return await apiClient.DeleteAsync<ApiResponse>(uri);
         }
-        
-        // USER
+
+        #endregion Comments
+
+        #region User
 
         /// <summary>
         /// 
@@ -277,7 +297,9 @@ namespace VoatHub.Api.Voat
         //    return await apiClient.GetAsync<ApiResponse<UserInfo>>(uri);
         //}
 
-        // VOTING
+        #endregion User
+
+        #region Voting
 
         /// <summary>
         /// 
@@ -314,7 +336,9 @@ namespace VoatHub.Api.Voat
             return await apiClient.PostAsync<ApiResponse<VoteResponse>>(uri, null);
         }
 
-        // SAVING
+        #endregion Voting
+
+        #region Saving
 
         public async Task<ApiResponse> PostSubmissionsSave(int submissionId)
         {
@@ -343,6 +367,8 @@ namespace VoatHub.Api.Voat
             Uri uri = uriBuilder.Uri(string.Format(COMMENTS_SAVE, submissionId));
             return await apiClient.DeleteAsync<ApiResponse>(uri);
         }
+
+        #endregion Saving
 
         public void Dispose()
         {
