@@ -265,46 +265,111 @@
                             <AppBarToggleButton Icon="Favorite" Label="Subscribe" 
                                                 IsChecked="{x:Bind ViewModel.MasterColumn.CurrentlySubscribed, Mode=TwoWay}"
                                                 Click="SubscribeButton_Click"/>
-                            <AppBarButton Icon="Add" Label="New Post" />
+                            <AppBarButton Icon="Add" Label="New Post" Click="NewPost_Click" />
                         </CommandBar.SecondaryCommands>
-                        
                     </CommandBar>
 
-                    <!--TODO: Put this into its own control template or something that can be reused-->
-                    <ContentPresenter x:Name="MasterColumnContent" Grid.Row="1">
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="Auto" />
-                                <RowDefinition Height="*" />
-                            </Grid.RowDefinitions>
+                    <Grid x:Name="MasterContentGrid" Grid.Row="1">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
 
-                            <ProgressRing x:Name="SubscriptionListProgressRing" Grid.Row="0"
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <!--TODO: Added other submission options when they became avaiable in the API-->
+                        <Popup x:Name="NewSubmissionPopup">
+                            <Grid Height="{Binding ActualHeight, ElementName=MasterColumnGrid, Mode=OneWay}"
+                                  Width="{Binding ActualWidth, ElementName=MasterColumnGrid, Mode=OneWay}"
+                                  Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+                                <StackPanel>
+                                    <Pivot>
+                                        <PivotItem Header="New Link">
+                                            <Grid>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition />
+                                                    <RowDefinition />
+                                                    <RowDefinition />
+                                                </Grid.RowDefinitions>
+
+                                                <TextBox Grid.Row="0" x:Name="LinkTitle" PlaceholderText="Title (Min length: 5)"/>
+                                                <TextBox Grid.Row="1" x:Name="LinkUrl" PlaceholderText="Url (Full path)"/>
+
+                                                <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
+                                                    <Button Content="Close"
+                                                            Tag="{Binding ElementName=NewSubmissionPopup}" 
+                                                            Click="ClosePopup_Click"/>
+                                                    <Button Content="New Link" Click="NewLink_Click" />
+                                                </StackPanel>
+                                            </Grid>
+                                        </PivotItem>
+
+                                        <PivotItem Header="New Discussion">
+                                            <Grid>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition />
+                                                    <RowDefinition />
+                                                    <RowDefinition />
+                                                </Grid.RowDefinitions>
+
+                                                <TextBox Grid.Row="0" x:Name="DiscussionTitle" PlaceholderText="Title (Min length: 5)"/>
+                                                <TextBox Grid.Row="1" x:Name="DiscussionContent" 
+                                                            AcceptsReturn="True" TextWrapping="Wrap" 
+                                                            PlaceholderText="Content"/>
+
+                                                <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
+                                                    <Button Content="Close"
+                                                            Tag="{Binding ElementName=NewSubmissionPopup}" 
+                                                            Click="ClosePopup_Click"/>
+                                                    <Button Content="New Discussion" Click="NewDiscussion_Click" />
+                                                </StackPanel>
+                                            </Grid>
+                                        </PivotItem>
+                                    </Pivot>
+                                    <TextBlock x:Name="NewSubmissionPopupErrorBlock" />
+                                    <ProgressRing x:Name="NewSubmissionPopupProgressRing" Style="{StaticResource DefaultProgressRingStyle}" />
+                                </StackPanel>
+                            </Grid>
+                        </Popup>
+
+                        <!--TODO: Put this into its own control template or something that can be reused-->
+                        <ContentPresenter x:Name="MasterContent" Grid.Row="1">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
+
+                                <ProgressRing x:Name="SubscriptionListProgressRing" Grid.Row="0"
                               Margin="0,50" Width="50" Height="50"
                               Visibility="{x:Bind ViewModel.MasterColumn.CurrentSubmissions.Loading, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}" 
                               IsActive="{x:Bind ViewModel.MasterColumn.CurrentSubmissions.Loading, Mode=OneWay}"/>
 
-                            <ListView x:Name="MasterListView" Grid.Row="1"
+                                <ListView x:Name="MasterListView" Grid.Row="1"
                                       ItemTemplate="{StaticResource SubmissionItemTemplate}"
                                       Visibility="{x:Bind ViewModel.MasterColumn.CurrentSubmissions.Loading, Converter={StaticResource BoolToNegateVisibilityConverter}, Mode=OneWay}"
                                       ItemsSource="{x:Bind ViewModel.MasterColumn.CurrentSubmissions.List, Mode=OneWay}"
                                       IsItemClickEnabled="True"
                                       ItemClick="MasterListView_ItemClick">
-                                <ListView.Header>
-                                    <!--Only show if its not loading and list has no items-->
-                                    <Grid Visibility="{x:Bind ViewModel.MasterColumn.CurrentSubmissions.Loading, Converter={StaticResource BoolToNegateVisibilityConverter}, Mode=OneWay}">
-                                        <TextBlock Text="There is nothing here." 
+                                    <ListView.Header>
+                                        <!--Only show if its not loading and list has no items-->
+                                        <Grid Visibility="{x:Bind ViewModel.MasterColumn.CurrentSubmissions.Loading, Converter={StaticResource BoolToNegateVisibilityConverter}, Mode=OneWay}">
+                                            <TextBlock Text="There is nothing here." 
                                                Visibility="{x:Bind ViewModel.MasterColumn.CurrentSubmissions.HasItems, Converter={StaticResource BoolToNegateVisibilityConverter}, Mode=OneWay}" />
-                                    </Grid>
-                                </ListView.Header>
-                                
-                                <ListView.ItemContainerStyle>
-                                    <Style TargetType="ListViewItem">
-                                        <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                                    </Style>
-                                </ListView.ItemContainerStyle>
-                            </ListView>
-                        </Grid>
-                    </ContentPresenter>
+                                        </Grid>
+                                    </ListView.Header>
+
+                                    <ListView.ItemContainerStyle>
+                                        <Style TargetType="ListViewItem">
+                                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                        </Style>
+                                    </ListView.ItemContainerStyle>
+                                </ListView>
+                            </Grid>
+                        </ContentPresenter>
+                    </Grid>
                 </Grid>
 
                 <Grid x:Name="DetailColumnGrid"

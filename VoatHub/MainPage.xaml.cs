@@ -55,6 +55,9 @@ namespace VoatHub
         /// </summary>
         public event TypedEventHandler<MainPage, Rect> TogglePaneButtonRectChanged;
 
+        // Misc
+        private SolidColorBrush RED_BRUSH = new SolidColorBrush(Windows.UI.Color.FromArgb(255, 255, 0, 0));
+
         public MainPage()
         { 
             this.InitializeComponent();
@@ -216,11 +219,6 @@ namespace VoatHub
             setContentPresenterToSubmission(submission, true);
         }
 
-        //private void SubscriptionsList_Click(object sender, RoutedEventArgs e)
-        //{
-        //    SubscriptionsPopup.IsOpen = !SubscriptionsPopup.IsOpen;
-        //}
-
         private void SubscribeButton_Click(object sender, RoutedEventArgs e)
         {
             var toggleButton = e.OriginalSource as AppBarToggleButton;
@@ -231,6 +229,92 @@ namespace VoatHub
             //{
 
             //}
+        }
+
+        /// <summary>
+        /// Assumes the button has the popup in its tag property.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ClosePopup_Click(object sender, RoutedEventArgs e)
+        {
+            var button = e.OriginalSource as Button;
+            var popup = button.Tag as Popup;
+            popup.IsOpen = false;
+        }
+
+
+        private void NewPost_Click(object sender, RoutedEventArgs e)
+        {
+            NewSubmissionPopup.IsOpen = true;
+        }
+
+        /// <summary>
+        /// TODO: Better validation
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private async void NewLink_Click(object sender, RoutedEventArgs e)
+        {
+            if (!canSubmitToSubverse())
+            {
+                NewSubmissionPopupErrorBlock.Text = "Cannot submit to subscription sets.";
+            }
+
+            if (validateNotEmpty(LinkTitle, LinkUrl) && validatePostTitle(LinkTitle) && validateLinkUrl(LinkUrl))
+            {
+                toggleProgressRing(NewSubmissionPopupProgressRing);
+
+                var submission = new UserSubmission
+                {
+                    Title = LinkTitle.Text,
+                    Url = LinkUrl.Text
+                };
+                var r = await voatApi.PostSubmission(ViewModel.MasterColumn.CurrentSubverse, submission);
+
+                if (r.Success)
+                {
+                    setContentPresenterToSubmission(r.Data, false);
+                    NewSubmissionPopup.IsOpen = false;
+                    NewSubmissionPopupErrorBlock.Text = "";
+                    LinkTitle.Text = "";
+                    LinkUrl.Text = "";
+                }
+
+                toggleProgressRing(NewSubmissionPopupProgressRing);
+            }
+        }
+
+        private async void NewDiscussion_Click(object sender, RoutedEventArgs e)
+        {
+            if (!canSubmitToSubverse())
+            {
+                NewSubmissionPopupErrorBlock.Text = "Cannot submit to subscription sets.";
+            }
+
+            // TODO: Eh, API says content is optional but it actually isn't. wtf
+            if (validateNotEmpty(DiscussionTitle, DiscussionContent) && validatePostTitle(DiscussionTitle))
+            {
+                toggleProgressRing(NewSubmissionPopupProgressRing);
+
+                var submission = new UserSubmission
+                {
+                    Title = DiscussionTitle.Text,
+                    Content = DiscussionContent.Text
+                };
+                var r = await voatApi.PostSubmission(ViewModel.MasterColumn.CurrentSubverse, submission);
+
+                if (r.Success)
+                {
+                    setContentPresenterToSubmission(r.Data, false);
+                    NewSubmissionPopup.IsOpen = false;
+                    NewSubmissionPopupErrorBlock.Text = "";
+                    DiscussionTitle.Text = "";
+                    DiscussionContent.Text = "";
+                }
+
+                toggleProgressRing(NewSubmissionPopupProgressRing);
+            }
         }
 
         #endregion MasterColumn
@@ -443,17 +527,82 @@ namespace VoatHub
             var result = await voatApi.PostVoteRevokeOnRevote("submission", submission.ID, vote, true);
         }
 
-        /// <summary>
-        /// Assumes the button has the popup in its tag property.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void ClosePopup_Click(object sender, RoutedEventArgs e)
+        private void toggleProgressRing(ProgressRing ring)
         {
-            var button = e.OriginalSource as Button;
-            var popup = button.Tag as Popup;
-            popup.IsOpen = false;
+            ring.Visibility = ring.Visibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
+            ring.IsActive = ring.IsActive ? false : true;
         }
+
+        /// <summary>
+        /// Go through every box and highlight it red if it's empty.
+        /// </summary>
+        /// <param name="boxes"></param>
+        /// <returns>Whether all box pass the check.</returns>
+        private bool validateNotEmpty(params TextBox[] boxes)
+        {
+            bool pass = true;
+
+            foreach (var box in boxes)
+            {
+                if (box.Text == "" || box.Text == null)
+                {
+                    invalidateBox(box);
+                    pass = false;
+                }
+            }
+            return pass;
+        }
+
+        private bool validatePostTitle(TextBox box)
+        {
+            if (box.Text.Length < 5)
+            {
+                invalidateBox(box);
+                return false;
+            }
+
+            return true;
+        }
+
+        private bool validateLinkUrl(TextBox box)
+        {
+            Uri uri;
+            bool success = Uri.TryCreate(box.Text, UriKind.Absolute, out uri);
+            if (!success) invalidateBox(box);
+            return success;
+        }
+
+        private void invalidateBox(TextBox box)
+        {
+            box.BorderBrush = RED_BRUSH;
+        }
+
+        private bool inValidSubverse()
+        {
+            var currentSub = ViewModel.MasterColumn.CurrentSubverse;
+            return currentSub != "_front" && currentSub != "_all";
+        }
+
+        private bool canSubmitToSubverse()
+        {
+            var current = ViewModel.MasterColumn.CurrentSubverse;
+            if (current == "_front" || current == "_all")
+                return false;
+            else if (ViewModel.User.Subscriptions != null)
+            {
+                foreach (var sub in ViewModel.User.Subscriptions.List)
+                {
+                    if (string.Equals(current, sub.Name, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return sub.Type == SubscriptionType.Subverse;
+                    }
+                }
+            }
+
+            // current subverse is not one of the special ones and its not in the subscription list that contains all the sets.
+            return true;
+        }
+
         #endregion Helpers
     }
 }

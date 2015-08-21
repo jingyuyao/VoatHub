@@ -1,5 +1,6 @@
 ﻿using System.Runtime.Serialization;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace VoatHub.Models.Voat
 {
@@ -21,6 +22,17 @@ namespace VoatHub.Models.Voat
         [JsonProperty("error")]
         [DataMember(Name = "error")]
         public ErrorInfo Error { get; set; }
+
+        /// <summary>
+        /// Ignores any serialization error that might occur. This enable us to already return an ApiResponse Instance
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="errorContext"></param>
+        [OnError]
+        internal void OnError(StreamingContext context, ErrorContext errorContext)
+        {
+            errorContext.Handled = true;
+        }
     }
 
     /// <summary>
