@@ -17,6 +17,7 @@ namespace VoatHub.Api.Client
     /// <para>Child classes should provided token retrieval, token refresh, client name
     /// and response deserialization methods.</para>
     /// </summary>
+    /// TODO: We really need a queue type of thing for the API calls.
     public abstract class ApiClient : IApiClient
     {
         private HttpClient httpClient;

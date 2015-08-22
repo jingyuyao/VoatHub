@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Text;
@@ -8,7 +9,7 @@ using System.Threading.Tasks;
 namespace VoatHub.Models.VoatHub
 {
     /// <summary>
-    /// Container for a list with its loading state.
+    /// Container for an ObservableCollection with loading status.
     /// </summary>
     /// <typeparam name="T"></typeparam>
     public class LoadingList<T> : BindableBase
@@ -46,6 +47,18 @@ namespace VoatHub.Models.VoatHub
         {
             get { return _hasItems; }
             set { SetProperty(ref _hasItems, value); }
+        }
+
+        public void Load(List<T> list)
+        {
+            List = list;
+            Loading = false;
+        }
+
+        public void Clear()
+        {
+            Loading = true;
+            List = new List<T>();
         }
     }
 }

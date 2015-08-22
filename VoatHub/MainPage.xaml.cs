@@ -32,16 +32,11 @@ namespace VoatHub
     /// </summary>
     public sealed partial class MainPage : Page
     {
-        // Xaml resources
-        private Flyout notFoundFlyout;
-
         // Page view model
-        public MainPageViewModel ViewModel { get; set; }
+        public MainPageVM ViewModel { get; set; }
         
         // Api
         private VoatApi voatApi;
-        private SearchOptions submissionSearchOptions;
-        private SearchOptions commentSearchOptions;
 
         // SplitView
         public Rect TogglePaneButtonRect
@@ -62,29 +57,12 @@ namespace VoatHub
         public MainPage()
         { 
             this.InitializeComponent();
-            ViewModel = new MainPageViewModel();
-
-            notFoundFlyout = Resources["NotFoundFlyout"] as Flyout;
-            // TODO: Load from settings
-            submissionSearchOptions = new SearchOptions();
-            commentSearchOptions = new SearchOptions();
         }
         
-        protected override async void OnNavigatedTo(NavigationEventArgs e)
+        protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             voatApi = e.Parameter as VoatApi;
-            
-            setCurrentSubverse("_front");
-
-            // TODO: We really need a queue type of thing for the API calls.
-            var subscriptions = await voatApi.UserSubscriptions(voatApi.UserName);
-            if (subscriptions.Success)
-                ViewModel.User.Subscriptions.List = subscriptions.Data;
-            ViewModel.User.Subscriptions.Loading = false;
-
-            //var userInfo = await voatApi.UserInfo(voatApi.UserName);
-            //if (userInfo.Success)
-            //    ViewModel.User.UserInfo = userInfo.Data;
+            ViewModel = new MainPageVM(voatApi);
         }
 
         #region EventHandlers
@@ -138,11 +116,11 @@ namespace VoatHub
             {
                 case "Front Page":
                     // Can't fail
-                    setCurrentSubverse("_front");
+                    ViewModel.ChangeSubverse("_front");
                     break;
 
                 case "All":
-                    setCurrentSubverse("_all");
+                    ViewModel.ChangeSubverse("_all");
                     break;
             }
         }
@@ -152,7 +130,7 @@ namespace VoatHub
             RootSplitView.IsPaneOpen = false;
 
             var subscription = e.ClickedItem as ApiSubscription;
-            setCurrentSubverse(subscription.Name);
+            ViewModel.ChangeSubverse(subscription.Name);
         }
 
         #endregion SplitView
@@ -170,7 +148,7 @@ namespace VoatHub
 
             var submission = e.ClickedItem as ApiSubmission;
 
-            setContentPresenterToSubmission(submission, false);
+            ViewModel.CurrentSubmission.ChangeSubmission(submission, false);
         }
 
         private void MasterCommandBarButton_Click(object sender, RoutedEventArgs e)
@@ -182,7 +160,7 @@ namespace VoatHub
             switch (button.Tag.ToString())
             {
                 case "refresh":
-                    refreshCurrentSubverse();
+                    ViewModel.RefreshCurrentSubverse();
                     break;
             }
         }
@@ -192,10 +170,10 @@ namespace VoatHub
             Debug.WriteLine(e.OriginalSource, "SortItem");
             var item = e.OriginalSource as MenuFlyoutItem;
 
-            submissionSearchOptions.sort = (SortAlgorithm)Enum.Parse(typeof(SortAlgorithm), item.Text);
+            voatApi.SubmissionSearchOptions.sort = (SortAlgorithm)Enum.Parse(typeof(SortAlgorithm), item.Text);
             ViewModel.SubmissionSort = item.Text;
 
-            refreshCurrentSubverse();
+            ViewModel.RefreshCurrentSubverse();
         }
 
         private void MasterSearchBox_QuerySubmitted(AutoSuggestBox sender, AutoSuggestBoxQuerySubmittedEventArgs args)
@@ -204,7 +182,7 @@ namespace VoatHub
 
             var query = args.ChosenSuggestion != null ? args.ChosenSuggestion.ToString() : args.QueryText;
 
-            setCurrentSubverse(query);
+            ViewModel.ChangeSubverse(query);
             
             sender.Text = "";
         }
@@ -217,7 +195,7 @@ namespace VoatHub
             // For the initial state where no submission was selected and user presses the comment icon in DetailCommandBar
             if (submission == null) return;
 
-            setContentPresenterToSubmission(submission, true);
+            ViewModel.CurrentSubmission.ChangeSubmission(submission, true);
         }
 
         private void SubscribeButton_Click(object sender, RoutedEventArgs e)
@@ -244,7 +222,6 @@ namespace VoatHub
             popup.IsOpen = false;
         }
 
-
         private void NewPost_Click(object sender, RoutedEventArgs e)
         {
             NewSubmissionPopup.IsOpen = true;
@@ -255,7 +232,7 @@ namespace VoatHub
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private async void NewLink_Click(object sender, RoutedEventArgs e)
+        private void NewLink_Click(object sender, RoutedEventArgs e)
         {
             if (!canSubmitToSubverse())
             {
@@ -264,29 +241,17 @@ namespace VoatHub
 
             if (validateNotEmpty(LinkTitle, LinkUrl) && validatePostTitle(LinkTitle) && validateLinkUrl(LinkUrl))
             {
-                toggleProgressRing(NewSubmissionPopupProgressRing);
-
                 var submission = new UserSubmission
                 {
                     Title = LinkTitle.Text,
                     Url = LinkUrl.Text
                 };
-                var r = await voatApi.PostSubmission(ViewModel.MasterColumn.CurrentSubverse, submission);
 
-                if (r.Success)
-                {
-                    setContentPresenterToSubmission(r.Data, false);
-                    NewSubmissionPopup.IsOpen = false;
-                    NewSubmissionPopupErrorBlock.Text = "";
-                    LinkTitle.Text = "";
-                    LinkUrl.Text = "";
-                }
-
-                toggleProgressRing(NewSubmissionPopupProgressRing);
+                postSubmission(submission);
             }
         }
 
-        private async void NewDiscussion_Click(object sender, RoutedEventArgs e)
+        private void NewDiscussion_Click(object sender, RoutedEventArgs e)
         {
             if (!canSubmitToSubverse())
             {
@@ -296,26 +261,36 @@ namespace VoatHub
             // TODO: Eh, API says content is optional but it actually isn't. wtf
             if (validateNotEmpty(DiscussionTitle, DiscussionContent) && validatePostTitle(DiscussionTitle))
             {
-                toggleProgressRing(NewSubmissionPopupProgressRing);
-
                 var submission = new UserSubmission
                 {
                     Title = DiscussionTitle.Text,
                     Content = DiscussionContent.Text
                 };
-                var r = await voatApi.PostSubmission(ViewModel.MasterColumn.CurrentSubverse, submission);
 
-                if (r.Success)
-                {
-                    setContentPresenterToSubmission(r.Data, false);
-                    NewSubmissionPopup.IsOpen = false;
-                    NewSubmissionPopupErrorBlock.Text = "";
-                    DiscussionTitle.Text = "";
-                    DiscussionContent.Text = "";
-                }
-
-                toggleProgressRing(NewSubmissionPopupProgressRing);
+                postSubmission(submission);
             }
+        }
+
+        /// <summary>
+        /// Helper method to post new submission and change current submission if post success
+        /// </summary>
+        /// <param name="submission"></param>
+        private async void postSubmission(UserSubmission submission)
+        {
+            toggleProgressRing(NewSubmissionPopupProgressRing);
+
+            var r = await voatApi.PostSubmission(ViewModel.CurrentSubverse, submission);
+
+            if (r.Success)
+            {
+                ViewModel.CurrentSubmission.ChangeSubmission(r.Data, false);
+                NewSubmissionPopup.IsOpen = false;
+                NewSubmissionPopupErrorBlock.Text = "";
+                DiscussionTitle.Text = "";
+                DiscussionContent.Text = "";
+            }
+
+            toggleProgressRing(NewSubmissionPopupProgressRing);
         }
 
         #endregion MasterColumn
@@ -342,7 +317,7 @@ namespace VoatHub
             switch (button.Tag.ToString())
             {
                 case "refresh":
-                    refreshCurrentContentPresenter();
+                    ViewModel.CurrentSubmission.Refresh();
                     break;
             }
         }
@@ -357,10 +332,11 @@ namespace VoatHub
         {
             var item = e.OriginalSource as MenuFlyoutItem;
 
-            commentSearchOptions.sort = (SortAlgorithm)Enum.Parse(typeof(SortAlgorithm), item.Text);
+            voatApi.CommentSearchOptions.sort = (SortAlgorithm)Enum.Parse(typeof(SortAlgorithm), item.Text);
+            
             ViewModel.CommentSort = item.Text;
 
-            refreshCurrentContentPresenter();
+            ViewModel.CurrentSubmission.Refresh();
         }
 
         /// <summary>
@@ -457,7 +433,7 @@ namespace VoatHub
             if (r.Success)
             {
                 var ct = new CommentTree(r.Data);
-                submissionViewModel.CommentTree.Add(ct);
+                submissionViewModel.Comments.Add(ct);
             }
         }
 
@@ -466,112 +442,6 @@ namespace VoatHub
         #endregion EventHandler
 
         #region Helpers
-
-        private async void setCurrentSubverse(string subverse)
-        {
-            ViewModel.MasterColumn.CurrentlySubscribed = isSubscribed(subverse);
-
-            ViewModel.MasterColumn.CurrentSubverse = subverse;
-            ViewModel.MasterColumn.CurrentSubmissions = new LoadingList<ApiSubmission>();
-            
-            var response = await voatApi.GetSubmissionList(subverse, submissionSearchOptions);
-            if (response != null && response.Success)
-            {
-                ViewModel.MasterColumn.CurrentSubmissions.List = response.Data;
-            }
-
-            ViewModel.MasterColumn.CurrentSubmissions.Loading = false;
-        }
-
-        private bool isSubscribed(string subverse)
-        {
-            if (subverse == "_front" || subverse == "_all")
-            {
-                return true;
-            }
-            else if (ViewModel.User.Subscriptions != null)
-            {
-                foreach (var sub in ViewModel.User.Subscriptions.List)
-                {
-                    if (string.Equals(subverse, sub.Name, StringComparison.OrdinalIgnoreCase))
-                    {
-                        return true;
-                    }
-                }
-            }
-            return false;
-        }
-
-        private void refreshCurrentSubverse()
-        {
-            setCurrentSubverse(ViewModel.MasterColumn.CurrentSubverse);
-        }
-
-        private async void setContentPresenterToSubmission(ApiSubmission submission, bool forceShowComments)
-        {
-            // Clears the webview
-            DetailWebView.Navigate(new Uri("about:blank"));
-
-            var submissionViewModel = new SubmissionViewModel();
-            submissionViewModel.Submission = submission;
-            
-            if (submission.Type == ApiSubmissionType.Self || forceShowComments)
-            {
-                submissionViewModel.ShowComments = true;
-                submissionViewModel.LoadingComments = true;
-                ViewModel.CurrentSubmission = submissionViewModel;
-
-                var response = await voatApi.GetCommentList(submission.Subverse, submission.ID, commentSearchOptions);
-
-                // If the current submission changes, then we released control over the loading icon.
-                if (ViewModel.CurrentSubmission.Submission.ID == submission.ID)
-                {
-                    if (response.Success)
-                    {
-                        var commentTreeList = CommentTree.FromApiCommentList(response.Data, null);
-                        var sortedList = commentTreeSorter(commentTreeList);
-                        submissionViewModel.CommentTree = sortedList;
-                    }
-
-                    submissionViewModel.LoadingComments = false;
-                }
-            }
-            else
-            {
-                ViewModel.CurrentSubmission = submissionViewModel;
-
-                Uri uri;
-                bool success = Uri.TryCreate(submission.Url, UriKind.Absolute, out uri);
-
-                if (success)
-                {
-                    DetailWebView.Navigate(uri);
-                }
-            }
-        }
-
-        private void refreshCurrentContentPresenter()
-        {
-            if (ViewModel.CurrentSubmission != null && ViewModel.CurrentSubmission.Submission != null)
-                setContentPresenterToSubmission(ViewModel.CurrentSubmission.Submission, ViewModel.CurrentSubmission.ShowComments);
-        }
-
-        /// <summary>
-        /// Sorts the commentTreeList based on <see cref="commentSearchOptions"/>.
-        /// </summary>
-        /// <param name="commentTree"></param>
-        private ObservableCollection<CommentTree> commentTreeSorter(ObservableCollection<CommentTree> commentTreeList)
-        {
-            switch (commentSearchOptions.sort)
-            {
-                case SortAlgorithm.New:
-                    return CommentTree.SortNew(commentTreeList);
-                case SortAlgorithm.Top:
-                    return CommentTree.SortTop(commentTreeList);
-            }
-
-            return commentTreeList;;
-        }
 
         private async void commentVotingHelper(Button button, int vote)
         {
@@ -639,18 +509,18 @@ namespace VoatHub
 
         private bool inValidSubverse()
         {
-            var currentSub = ViewModel.MasterColumn.CurrentSubverse;
+            var currentSub = ViewModel.CurrentSubverse;
             return currentSub != "_front" && currentSub != "_all";
         }
 
         private bool canSubmitToSubverse()
         {
-            var current = ViewModel.MasterColumn.CurrentSubverse;
+            var current = ViewModel.CurrentSubverse;
             if (current == "_front" || current == "_all")
                 return false;
-            else if (ViewModel.User.Subscriptions != null)
+            else if (ViewModel.Subscriptions != null)
             {
-                foreach (var sub in ViewModel.User.Subscriptions.List)
+                foreach (var sub in ViewModel.Subscriptions.List)
                 {
                     if (string.Equals(current, sub.Name, StringComparison.OrdinalIgnoreCase))
                     {
@@ -662,34 +532,6 @@ namespace VoatHub
             // current subverse is not one of the special ones and its not in the subscription list that contains all the sets.
             return true;
         }
-
-        private DependencyObject FindChildControl<T>(DependencyObject control, string ctrlName)
-        {
-            int childNumber = VisualTreeHelper.GetChildrenCount(control);
-            for (int i = 0; i < childNumber; i++)
-            {
-                DependencyObject child = VisualTreeHelper.GetChild(control, i);
-                FrameworkElement fe = child as FrameworkElement;
-                // Not a framework element or is null
-                if (fe == null) return null;
-
-                if (child is T && fe.Name == ctrlName)
-                {
-                    // Found the control so return
-                    return child;
-                }
-                else
-                {
-                    // Not found it - search children
-                    DependencyObject nextLevel = FindChildControl<T>(child, ctrlName);
-                    if (nextLevel != null)
-                        return nextLevel;
-                }
-            }
-            return null;
-        }
-
         #endregion Helpers
-
     }
 }

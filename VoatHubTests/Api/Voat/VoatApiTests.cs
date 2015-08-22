@@ -69,7 +69,7 @@ namespace VoatHubTests.Api
         [TestMethod]
         public async Task Submissions()
         {
-            assertResponse(await api.GetSubmissionList(testSub, null));
+            assertResponse(await api.GetSubmissionList(testSub));
             var title = assertResponse(await api.GetSubmission(testSub, 1)).Data.Title;
             Assert.AreEqual("Wow, Voat on Azure is a pain in the...", title);
             assertResponse(await api.GetSubmission(1));
@@ -103,8 +103,8 @@ namespace VoatHubTests.Api
             //Assert.AreEqual(2, numComments);  // Bugged API
             var updatedContent = assertResponse(await api.PutComment(commentId2, updatedComment)).Data.Content;
             Assert.AreEqual(updatedComment.Value, updatedContent);
-            assertResponse(await api.GetCommentList(testSub, submissionId, null));
-            assertResponse(await api.GetCommentList(testSub, submissionId, commentId, null));
+            assertResponse(await api.GetCommentList(testSub, submissionId));
+            assertResponse(await api.GetCommentList(testSub, submissionId, commentId));
             assertResponse(await api.DeleteComment(commentId));
         }
 

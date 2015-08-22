@@ -157,11 +157,6 @@
                           ItemsSource="{x:Bind Children, Mode=OneWay}"/>
             </StackPanel>
         </DataTemplate>
-
-        <!--Misc resources-->        
-        <Flyout x:Key="NotFoundFlyout">
-            <TextBlock Text="Not Found."/>
-        </Flyout>
     </Page.Resources>
 
     <Grid>
@@ -218,8 +213,8 @@
 
                     <ProgressRing x:Name="MasterProgressRing" Grid.Row="2"
                               Margin="0,50" Width="50" Height="50"
-                              Visibility="{x:Bind ViewModel.User.Subscriptions.Loading, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}" 
-                              IsActive="{x:Bind ViewModel.User.Subscriptions.Loading, Mode=OneWay}"/>
+                              Visibility="{x:Bind ViewModel.Subscriptions.Loading, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}" 
+                              IsActive="{x:Bind ViewModel.Subscriptions.Loading, Mode=OneWay}"/>
 
                     <ListView x:Name="SubscriptionsListView" Grid.Row="3"
                               SelectionMode="None"
@@ -228,7 +223,7 @@
                               Visibility="{Binding IsPaneOpen, ElementName=RootSplitView, Mode=OneWay, Converter={StaticResource BoolToVisibilityConverter}}"
                               ItemContainerStyle="{StaticResource NavMenuItemContainerStyle}"
                               ItemTemplate="{StaticResource SubscriptionItemTemplate}"
-                              ItemsSource="{x:Bind ViewModel.User.Subscriptions.List, Mode=OneWay}"/>
+                              ItemsSource="{x:Bind ViewModel.Subscriptions.List, Mode=OneWay}"/>
                 </Grid>
             </SplitView.Pane>
 
@@ -255,7 +250,7 @@
                     <CommandBar Grid.Row="0" x:Name="MasterCommandBar">
                         <CommandBar.Content>
                             <TextBlock HorizontalAlignment="Left" Margin="12,14">
-                                <Run FontWeight="Bold" Text="{x:Bind ViewModel.MasterColumn.CurrentSubverse, Mode=OneWay}" /> 
+                                <Run FontWeight="Bold" Text="{x:Bind ViewModel.CurrentSubverse, Mode=OneWay}" /> 
                                 :: <Run Text="{x:Bind ViewModel.SubmissionSort, Mode=OneWay}"/>
                             </TextBlock>
                         </CommandBar.Content>
@@ -275,7 +270,7 @@
 
                         <CommandBar.SecondaryCommands>
                             <AppBarToggleButton Icon="Favorite" Label="Subscribe" 
-                                                IsChecked="{x:Bind ViewModel.MasterColumn.CurrentlySubscribed, Mode=TwoWay}"
+                                                IsChecked="{x:Bind ViewModel.CurrentlySubscribed, Mode=TwoWay}"
                                                 Click="SubscribeButton_Click"/>
                             <AppBarButton Icon="Add" Label="New Post" Click="NewPost_Click" />
                         </CommandBar.SecondaryCommands>
@@ -355,21 +350,21 @@
                                 </Grid.RowDefinitions>
 
                                 <ProgressRing x:Name="SubscriptionListProgressRing" Grid.Row="0"
-                              Margin="0,50" Width="50" Height="50"
-                              Visibility="{x:Bind ViewModel.MasterColumn.CurrentSubmissions.Loading, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}" 
-                              IsActive="{x:Bind ViewModel.MasterColumn.CurrentSubmissions.Loading, Mode=OneWay}"/>
+                                              Margin="0,50" Width="50" Height="50"
+                                              Visibility="{x:Bind ViewModel.SubmissionList.Loading, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}" 
+                                              IsActive="{x:Bind ViewModel.SubmissionList.Loading, Mode=OneWay}"/>
 
                                 <ListView x:Name="MasterListView" Grid.Row="1"
-                                      ItemTemplate="{StaticResource SubmissionItemTemplate}"
-                                      Visibility="{x:Bind ViewModel.MasterColumn.CurrentSubmissions.Loading, Converter={StaticResource BoolToNegateVisibilityConverter}, Mode=OneWay}"
-                                      ItemsSource="{x:Bind ViewModel.MasterColumn.CurrentSubmissions.List, Mode=OneWay}"
-                                      IsItemClickEnabled="True"
-                                      ItemClick="MasterListView_ItemClick">
+                                          ItemTemplate="{StaticResource SubmissionItemTemplate}"
+                                          Visibility="{x:Bind ViewModel.SubmissionList.Loading, Converter={StaticResource BoolToNegateVisibilityConverter}, Mode=OneWay}"
+                                          ItemsSource="{x:Bind ViewModel.SubmissionList.List, Mode=OneWay}"
+                                          IsItemClickEnabled="True"
+                                          ItemClick="MasterListView_ItemClick">
                                     <ListView.Header>
                                         <!--Only show if its not loading and list has no items-->
-                                        <Grid Visibility="{x:Bind ViewModel.MasterColumn.CurrentSubmissions.Loading, Converter={StaticResource BoolToNegateVisibilityConverter}, Mode=OneWay}">
+                                        <Grid Visibility="{x:Bind ViewModel.SubmissionList.Loading, Converter={StaticResource BoolToNegateVisibilityConverter}, Mode=OneWay}">
                                             <TextBlock Text="There is nothing here." 
-                                               Visibility="{x:Bind ViewModel.MasterColumn.CurrentSubmissions.HasItems, Converter={StaticResource BoolToNegateVisibilityConverter}, Mode=OneWay}" />
+                                               Visibility="{x:Bind ViewModel.SubmissionList.HasItems, Converter={StaticResource BoolToNegateVisibilityConverter}, Mode=OneWay}" />
                                         </Grid>
                                     </ListView.Header>
 
@@ -484,8 +479,9 @@
                             </StackPanel>
 
                             <WebView Grid.Row="1"
-                                 x:Name="DetailWebView"
-                                 Visibility="{x:Bind ViewModel.CurrentSubmission.ShowComments, Converter={StaticResource BoolToNegateVisibilityConverter}, Mode=OneWay}"/>
+                                     x:Name="DetailWebView"
+                                     Source="{x:Bind ViewModel.CurrentSubmission.Uri, Mode=OneWay}"
+                                     Visibility="{x:Bind ViewModel.CurrentSubmission.ShowComments, Converter={StaticResource BoolToNegateVisibilityConverter}, Mode=OneWay}"/>
 
                             <StackPanel Grid.Row="2"
                                     Visibility="{x:Bind ViewModel.CurrentSubmission.ShowComments, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}">
@@ -514,7 +510,7 @@
                                   IsItemClickEnabled="False"
                                   ItemContainerStyle="{StaticResource ContentTreeItemStyle}"
                                   ItemTemplate="{StaticResource CommentTreeTemplate}"
-                                  ItemsSource="{x:Bind ViewModel.CurrentSubmission.CommentTree, Mode=OneWay}" />
+                                  ItemsSource="{x:Bind ViewModel.CurrentSubmission.Comments, Mode=OneWay}" />
                             </StackPanel>
                         </Grid>
                     </ScrollViewer>

@@ -116,12 +116,10 @@
     <Compile Include="Models\IOauthToken.cs" />
     <Compile Include="Models\VoatHub\BindableBase.cs" />
     <Compile Include="Models\VoatHub\LoadingList.cs" />
-    <Compile Include="Models\VoatHub\MasterColumnViewModel.cs" />
     <Compile Include="Models\VoatHub\NavMenuItem.cs" />
-    <Compile Include="Models\VoatHub\SubmissionViewModel.cs" />
-    <Compile Include="Models\VoatHub\MainPageViewModel.cs" />
+    <Compile Include="Models\VoatHub\SubmissionVM.cs" />
+    <Compile Include="Models\VoatHub\MainPageVM.cs" />
     <Compile Include="Models\VoatHub\CommentTree.cs" />
-    <Compile Include="Models\VoatHub\UserViewModel.cs" />
     <Compile Include="Models\Voat\FormattedContentContainer.cs" />
     <Compile Include="Models\Voat\Score.cs" />
     <Compile Include="Models\Voat\v1\ApiBadge.cs" />

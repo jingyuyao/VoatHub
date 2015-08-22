@@ -15,6 +15,7 @@ namespace VoatHub.Api.Voat
     /// </summary>
     public class VoatApi : IDisposable
     {
+        #region ApiPath
         private static readonly string SUBVERSE = "v/{0}";
         private static readonly string SUBVERSE_SUBMISSION = SUBVERSE + "/{1}";
         private static readonly string SUBVERSE_SUBMISSION_COMMENTS = SUBVERSE_SUBMISSION + "/comments";
@@ -42,10 +43,14 @@ namespace VoatHub.Api.Voat
         private static readonly string USER_MESSAGE_GET = USER_MESSAGE + "/{0}/{1}";
 
         private static readonly string VOTE = "vote/{0}/{1}/{2}";
-        private static readonly string VOTE_ON_REVOKE = VOTE + "?revokeOnRevote={3}";
+        private static readonly string VOTE_ON_REVOKE = VOTE + "?revokeOnRevote={3}"; 
+        #endregion
 
         private IApiClient apiClient;
         private ApiUriBuilder uriBuilder;
+
+        public SearchOptions SubmissionSearchOptions { get; set; }
+        public SearchOptions CommentSearchOptions { get; set; }
 
         /// <summary>
         /// 
@@ -58,8 +63,13 @@ namespace VoatHub.Api.Voat
         {
             apiClient = new VoatApiClient(apiKey, tokenUri);
             uriBuilder = new ApiUriBuilder(scheme, host, apiPath);
+
+            // TODO: Load options from settings
+            SubmissionSearchOptions = new SearchOptions();
+            CommentSearchOptions = new SearchOptions();
         }
 
+        #region Accounts
         public string UserName
         {
             get
@@ -84,13 +94,14 @@ namespace VoatHub.Api.Voat
             {
                 return apiClient.LoggedIn;
             }
-        }
+        } 
+        #endregion
 
         #region Submissions
 
-        public async Task<ApiResponse<List<ApiSubmission>>> GetSubmissionList(string subverse, SearchOptions searchOptions)
+        public async Task<ApiResponse<List<ApiSubmission>>> GetSubmissionList(string subverse)
         {
-            Uri uri = uriBuilder.Uri(String.Format(SUBVERSE, subverse), Utility.ToQueryString(searchOptions));
+            Uri uri = uriBuilder.Uri(String.Format(SUBVERSE, subverse), Utility.ToQueryString(SubmissionSearchOptions));
             return await apiClient.GetAsync<ApiResponse<List<ApiSubmission>>>(uri);
         }
 
@@ -171,15 +182,15 @@ namespace VoatHub.Api.Voat
 
         #region Comments
 
-        public async Task<ApiResponse<List<ApiComment>>> GetCommentList(string subverse, int submissionId, SearchOptions searchOptions)
+        public async Task<ApiResponse<List<ApiComment>>> GetCommentList(string subverse, int submissionId)
         {
-            Uri uri = uriBuilder.Uri(string.Format(SUBVERSE_SUBMISSION_COMMENTS, subverse, submissionId), Utility.ToQueryString(searchOptions));
+            Uri uri = uriBuilder.Uri(string.Format(SUBVERSE_SUBMISSION_COMMENTS, subverse, submissionId), Utility.ToQueryString(CommentSearchOptions));
             return await apiClient.GetAsync<ApiResponse<List<ApiComment>>>(uri);
         }
 
-        public async Task<ApiResponse<List<ApiComment>>> GetCommentList(string subverse, int submissionId, int parentId, SearchOptions searchOptions)
+        public async Task<ApiResponse<List<ApiComment>>> GetCommentList(string subverse, int submissionId, int parentId)
         {
-            Uri uri = uriBuilder.Uri(string.Format(SUBVERSE_SUBMISSION_COMMENTS, subverse, submissionId, parentId), Utility.ToQueryString(searchOptions));
+            Uri uri = uriBuilder.Uri(string.Format(SUBVERSE_SUBMISSION_COMMENTS, subverse, submissionId, parentId), Utility.ToQueryString(CommentSearchOptions));
             return await apiClient.GetAsync<ApiResponse<List<ApiComment>>>(uri);
         }
 
