@@ -213,8 +213,8 @@
 
                     <ProgressRing x:Name="MasterProgressRing" Grid.Row="2"
                               Margin="0,50" Width="50" Height="50"
-                              Visibility="{x:Bind ViewModel.Subscriptions.Loading, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}" 
-                              IsActive="{x:Bind ViewModel.Subscriptions.Loading, Mode=OneWay}"/>
+                              Visibility="{x:Bind ViewModel.Subscriptions.HasItems, Converter={StaticResource BoolToNegateVisibilityConverter}, Mode=OneWay}" 
+                              IsActive="{x:Bind ViewModel.Subscriptions.HasItems, Converter={StaticResource BoolNegateConverter}, Mode=OneWay}"/>
 
                     <ListView x:Name="SubscriptionsListView" Grid.Row="3"
                               SelectionMode="None"
@@ -347,12 +347,13 @@
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto" />
                                     <RowDefinition Height="*" />
+                                    <RowDefinition Height="Auto" />
                                 </Grid.RowDefinitions>
 
-                                <ProgressRing x:Name="SubscriptionListProgressRing" Grid.Row="0"
+                                <ProgressRing Grid.Row="0"
                                               Margin="0,50" Width="50" Height="50"
-                                              Visibility="{x:Bind ViewModel.SubmissionList.Loading, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}" 
-                                              IsActive="{x:Bind ViewModel.SubmissionList.Loading, Mode=OneWay}"/>
+                                              Visibility="{x:Bind ViewModel.SubmissionList.HasItems, Converter={StaticResource BoolToNegateVisibilityConverter}, Mode=OneWay}" 
+                                              IsActive="{x:Bind ViewModel.SubmissionList.HasItems, Converter={StaticResource BoolNegateConverter}, Mode=OneWay}"/>
 
                                 <!--Note: ListView must be visibile in order for it to request more items.-->
                                 <ListView x:Name="MasterListView" Grid.Row="1"
@@ -374,6 +375,13 @@
                                         </Style>
                                     </ListView.ItemContainerStyle>
                                 </ListView>
+
+                                <!--Avoids showing ProgressBar and ProgressRing at the same time-->
+                                <Grid Grid.Row="2" Visibility="{x:Bind ViewModel.SubmissionList.HasItems, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}">
+                                    <ProgressBar  IsIndeterminate="{x:Bind ViewModel.SubmissionList.Loading, Mode=OneWay}"
+                                                  Height="10"
+                                                  Visibility="{x:Bind ViewModel.SubmissionList.Loading, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"/>
+                                </Grid>
                             </Grid>
                         </ContentPresenter>
                     </Grid>
@@ -486,10 +494,10 @@
                                     Visibility="{x:Bind ViewModel.CurrentSubmission.ShowComments, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}">
                                 
                                 <TextBlock Margin="0,9" HorizontalAlignment="Left" MaxWidth="560"
-                                    FontSize="{ThemeResource TextStyleLargeFontSize}"
-                                    Foreground="{ThemeResource SystemControlForegroundBaseHighBrush}"
-                                    Style="{ThemeResource SubtitleTextBlockStyle}" 
-                                    Text="{x:Bind ViewModel.CurrentSubmission.Submission.Content, Mode=OneWay}" />
+                                        FontSize="{ThemeResource TextStyleLargeFontSize}"
+                                        Foreground="{ThemeResource SystemControlForegroundBaseHighBrush}"
+                                        Style="{ThemeResource SubtitleTextBlockStyle}" 
+                                        Text="{x:Bind ViewModel.CurrentSubmission.Submission.Content, Mode=OneWay}" />
 
                                 <StackPanel Visibility="{x:Bind ViewModel.CurrentSubmission.ReplyOpen, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}">
                                     <TextBox Text="{x:Bind ViewModel.CurrentSubmission.ReplyText, Mode=TwoWay}" 
@@ -502,14 +510,14 @@
                                 </StackPanel>
 
                                 <ProgressRing Margin="0,50" Width="50" Height="50"
-                                      Visibility="{x:Bind ViewModel.CurrentSubmission.LoadingComments, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}" 
-                                      IsActive="{x:Bind ViewModel.CurrentSubmission.LoadingComments, Mode=OneWay}"/>
+                                      Visibility="{x:Bind ViewModel.CurrentSubmission.CommentList.Loading, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}" 
+                                      IsActive="{x:Bind ViewModel.CurrentSubmission.CommentList.Loading, Mode=OneWay}"/>
 
                                 <ListView SelectionMode="None"
-                                  IsItemClickEnabled="False"
-                                  ItemContainerStyle="{StaticResource ContentTreeItemStyle}"
-                                  ItemTemplate="{StaticResource CommentTreeTemplate}"
-                                  ItemsSource="{x:Bind ViewModel.CurrentSubmission.Comments, Mode=OneWay}" />
+                                          IsItemClickEnabled="False"
+                                          ItemContainerStyle="{StaticResource ContentTreeItemStyle}"
+                                          ItemTemplate="{StaticResource CommentTreeTemplate}"
+                                          ItemsSource="{x:Bind ViewModel.CurrentSubmission.CommentList.List, Mode=OneWay}" />
                             </StackPanel>
                         </Grid>
                     </ScrollViewer>
@@ -521,7 +529,8 @@
         <ToggleButton x:Name="TogglePaneButton"
                       Style="{StaticResource SplitViewTogglePaneButtonStyle}"
                       IsChecked="{Binding IsPaneOpen, ElementName=RootSplitView, Mode=TwoWay}"
-                      Unchecked="TogglePaneButton_Checked"
+                      Checked="TogglePaneButton_Checked"
+                      Unchecked="TogglePaneButton_UnChecked"
                       ToolTipService.ToolTip="Menu" />
     </Grid>
 </Page>

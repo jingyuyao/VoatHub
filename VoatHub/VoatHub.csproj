@@ -115,8 +115,11 @@
     </Compile>
     <Compile Include="Models\IOauthToken.cs" />
     <Compile Include="Models\VoatHub\BindableBase.cs" />
+    <Compile Include="Models\VoatHub\LoadingList\LoadingObservableCollection.cs" />
+    <Compile Include="Models\VoatHub\LoadingList\IncrementalLoadingList.cs" />
     <Compile Include="Models\VoatHub\IncrementalSubmissionList.cs" />
-    <Compile Include="Models\VoatHub\LoadingList.cs" />
+    <Compile Include="Models\VoatHub\LoadingList\LoadingList.cs" />
+    <Compile Include="Models\VoatHub\LoadingList\LoadingListBase.cs" />
     <Compile Include="Models\VoatHub\NavMenuItem.cs" />
     <Compile Include="Models\VoatHub\SubmissionVM.cs" />
     <Compile Include="Models\VoatHub\MainPageVM.cs" />

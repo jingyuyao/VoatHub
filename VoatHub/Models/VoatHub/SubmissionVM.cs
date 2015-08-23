@@ -5,6 +5,7 @@ using VoatHub.Models.Voat.v1;
 
 using VoatHub.Api.Voat;
 using VoatHub.Models.Voat;
+using VoatHub.Models.VoatHub.LoadingList;
 
 namespace VoatHub.Models.VoatHub
 {
@@ -23,7 +24,7 @@ namespace VoatHub.Models.VoatHub
             Uri = DEFAULT_URI;
 
             // Fixes item source null binding errors.
-            Comments = new ObservableCollection<CommentTree>();
+            CommentList = new LoadingList<CommentTree>();
         }
 
         #region Properties
@@ -46,20 +47,13 @@ namespace VoatHub.Models.VoatHub
             set { SetProperty(ref _Uri, value); }
         }
 
-        private ObservableCollection<CommentTree> _Comments;
-        public ObservableCollection<CommentTree> Comments
+        private LoadingList<CommentTree> _CommentList;
+        public LoadingList<CommentTree> CommentList
         {
-            get { return _Comments; }
-            set { SetProperty(ref _Comments, value); }
+            get { return _CommentList; }
+            set { SetProperty(ref _CommentList, value); }
         }
-
-        private bool _LoadingComments;
-        public bool LoadingComments
-        {
-            get { return _LoadingComments; }
-            set { SetProperty(ref _LoadingComments, value); }
-        }
-
+        
         private bool _ShowComments;
         public bool ShowComments
         {
@@ -101,8 +95,8 @@ namespace VoatHub.Models.VoatHub
         public void ResetVM()
         {
             Submission = null;
-            Comments = new ObservableCollection<CommentTree>();
-            LoadingComments = false;
+            CommentList.Clear();
+            api.CommentSearchOptions.page = 1;
             ShowComments = false;
             ReplyOpen = false;
             ReplyText = null;
@@ -119,7 +113,6 @@ namespace VoatHub.Models.VoatHub
         {
             var idLoadingCommentsFor = Submission.ID;
             ShowComments = true;
-            LoadingComments = true;
 
             var response = await api.GetCommentList(Submission.Subverse, Submission.ID);
 
@@ -130,10 +123,10 @@ namespace VoatHub.Models.VoatHub
                 {
                     var commentTreeList = CommentTree.FromApiCommentList(response.Data, null);
                     var sortedList = commentTreeSorter(commentTreeList);
-                    Comments = sortedList;
+                    CommentList.List = sortedList;
                 }
 
-                LoadingComments = false;
+                CommentList.Loading = false;
             }
         }
 
@@ -169,7 +162,7 @@ namespace VoatHub.Models.VoatHub
 
         public override string ToString()
         {
-            var count = Comments == null ? 0 : Comments.Count;
+            var count = CommentList == null ? 0 : CommentList.List.Count;
             return Submission.ToString() + " Comment Count:" + count;
         }
         

@@ -65,9 +65,12 @@ namespace VoatHub
             ViewModel = new MainPageVM(voatApi);
         }
 
-        #region EventHandlers
-
         #region SplitView
+
+        private void TogglePaneButton_Checked(object sender, RoutedEventArgs e)
+        {
+            ViewModel.LoadSubscriptions();
+        }
 
         /// <summary>
         /// Callback when the SplitView's Pane is toggled open or close.  When the Pane is not visible
@@ -75,7 +78,7 @@ namespace VoatHub
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void TogglePaneButton_Checked(object sender, RoutedEventArgs e)
+        private void TogglePaneButton_UnChecked(object sender, RoutedEventArgs e)
         {
             this.CheckTogglePaneButtonSizeChanged();
         }
@@ -433,14 +436,12 @@ namespace VoatHub
             if (r.Success)
             {
                 var ct = new CommentTree(r.Data);
-                submissionViewModel.Comments.Add(ct);
+                submissionViewModel.CommentList.List.Add(ct);
             }
         }
 
         #endregion DetailColumn
-
-        #endregion EventHandler
-
+        
         #region Helpers
 
         private async void commentVotingHelper(Button button, int vote)

@@ -69,7 +69,10 @@ namespace VoatHub.Api.Voat
             {
                 page = 1
             };
-            CommentSearchOptions = new SearchOptions();
+            CommentSearchOptions = new SearchOptions()
+            {
+                page = 1
+            };
         }
 
         #region Accounts
@@ -190,12 +193,14 @@ namespace VoatHub.Api.Voat
         public async Task<ApiResponse<List<ApiComment>>> GetCommentList(string subverse, int submissionId)
         {
             Uri uri = uriBuilder.Uri(string.Format(SUBVERSE_SUBMISSION_COMMENTS, subverse, submissionId), Utility.ToQueryString(CommentSearchOptions));
+            if (CommentSearchOptions.page != null) CommentSearchOptions.page++;
             return await apiClient.GetAsync<ApiResponse<List<ApiComment>>>(uri);
         }
 
         public async Task<ApiResponse<List<ApiComment>>> GetCommentList(string subverse, int submissionId, int parentId)
         {
             Uri uri = uriBuilder.Uri(string.Format(SUBVERSE_SUBMISSION_COMMENTS, subverse, submissionId, parentId), Utility.ToQueryString(CommentSearchOptions));
+            if (CommentSearchOptions.page != null) CommentSearchOptions.page++;
             return await apiClient.GetAsync<ApiResponse<List<ApiComment>>>(uri);
         }
 

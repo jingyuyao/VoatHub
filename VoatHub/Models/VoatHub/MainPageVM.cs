@@ -9,6 +9,8 @@ using Windows.UI.Xaml.Controls;
 using VoatHub.Models.Voat.v1;
 using System.Collections.ObjectModel;
 
+using VoatHub.Models.VoatHub.LoadingList;
+
 namespace VoatHub.Models.VoatHub
 {
     /// <summary>
@@ -40,15 +42,17 @@ namespace VoatHub.Models.VoatHub
             });
             Subscriptions = new LoadingList<ApiSubscription>();
 
-            SubmissionList = new LoadingList<ApiSubmission>();
-            CurrentSubverse = "Loading...";
+            // TODO: loading from settings
+            string lastVistedSubverse = "_front";
+
+            SubmissionList = IncrementalLoadingList<ApiSubmission>.CreateList(new IncrementalSubmissionList(api, lastVistedSubverse));
+            CurrentlySubscribed = isSubscribed(lastVistedSubverse);
+            CurrentSubverse = lastVistedSubverse;
             CurrentlySubscribed = false;
             SubmissionSort = CommentSort = "Hot";
 
             // Fixes item source null binding errors.
             CurrentSubmission = new SubmissionVM(api);
-
-            initialSetup();
         }
 
         #region Properties
@@ -66,8 +70,8 @@ namespace VoatHub.Models.VoatHub
             set { SetProperty(ref _CurrentSubverse, value); }
         }
 
-        private LoadingList<ApiSubmission> _SubmissionList;
-        public LoadingList<ApiSubmission> SubmissionList
+        private IncrementalLoadingList<ApiSubmission> _SubmissionList;
+        public IncrementalLoadingList<ApiSubmission> SubmissionList
         {
             get { return _SubmissionList; }
             set { Contract.Requires(value != null); SetProperty(ref _SubmissionList, value); }
@@ -105,24 +109,6 @@ namespace VoatHub.Models.VoatHub
         #endregion
 
         #region Methods
-        private async void initialSetup()
-        {
-            // TODO: Load from saved settings
-            ChangeSubverse("_front");
-
-            var subscriptions = await api.UserSubscriptions(api.UserName);
-
-            List<ApiSubscription> list = null;
-            if (subscriptions.Success)
-                list = subscriptions.Data;
-
-            Subscriptions.List = new ObservableCollection<ApiSubscription>(list);
-
-            //var userInfo = await voatApi.UserInfo(voatApi.UserName);
-            //if (userInfo.Success)
-            //    ViewModel.User.UserInfo = userInfo.Data;
-        }
-
         public void ChangeSubverse(string subverse)
         {
             CurrentlySubscribed = isSubscribed(subverse);
@@ -135,6 +121,19 @@ namespace VoatHub.Models.VoatHub
         public void RefreshCurrentSubverse()
         {
             ChangeSubverse(CurrentSubverse);
+        }
+
+        public async void LoadSubscriptions()
+        {
+            if (Subscriptions.Loading)
+            {
+                var subscriptions = await api.UserSubscriptions(api.UserName);
+                
+                if (subscriptions.Success && subscriptions.Data != null)
+                    Subscriptions.List = new ObservableCollection<ApiSubscription>(subscriptions.Data);
+
+                Subscriptions.Loading = false;
+            }
         }
 
         private bool isSubscribed(string subverse)
