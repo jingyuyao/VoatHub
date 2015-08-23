@@ -534,5 +534,11 @@ namespace VoatHub
             return true;
         }
         #endregion Helpers
+
+        private void PrintDataContext_Click(object sender, RoutedEventArgs e)
+        {
+            var button = sender as FrameworkElement;
+            Debug.WriteLine(button.DataContext);
+        }
     }
 }

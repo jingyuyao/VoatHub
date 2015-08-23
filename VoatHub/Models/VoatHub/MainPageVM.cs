@@ -42,17 +42,14 @@ namespace VoatHub.Models.VoatHub
             });
             Subscriptions = new LoadingList<ApiSubscription>();
 
-            // TODO: loading from settings
-            string lastVistedSubverse = "_front";
-
-            SubmissionList = IncrementalLoadingList<ApiSubmission>.CreateList(new IncrementalSubmissionList(api, lastVistedSubverse));
-            CurrentlySubscribed = isSubscribed(lastVistedSubverse);
-            CurrentSubverse = lastVistedSubverse;
-            CurrentlySubscribed = false;
+            // SubmissionList is left out because it is set by ChangeSubverse()
             SubmissionSort = CommentSort = "Hot";
 
             // Fixes item source null binding errors.
             CurrentSubmission = new SubmissionVM(api);
+
+            // TODO: loading from settings
+            ChangeSubverse("_front");
         }
 
         #region Properties
@@ -70,8 +67,8 @@ namespace VoatHub.Models.VoatHub
             set { SetProperty(ref _CurrentSubverse, value); }
         }
 
-        private IncrementalLoadingList<ApiSubmission> _SubmissionList;
-        public IncrementalLoadingList<ApiSubmission> SubmissionList
+        private IncrementalLoadingList<ApiSubmission, IncrementalSubmissionList> _SubmissionList;
+        public IncrementalLoadingList<ApiSubmission, IncrementalSubmissionList> SubmissionList
         {
             get { return _SubmissionList; }
             set { Contract.Requires(value != null); SetProperty(ref _SubmissionList, value); }
@@ -111,11 +108,13 @@ namespace VoatHub.Models.VoatHub
         #region Methods
         public void ChangeSubverse(string subverse)
         {
-            CurrentlySubscribed = isSubscribed(subverse);
-            CurrentSubverse = subverse;
             // We do not need to explictly load the initial data because if the ListView is visible
             // and the list is empty, it will automatically request more data.
-            SubmissionList.List = new IncrementalSubmissionList(api, subverse);
+            // ALSO: We make a new object because the events from the previous object can still be fired to change state
+            // We could try to do some fancy event management to prevent that but I ain't got the time.
+            SubmissionList = new IncrementalLoadingList<ApiSubmission, IncrementalSubmissionList>(new IncrementalSubmissionList(api, subverse));
+            CurrentlySubscribed = isSubscribed(subverse);
+            CurrentSubverse = subverse;
         }
 
         public void RefreshCurrentSubverse()

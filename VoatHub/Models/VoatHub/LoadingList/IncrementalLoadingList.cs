@@ -9,14 +9,14 @@ namespace VoatHub.Models.VoatHub.LoadingList
     /// An ObservableCollection container that manages its own Loading and HasItems states.
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public class IncrementalLoadingList<T> : LoadingListBase<T>
+    public class IncrementalLoadingList<T, N> : LoadingListBase<T> where N : LoadingObservableCollection<T>, new()
     {
         /// <summary>
         /// Prevents using the constructor. Use <see cref="CreateList{N}(LoadingObservableCollection{N})"/> instead.
         /// </summary>
-        private IncrementalLoadingList() : base()
+        public IncrementalLoadingList(LoadingObservableCollection<T> collection) : base()
         {
-
+            List = collection;
         }
 
         private LoadingObservableCollection<T> _List;
@@ -35,6 +35,14 @@ namespace VoatHub.Models.VoatHub.LoadingList
                 _List.CollectionChanged += new System.Collections.Specialized.NotifyCollectionChangedEventHandler(ListChanged);
                 _List.LoadingStart += new EventHandler(LoadingStartHandler);
                 _List.LoadingFinish += new EventHandler(LoadingFinishHandler);
+            }
+        }
+
+        protected override ObservableCollection<T> DefaultList
+        {
+            get
+            {
+                return new N();
             }
         }
 
@@ -68,19 +76,6 @@ namespace VoatHub.Models.VoatHub.LoadingList
             {
                 Loading = false;
             });
-        }
-
-        /// <summary>
-        /// Factory pattern is used to ensure the List property is never null. Due to <see cref="LoadingObservableCollection{T}"/>
-        /// being abstract we cannot create it in the constructor of <see cref="IncrementalLoadingList{T}"/>.
-        /// </summary>
-        /// <param name="collection"></param>
-        /// <returns></returns>
-        public static IncrementalLoadingList<T> CreateList(LoadingObservableCollection<T> collection)
-        {
-            var loadingList = new IncrementalLoadingList<T>();
-            loadingList.List = collection;
-            return loadingList;
         }
     }
 }

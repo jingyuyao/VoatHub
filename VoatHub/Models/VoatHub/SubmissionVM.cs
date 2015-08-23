@@ -53,7 +53,14 @@ namespace VoatHub.Models.VoatHub
             get { return _CommentList; }
             set { SetProperty(ref _CommentList, value); }
         }
-        
+
+        private bool _HasMoreComments;
+        public bool HasMoreComments
+        {
+            get { return _HasMoreComments; }
+            set { SetProperty(ref _HasMoreComments, value); }
+        }
+
         private bool _ShowComments;
         public bool ShowComments
         {
@@ -97,6 +104,7 @@ namespace VoatHub.Models.VoatHub
             Submission = null;
             CommentList.Clear();
             api.CommentSearchOptions.page = 1;
+            HasMoreComments = false;
             ShowComments = false;
             ReplyOpen = false;
             ReplyText = null;
@@ -121,9 +129,12 @@ namespace VoatHub.Models.VoatHub
             {
                 if (response.Success)
                 {
+                    // TODO: Shit man, we going through the list at least 3 times. Might have to write more
+                    // specific code if performance becomes a problem.
                     var commentTreeList = CommentTree.FromApiCommentList(response.Data, null);
                     var sortedList = commentTreeSorter(commentTreeList);
                     CommentList.List = sortedList;
+                    if (Submission.CommentCount > CommentTree.Count(sortedList)) HasMoreComments = true;
                 }
 
                 CommentList.Loading = false;

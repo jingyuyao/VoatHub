@@ -20,7 +20,13 @@ namespace VoatHub.Models.VoatHub.LoadingList
         public LoadingListBase()
         {
             Loading = true;
+            List = DefaultList;
         }
+
+        /// <summary>
+        /// Should return a NEW list.
+        /// </summary>
+        protected abstract ObservableCollection<T> DefaultList { get; }
 
         /// <summary>
         /// Invariant: Never null.
@@ -47,9 +53,9 @@ namespace VoatHub.Models.VoatHub.LoadingList
             set { SetProperty(ref _HasItems, value); }
         }
 
-        public void Clear()
+        public virtual void Clear()
         {
-            List = new ObservableCollection<T>();
+            List = DefaultList;
             Loading = true;
             HasItems = false;
         }

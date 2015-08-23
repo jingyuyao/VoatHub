@@ -109,5 +109,10 @@ namespace VoatHub.Models.Voat.v1
                 return UpVotes - DownVotes;
             }
         }
+
+        public override string ToString()
+        {
+            return string.Format("ID: {0}, Sub: {1}, User: {2}, Level: {3}, TotalVotes: {4}, ChildCount: {5}", ID, Subverse, UserName, Level, TotalVotes, ChildCount);
+        }
     }
 }

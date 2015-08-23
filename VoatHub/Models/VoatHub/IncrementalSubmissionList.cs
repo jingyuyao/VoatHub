@@ -26,6 +26,14 @@ namespace VoatHub.Models.VoatHub
         private bool hasMoreItems;
         private string subverse;
 
+        /// <summary>
+        /// For <see cref="IncrementalLoadingList{T, N}"/>
+        /// </summary>
+        public IncrementalSubmissionList() : base()
+        {
+
+        }
+
         public IncrementalSubmissionList(VoatApi api, string subverse)
         {
             this.api = api;

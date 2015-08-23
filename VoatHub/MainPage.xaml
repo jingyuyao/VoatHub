@@ -93,8 +93,14 @@
 
                 <Button Grid.Column="2" Click="SubmissionCommentsButton_Click" Tag="{Binding}" 
                         Padding="10,10" BorderThickness="2" Background="Transparent">
-                    <SymbolIcon Symbol="Comment" Foreground="Blue" />
+                    <StackPanel>
+                        <SymbolIcon Symbol="Comment" Foreground="Blue" />
+                        <TextBlock Text="{x:Bind CommentCount}"
+                                   HorizontalAlignment="Center"
+                                   Style="{ThemeResource BodyTextBlockStyle}" />
+                    </StackPanel>
                 </Button>
+
             </Grid>
         </DataTemplate>
 
@@ -111,28 +117,31 @@
                                 BorderBrush="LightBlue"
                                 BorderThickness="1.5,0,0,0">
 
-                    <StackPanel Orientation="Horizontal">
-                        <TextBlock Foreground="{ThemeResource SystemControlForegroundBaseMediumBrush}">
+                    <ToggleButton IsChecked="{x:Bind ShowChildren, Mode=TwoWay}" Background="Transparent" Foreground="Aqua">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Foreground="{ThemeResource SystemControlForegroundBaseMediumBrush}">
                             <Run FontWeight="Bold" Text="{x:Bind Comment.UserName}"/>
                             <Run Text="{x:Bind Comment.TotalVotes}"/> points
                             <Run Text="{x:Bind Comment.Date, Converter={StaticResource TimeAgoConverter}}"/>
-                        </TextBlock>
-                        <Button Click="CommentUpVote_Click" Background="Transparent">
-                            <SymbolIcon Symbol="Up"/>
-                        </Button>
-                        <Button Click="CommentDownVote_Click" Background="Transparent">
-                            <SymbolIcon Symbol="Up" RenderTransformOrigin="0.5,0.5">
-                                <SymbolIcon.RenderTransform>
-                                    <ScaleTransform ScaleY="-1" />
-                                </SymbolIcon.RenderTransform>
-                            </SymbolIcon>
-                        </Button>
-                        <Button Click="OpenCommentReply_Click" Background="Transparent">
-                            <SymbolIcon Symbol="MailReply"/>
-                        </Button>
-                    </StackPanel>
+                            </TextBlock>
+                            <Button Click="CommentUpVote_Click" Background="Transparent">
+                                <SymbolIcon Symbol="Up"/>
+                            </Button>
+                            <Button Click="CommentDownVote_Click" Background="Transparent">
+                                <SymbolIcon Symbol="Up" RenderTransformOrigin="0.5,0.5">
+                                    <SymbolIcon.RenderTransform>
+                                        <ScaleTransform ScaleY="-1" />
+                                    </SymbolIcon.RenderTransform>
+                                </SymbolIcon>
+                            </Button>
+                            <Button Click="OpenCommentReply_Click" Background="Transparent">
+                                <SymbolIcon Symbol="MailReply"/>
+                            </Button>
+                        </StackPanel>
+                    </ToggleButton>
 
                     <TextBlock Text="{x:Bind Comment.Content}"
+                               Visibility="{x:Bind ShowChildren, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"
                                FontSize="{ThemeResource TextStyleLargeFontSize}"
                                Foreground="{ThemeResource SystemControlForegroundBaseHighBrush}"
                                HorizontalAlignment="Left"
@@ -151,10 +160,14 @@
                 </StackPanel>
 
                 <ListView SelectionMode="None"
+                          Visibility="{x:Bind ShowChildren, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"
                           IsItemClickEnabled="False"
                           ItemTemplate="{StaticResource CommentTreeTemplate}"
                           ItemContainerStyle="{StaticResource ContentTreeItemStyle}"
                           ItemsSource="{x:Bind Children, Mode=OneWay}"/>
+
+                <TextBlock Text="HAS MORE COMMENTS." 
+                            Visibility="{x:Bind HasMoreComments, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"/>
             </StackPanel>
         </DataTemplate>
     </Page.Resources>
@@ -350,10 +363,11 @@
                                     <RowDefinition Height="Auto" />
                                 </Grid.RowDefinitions>
 
+                                <!--Only visible and active when there are no items and it is loading-->
                                 <ProgressRing Grid.Row="0"
                                               Margin="0,50" Width="50" Height="50"
                                               Visibility="{x:Bind ViewModel.SubmissionList.HasItems, Converter={StaticResource BoolToNegateVisibilityConverter}, Mode=OneWay}" 
-                                              IsActive="{x:Bind ViewModel.SubmissionList.HasItems, Converter={StaticResource BoolNegateConverter}, Mode=OneWay}"/>
+                                              IsActive="{x:Bind ViewModel.SubmissionList.Loading, Mode=OneWay}"/>
 
                                 <!--Note: ListView must be visibile in order for it to request more items.-->
                                 <ListView x:Name="MasterListView" Grid.Row="1"
@@ -509,8 +523,9 @@
                                     </StackPanel>
                                 </StackPanel>
 
+                                <!--Only visible and active when there are no items and it is loading-->
                                 <ProgressRing Margin="0,50" Width="50" Height="50"
-                                      Visibility="{x:Bind ViewModel.CurrentSubmission.CommentList.Loading, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}" 
+                                      Visibility="{x:Bind ViewModel.CurrentSubmission.CommentList.HasItems, Converter={StaticResource BoolToNegateVisibilityConverter}, Mode=OneWay}" 
                                       IsActive="{x:Bind ViewModel.CurrentSubmission.CommentList.Loading, Mode=OneWay}"/>
 
                                 <ListView SelectionMode="None"
@@ -518,6 +533,9 @@
                                           ItemContainerStyle="{StaticResource ContentTreeItemStyle}"
                                           ItemTemplate="{StaticResource CommentTreeTemplate}"
                                           ItemsSource="{x:Bind ViewModel.CurrentSubmission.CommentList.List, Mode=OneWay}" />
+                                
+                                <TextBlock Text="HAS MORE COMMENTS." 
+                                           Visibility="{x:Bind ViewModel.CurrentSubmission.HasMoreComments, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"/>
                             </StackPanel>
                         </Grid>
                     </ScrollViewer>

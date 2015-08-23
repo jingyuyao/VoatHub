@@ -46,6 +46,7 @@ namespace VoatHubTests.Models.VoatHub
 
             var commentTreeList = CommentTree.FromApiCommentList(comments, null);
             Assert.AreEqual(2, commentTreeList.Count);
+            Assert.AreEqual(5, CommentTree.Count(commentTreeList));
 
             //var first = commentTreeList.Find(i => i.Comment.ID == 1);
             //Assert.AreEqual(2, first.Children.Count);

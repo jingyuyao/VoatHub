@@ -17,7 +17,7 @@ namespace VoatHub.Models.VoatHub
         private ApiComment comment;
         private bool replyOpen;
         private string replyText;
-        private bool showChildren;
+        private bool? showChildren;
         private ObservableCollection<CommentTree> children;
 
         public CommentTree(ApiComment comment)
@@ -29,6 +29,7 @@ namespace VoatHub.Models.VoatHub
             ShowChildren = true;
         }
 
+        #region Properties
         /// <summary>
         /// Invariant: never null.
         /// </summary>
@@ -46,10 +47,12 @@ namespace VoatHub.Models.VoatHub
             set
             {
                 SetProperty(ref children, value);
+                HasMoreComments = Comment.ChildCount > value.Count;  // ChildCount include direct descendents only.
+                value.CollectionChanged += new System.Collections.Specialized.NotifyCollectionChangedEventHandler(ListChangedHandler);
             }
         }
 
-        public bool ShowChildren
+        public bool? ShowChildren
         {
             get { return showChildren; }
             set { SetProperty(ref showChildren, value); }
@@ -67,6 +70,15 @@ namespace VoatHub.Models.VoatHub
             set { SetProperty(ref replyText, value); }
         }
 
+        private bool _HasMoreComments;
+        public bool HasMoreComments
+        {
+            get { return _HasMoreComments; }
+            set { SetProperty(ref _HasMoreComments, value); }
+        }
+        #endregion
+
+        #region Methods
         /// <summary>
         /// Assumptions: Comment.Level is accurate.
         /// </summary>
@@ -82,6 +94,24 @@ namespace VoatHub.Models.VoatHub
             return FindParentList(target, Children);
         }
 
+        /// <summary>
+        /// Oh boy, hopefully this isn't called a lot.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ListChangedHandler(object sender, EventArgs e)
+        {
+            var collection = sender as ObservableCollection<CommentTree>;
+            HasMoreComments = Comment.ChildCount > collection.Count; // ChildCount include direct descendents only.
+        }
+
+        public override string ToString()
+        {
+            return comment.ToString() + " Children count: " + Count(Children);
+        }
+        #endregion
+
+        #region StaticHelpers
         private static CommentTree FindParentList(ApiComment target, ObservableCollection<CommentTree> source)
         {
             for (var i = 0; i < source.Count; i++)
@@ -89,7 +119,7 @@ namespace VoatHub.Models.VoatHub
                 var result = source[i].FindParent(target);
                 if (result != null) return result;
             }
-            
+
             return null;
         }
 
@@ -135,7 +165,7 @@ namespace VoatHub.Models.VoatHub
                 else
                     return 0;
             });
-            
+
             foreach (var commentTree in sortedList)
             {
                 commentTree.Children = SortNew(commentTree.Children);
@@ -171,5 +201,42 @@ namespace VoatHub.Models.VoatHub
 
             return new ObservableCollection<CommentTree>(sortedList);
         }
+
+        /// <summary>
+        /// Recursively count the number of comments in a list of <see cref="CommentTree"/>.
+        /// </summary>
+        /// <param name="list"></param>
+        /// <returns></returns>
+        public static int Count(ObservableCollection<CommentTree> list)
+        {
+            int counter = 0;
+
+            foreach (var c in list)
+            {
+                counter += Count(c);
+            }
+
+            return counter;
+        }
+
+        /// <summary>
+        /// Recursively count the number of comments in a <see cref="CommentTree"/>.
+        /// </summary>
+        /// <param name="tree"></param>
+        /// <returns></returns>
+        public static int Count(CommentTree tree)
+        {
+            int counter = 0;
+            if (tree != null)
+            {
+                if (tree.Comment != null) counter++;
+                if (tree.Children != null)
+                {
+                    counter += Count(tree.Children);
+                }
+            }
+            return counter;
+        } 
+        #endregion
     }
 }
