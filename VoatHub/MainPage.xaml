@@ -444,7 +444,7 @@
                             </Grid.ColumnDefinitions>
 
                             <StackPanel Grid.Row="0" SizeChanged="DetailTitleRow_SizeChanged">
-                                <TextBlock Margin="0,8" Style="{ThemeResource SubheaderTextBlockStyle}"
+                                <TextBlock Margin="0,8" Style="{ThemeResource TitleTextBlockStyle}"
                                         Foreground="{ThemeResource SystemControlForegroundBaseHighBrush}"
                                         FontWeight="Bold"
                                         HorizontalAlignment="Left" Text="{x:Bind ViewModel.CurrentSubmission.Submission.Title, Mode=OneWay}"/>
