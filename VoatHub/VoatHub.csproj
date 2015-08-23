@@ -115,6 +115,7 @@
     </Compile>
     <Compile Include="Models\IOauthToken.cs" />
     <Compile Include="Models\VoatHub\BindableBase.cs" />
+    <Compile Include="Models\VoatHub\IncrementalSubmissionList.cs" />
     <Compile Include="Models\VoatHub\LoadingList.cs" />
     <Compile Include="Models\VoatHub\NavMenuItem.cs" />
     <Compile Include="Models\VoatHub\SubmissionVM.cs" />

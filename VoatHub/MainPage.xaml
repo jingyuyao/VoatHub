@@ -354,9 +354,9 @@
                                               Visibility="{x:Bind ViewModel.SubmissionList.Loading, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}" 
                                               IsActive="{x:Bind ViewModel.SubmissionList.Loading, Mode=OneWay}"/>
 
+                                <!--Note: ListView must be visibile in order for it to request more items.-->
                                 <ListView x:Name="MasterListView" Grid.Row="1"
                                           ItemTemplate="{StaticResource SubmissionItemTemplate}"
-                                          Visibility="{x:Bind ViewModel.SubmissionList.Loading, Converter={StaticResource BoolToNegateVisibilityConverter}, Mode=OneWay}"
                                           ItemsSource="{x:Bind ViewModel.SubmissionList.List, Mode=OneWay}"
                                           IsItemClickEnabled="True"
                                           ItemClick="MasterListView_ItemClick">
@@ -427,7 +427,6 @@
                     <!--Wraps Title, WebView, Content and Comments-->
                     <ScrollViewer Grid.Row="1"
                               x:Name="DetailContentViewer"
-                              SizeChanged="DetailContentViewer_SizeChanged"
                               Visibility="{x:Bind ViewModel.CurrentSubmission.Submission, Converter={StaticResource NullToVisibilityConverter}, Mode=OneWay}"
                               HorizontalScrollBarVisibility="Disabled" 
                               VerticalScrollBarVisibility="Auto"
@@ -444,7 +443,7 @@
                                 <ColumnDefinition x:Name="DetailInnerColumn" Width="*" />
                             </Grid.ColumnDefinitions>
 
-                            <StackPanel Grid.Row="0">
+                            <StackPanel Grid.Row="0" SizeChanged="DetailTitleRow_SizeChanged">
                                 <TextBlock Margin="0,8" Style="{ThemeResource SubheaderTextBlockStyle}"
                                         Foreground="{ThemeResource SystemControlForegroundBaseHighBrush}"
                                         FontWeight="Bold"

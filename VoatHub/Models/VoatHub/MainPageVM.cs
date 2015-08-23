@@ -7,6 +7,7 @@ using VoatHub.Models.Voat;
 using Windows.UI.Xaml.Controls;
 
 using VoatHub.Models.Voat.v1;
+using System.Collections.ObjectModel;
 
 namespace VoatHub.Models.VoatHub
 {
@@ -115,27 +116,20 @@ namespace VoatHub.Models.VoatHub
             if (subscriptions.Success)
                 list = subscriptions.Data;
 
-            Subscriptions.Load(list);
+            Subscriptions.List = new ObservableCollection<ApiSubscription>(list);
 
             //var userInfo = await voatApi.UserInfo(voatApi.UserName);
             //if (userInfo.Success)
             //    ViewModel.User.UserInfo = userInfo.Data;
         }
 
-        public async void ChangeSubverse(string subverse)
+        public void ChangeSubverse(string subverse)
         {
             CurrentlySubscribed = isSubscribed(subverse);
-
             CurrentSubverse = subverse;
-            SubmissionList.Clear();
-
-            var response = await api.GetSubmissionList(subverse);
-            if (response != null && response.Success)
-            {
-                SubmissionList.List = response.Data;
-            }
-
-            SubmissionList.Loading = false;
+            // We do not need to explictly load the initial data because if the ListView is visible
+            // and the list is empty, it will automatically request more data.
+            SubmissionList.List = new IncrementalSubmissionList(api, subverse);
         }
 
         public void RefreshCurrentSubverse()

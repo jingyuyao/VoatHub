@@ -65,7 +65,10 @@ namespace VoatHub.Api.Voat
             uriBuilder = new ApiUriBuilder(scheme, host, apiPath);
 
             // TODO: Load options from settings
-            SubmissionSearchOptions = new SearchOptions();
+            SubmissionSearchOptions = new SearchOptions()
+            {
+                page = 1
+            };
             CommentSearchOptions = new SearchOptions();
         }
 
@@ -102,6 +105,8 @@ namespace VoatHub.Api.Voat
         public async Task<ApiResponse<List<ApiSubmission>>> GetSubmissionList(string subverse)
         {
             Uri uri = uriBuilder.Uri(String.Format(SUBVERSE, subverse), Utility.ToQueryString(SubmissionSearchOptions));
+            if (SubmissionSearchOptions.page != null) SubmissionSearchOptions.page++;
+
             return await apiClient.GetAsync<ApiResponse<List<ApiSubmission>>>(uri);
         }
 

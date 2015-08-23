@@ -344,7 +344,7 @@ namespace VoatHub
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void DetailContentViewer_SizeChanged(object sender, SizeChangedEventArgs e)
+        private void DetailTitleRow_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             try
             {
