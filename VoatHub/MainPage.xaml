@@ -117,7 +117,8 @@
                                 BorderBrush="LightBlue"
                                 BorderThickness="1.5,0,0,0">
 
-                    <ToggleButton IsChecked="{x:Bind ShowChildren, Mode=TwoWay}" Background="Transparent" Foreground="Aqua">
+                    <ToggleButton IsChecked="{x:Bind ShowChildren, Mode=TwoWay}"
+                                  Style="{StaticResource CommentTreeToggleButtonStyle}">
                         <StackPanel Orientation="Horizontal">
                             <TextBlock Foreground="{ThemeResource SystemControlForegroundBaseMediumBrush}">
                             <Run FontWeight="Bold" Text="{x:Bind Comment.UserName}"/>
@@ -163,7 +164,7 @@
                           Visibility="{x:Bind ShowChildren, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"
                           IsItemClickEnabled="False"
                           ItemTemplate="{StaticResource CommentTreeTemplate}"
-                          ItemContainerStyle="{StaticResource ContentTreeItemStyle}"
+                          ItemContainerStyle="{StaticResource CommentTreeItemStyle}"
                           ItemsSource="{x:Bind Children, Mode=OneWay}"/>
 
                 <TextBlock Text="HAS MORE COMMENTS." 
@@ -530,7 +531,7 @@
 
                                 <ListView SelectionMode="None"
                                           IsItemClickEnabled="False"
-                                          ItemContainerStyle="{StaticResource ContentTreeItemStyle}"
+                                          ItemContainerStyle="{StaticResource CommentTreeItemStyle}"
                                           ItemTemplate="{StaticResource CommentTreeTemplate}"
                                           ItemsSource="{x:Bind ViewModel.CurrentSubmission.CommentList.List, Mode=OneWay}" />
                                 

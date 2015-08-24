@@ -78,7 +78,8 @@ namespace VoatHub.Ui.Helpers
 
         public object ConvertBack(object value, Type targetType, object parameter, string language)
         {
-            throw new NotImplementedException();
+            if (value == null) return false;
+            return !((bool)value);
         }
     }
 
