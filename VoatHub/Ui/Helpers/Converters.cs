@@ -7,6 +7,7 @@ using Windows.UI.Xaml;
 using Windows.UI.Xaml.Data;
 
 using VoatHub.Utils;
+using Windows.UI.Xaml.Media;
 
 namespace VoatHub.Ui.Helpers
 {
@@ -80,6 +81,23 @@ namespace VoatHub.Ui.Helpers
         {
             if (value == null) return false;
             return !((bool)value);
+        }
+    }
+
+    public class LevelToBrushConverter : IValueConverter
+    {
+        private static readonly SolidColorBrush lightBrush = Application.Current.Resources["LightBackgroundBrush"] as SolidColorBrush;
+        private static readonly SolidColorBrush darkBrush = Application.Current.Resources["DarkBackgroundBrush"] as SolidColorBrush;
+
+        public object Convert(object value, Type targetType, object parameter, string language)
+        {
+            if (value == null) return lightBrush;
+            return (int)value % 2 == 0 ? lightBrush : darkBrush;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, string language)
+        {
+            throw new NotImplementedException();
         }
     }
 
