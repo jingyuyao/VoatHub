@@ -110,6 +110,9 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="DetailPage.xaml.cs">
+      <DependentUpon>DetailPage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="LoginPage.xaml.cs">
       <DependentUpon>LoginPage.xaml</DependentUpon>
     </Compile>
@@ -121,7 +124,7 @@
     <Compile Include="Models\VoatHub\LoadingList\LoadingList.cs" />
     <Compile Include="Models\VoatHub\LoadingList\LoadingListBase.cs" />
     <Compile Include="Models\VoatHub\NavMenuItem.cs" />
-    <Compile Include="Models\VoatHub\SubmissionVM.cs" />
+    <Compile Include="Models\VoatHub\DetailPageVM.cs" />
     <Compile Include="Models\VoatHub\MainPageVM.cs" />
     <Compile Include="Models\VoatHub\CommentTree.cs" />
     <Compile Include="Models\Voat\FormattedContentContainer.cs" />
@@ -172,6 +175,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Page Include="DetailPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="LoginPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

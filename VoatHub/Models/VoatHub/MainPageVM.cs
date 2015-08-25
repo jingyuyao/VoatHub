@@ -19,12 +19,10 @@ namespace VoatHub.Models.VoatHub
     /// </summary>
     public class MainPageVM : BindableBase
     {
-        private VoatApi api;
+        private VoatApi VOAT_API = App.VOAT_API;
 
-        public MainPageVM(VoatApi api)
+        public MainPageVM()
         {
-            this.api = api;
-
             // From left to right side of the page
 
             Navlist = new List<NavMenuItem>(new[]
@@ -43,10 +41,7 @@ namespace VoatHub.Models.VoatHub
             Subscriptions = new LoadingList<ApiSubscription>();
 
             // SubmissionList is left out because it is set by ChangeSubverse()
-            SubmissionSort = CommentSort = "Hot";
-
-            // Fixes item source null binding errors.
-            CurrentSubmission = new SubmissionVM(api);
+            SubmissionSort = "Hot";
 
             // TODO: loading from settings
             ChangeSubverse("_front");
@@ -77,18 +72,8 @@ namespace VoatHub.Models.VoatHub
         private bool? _CurrentlySubscribed;
         public bool? CurrentlySubscribed { get { return _CurrentlySubscribed; } set { SetProperty(ref _CurrentlySubscribed, value); } }
 
-        private SubmissionVM _CurrentSubmission;
-        public SubmissionVM CurrentSubmission
-        {
-            get { return _CurrentSubmission; }
-            set { Contract.Requires(value != null); SetProperty(ref _CurrentSubmission, value); }
-        }
-
         private string _SubmissionSort;
         public string SubmissionSort { get { return _SubmissionSort; } set { SetProperty(ref _SubmissionSort, value); } }
-
-        private string _CommentSort;
-        public string CommentSort { get { return _CommentSort; } set { SetProperty(ref _CommentSort, value); } }
 
         private ApiUserInfo _UserInfo;
         public ApiUserInfo UserInfo
@@ -112,7 +97,7 @@ namespace VoatHub.Models.VoatHub
             // and the list is empty, it will automatically request more data.
             // ALSO: We make a new object because the events from the previous object can still be fired to change state
             // We could try to do some fancy event management to prevent that but I ain't got the time.
-            SubmissionList = new IncrementalLoadingList<ApiSubmission, IncrementalSubmissionList>(new IncrementalSubmissionList(api, subverse));
+            SubmissionList = new IncrementalLoadingList<ApiSubmission, IncrementalSubmissionList>(new IncrementalSubmissionList(VOAT_API, subverse));
             CurrentlySubscribed = isSubscribed(subverse);
             CurrentSubverse = subverse;
         }
@@ -126,7 +111,7 @@ namespace VoatHub.Models.VoatHub
         {
             if (Subscriptions.Loading)
             {
-                var subscriptions = await api.UserSubscriptions(api.UserName);
+                var subscriptions = await VOAT_API.UserSubscriptions(VOAT_API.UserName);
                 
                 if (subscriptions.Success && subscriptions.Data != null)
                     Subscriptions.List = new ObservableCollection<ApiSubscription>(subscriptions.Data);

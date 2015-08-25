@@ -36,7 +36,7 @@ namespace VoatHub
         public MainPageVM ViewModel { get; set; }
         
         // Api
-        private VoatApi voatApi;
+        private VoatApi VOAT_API = App.VOAT_API;
 
         // SplitView
         public Rect TogglePaneButtonRect
@@ -61,8 +61,8 @@ namespace VoatHub
         
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            voatApi = e.Parameter as VoatApi;
-            ViewModel = new MainPageVM(voatApi);
+            ViewModel = new MainPageVM();
+            
         }
 
         #region SplitView
@@ -151,7 +151,7 @@ namespace VoatHub
 
             var submission = e.ClickedItem as ApiSubmission;
 
-            ViewModel.CurrentSubmission.ChangeSubmission(submission, false);
+            DetailFrame.Navigate(typeof(DetailPage), new DetailPageVM(submission, false));
         }
 
         private void MasterCommandBarButton_Click(object sender, RoutedEventArgs e)
@@ -173,7 +173,7 @@ namespace VoatHub
             Debug.WriteLine(e.OriginalSource, "SortItem");
             var item = e.OriginalSource as MenuFlyoutItem;
 
-            voatApi.SubmissionSearchOptions.sort = (SortAlgorithm)Enum.Parse(typeof(SortAlgorithm), item.Text);
+            VOAT_API.SubmissionSearchOptions.sort = (SortAlgorithm)Enum.Parse(typeof(SortAlgorithm), item.Text);
             ViewModel.SubmissionSort = item.Text;
 
             ViewModel.RefreshCurrentSubverse();
@@ -198,7 +198,7 @@ namespace VoatHub
             // For the initial state where no submission was selected and user presses the comment icon in DetailCommandBar
             if (submission == null) return;
 
-            ViewModel.CurrentSubmission.ChangeSubmission(submission, true);
+            DetailFrame.Navigate(typeof(DetailPage), new DetailPageVM(submission, true));
         }
 
         private void SubscribeButton_Click(object sender, RoutedEventArgs e)
@@ -282,11 +282,11 @@ namespace VoatHub
         {
             toggleProgressRing(NewSubmissionPopupProgressRing);
 
-            var r = await voatApi.PostSubmission(ViewModel.CurrentSubverse, submission);
+            var r = await VOAT_API.PostSubmission(ViewModel.CurrentSubverse, submission);
 
             if (r.Success)
             {
-                ViewModel.CurrentSubmission.ChangeSubmission(r.Data, false);
+                DetailFrame.Navigate(typeof(DetailPage), new DetailPageVM(r.Data, false));
                 NewSubmissionPopup.IsOpen = false;
                 NewSubmissionPopupErrorBlock.Text = "";
                 DiscussionTitle.Text = "";
@@ -298,166 +298,8 @@ namespace VoatHub
 
         #endregion MasterColumn
 
-        #region DetailColumn
-
-        /// <summary>
-        /// This is fired AFTER DataTemplate is set for the content. So it is not useful to update the data template since it will
-        /// not affect the current selected item.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="args"></param>
-        private void DetailContentPresenter_DataContextChanged(FrameworkElement sender, DataContextChangedEventArgs args)
-        {
-            Debug.WriteLine(args.NewValue, "Data context change");
-        }
-        
-        private void DetailCommandBarButton_Click(object sender, RoutedEventArgs e)
-        {
-            AppBarButton button = e.OriginalSource as AppBarButton;
-
-            Debug.WriteLine(button, "DetailBar");
-
-            switch (button.Tag.ToString())
-            {
-                case "refresh":
-                    ViewModel.CurrentSubmission.Refresh();
-                    break;
-            }
-        }
-
-        /// <summary>
-        /// This actually doesn't do shit. Voat returns the same thing no matter what sort options we send it...
-        /// <para>We actually have to do the sorting ourselves which kind of makes sense.</para>
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void SortComments_Click(object sender, RoutedEventArgs e)
-        {
-            var item = e.OriginalSource as MenuFlyoutItem;
-
-            voatApi.CommentSearchOptions.sort = (SortAlgorithm)Enum.Parse(typeof(SortAlgorithm), item.Text);
-            
-            ViewModel.CommentSort = item.Text;
-
-            ViewModel.CurrentSubmission.Refresh();
-        }
-
-        /// <summary>
-        /// Fixes WebView size not fit to grid issue.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void DetailTitleRow_SizeChanged(object sender, SizeChangedEventArgs e)
-        {
-            try
-            {
-                DetailWebView.Height = DetailContentViewer.ActualHeight - DetailTitleRow.ActualHeight;
-                DetailWebView.Width = DetailInnerColumn.ActualWidth;
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex);
-            }
-        }
-
-        private void SubmissionUpVote_Click(object sender, RoutedEventArgs e)
-        {
-            submissionVotingHelper(e.OriginalSource as Button, 1);
-        }
-
-        private void SubmissionDownVote_Click(object sender, RoutedEventArgs e)
-        {
-            submissionVotingHelper(e.OriginalSource as Button, -1);
-        }
-
-        private void CommentUpVote_Click(object sender, RoutedEventArgs e)
-        {
-            commentVotingHelper(e.OriginalSource as Button, 1);
-        }
-
-        private void CommentDownVote_Click(object sender, RoutedEventArgs e)
-        {
-            commentVotingHelper(e.OriginalSource as Button, -1);
-        }
-
-        private void OpenCommentReply_Click(object sender, RoutedEventArgs e)
-        {
-            var button = e.OriginalSource as Button;
-            var commentTree = button.DataContext as CommentTree;
-            commentTree.ReplyOpen = true;
-        }
-
-        private void CloseCommentReply_Click(object sender, RoutedEventArgs e)
-        {
-            var button = e.OriginalSource as Button;
-            var commentTree = button.DataContext as CommentTree;
-            commentTree.ReplyOpen = false;
-        }
-
-        private async void SendCommentReply_Click(object sender, RoutedEventArgs e)
-        {
-            var button = e.OriginalSource as Button;
-            var commentTree = button.DataContext as CommentTree;
-            var comment = commentTree.Comment;
-
-            commentTree.ReplyOpen = false;
-
-            var value = new UserValue { Value = commentTree.ReplyText };
-            var r = await voatApi.PostCommentReply(comment.Subverse, (int)comment.SubmissionID, comment.ID, value);
-
-            if (r.Success)
-            {
-                var ct = new CommentTree(r.Data);
-                commentTree.Children.Add(ct);
-            }
-        }
-
-        private void OpenSubmissionReply_Click(object sender, RoutedEventArgs e)
-        {
-            ViewModel.CurrentSubmission.ReplyOpen = true;
-        }
-
-        private void CloseSubmissionReply_Click(object sender, RoutedEventArgs e)
-        {
-            ViewModel.CurrentSubmission.ReplyOpen = false;
-        }
-
-        private async void SendSubmissionReply_Click(object sender, RoutedEventArgs e)
-        {
-            var button = e.OriginalSource as Button;
-            var submissionViewModel = ViewModel.CurrentSubmission;
-            var submission = submissionViewModel.Submission;
-
-            submissionViewModel.ReplyOpen = false;
-
-            var value = new UserValue { Value = submissionViewModel.ReplyText };
-            var r = await voatApi.PostComment(submission.Subverse, submission.ID, value);
-
-            if (r.Success)
-            {
-                var ct = new CommentTree(r.Data);
-                submissionViewModel.CommentList.List.Add(ct);
-            }
-        }
-
-        #endregion DetailColumn
-        
         #region Helpers
-
-        private async void commentVotingHelper(Button button, int vote)
-        {
-            var commentTree = button.DataContext as CommentTree;
-            var comment = commentTree.Comment;
-            var result = await voatApi.PostVoteRevokeOnRevote("comment", comment.ID, vote, true);
-            Debug.WriteLine(result.Data);
-        }
-
-        private async void submissionVotingHelper(Button button, int vote)
-        {
-            var submission = button.Tag as ApiSubmission;
-            var result = await voatApi.PostVoteRevokeOnRevote("submission", submission.ID, vote, true);
-        }
-
+       
         private void toggleProgressRing(ProgressRing ring)
         {
             ring.Visibility = ring.Visibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;

@@ -12,19 +12,22 @@ namespace VoatHub.Models.VoatHub
     /// <summary>
     /// An obversable model for ApiSubmission.
     /// </summary>
-    public class SubmissionVM : BindableBase
+    public class DetailPageVM : BindableBase
     {
         private static readonly Uri DEFAULT_URI = new Uri("about:blank");
-        private VoatApi api;
+        private VoatApi VOAT_API = App.VOAT_API;
 
-        public SubmissionVM(VoatApi api)
+        public DetailPageVM(ApiSubmission submission, bool forceShowComments)
         {
-            this.api = api;
             // Prevents WebView binding to null error.
             Uri = DEFAULT_URI;
+            
+            CommentSort = "Hot";
 
             // Fixes item source null binding errors.
             CommentList = new LoadingList<CommentTree>();
+
+            ChangeSubmission(submission, forceShowComments);
         }
 
         #region Properties
@@ -68,6 +71,13 @@ namespace VoatHub.Models.VoatHub
             set { SetProperty(ref _ShowComments, value); }
         }
 
+        private string _CommentSort;
+        public string CommentSort
+        {
+            get { return _CommentSort; }
+            set { SetProperty(ref _CommentSort, value); }
+        }
+
         private bool _ReplyOpen;
         public bool ReplyOpen
         {
@@ -103,7 +113,7 @@ namespace VoatHub.Models.VoatHub
         {
             Submission = null;
             CommentList.Clear();
-            api.CommentSearchOptions.page = 1;
+            VOAT_API.CommentSearchOptions.page = 1;
             HasMoreComments = false;
             ShowComments = false;
             ReplyOpen = false;
@@ -116,13 +126,13 @@ namespace VoatHub.Models.VoatHub
             ResetVM();
             Submission = submission;
         }
-        
+
         public async void LoadComments()
         {
             var idLoadingCommentsFor = Submission.ID;
             ShowComments = true;
 
-            var response = await api.GetCommentList(Submission.Subverse, Submission.ID);
+            var response = await VOAT_API.GetCommentList(Submission.Subverse, Submission.ID);
 
             // If the current submission changes, then we released control over the loading icon.
             if (Submission.ID == idLoadingCommentsFor)
@@ -160,7 +170,7 @@ namespace VoatHub.Models.VoatHub
         /// <param name="commentTree"></param>
         private ObservableCollection<CommentTree> commentTreeSorter(ObservableCollection<CommentTree> commentTreeList)
         {
-            switch (api.CommentSearchOptions.sort)
+            switch (VOAT_API.CommentSearchOptions.sort)
             {
                 case SortAlgorithm.New:
                     return CommentTree.SortNew(commentTreeList);

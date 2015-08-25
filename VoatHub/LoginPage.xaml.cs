@@ -25,7 +25,7 @@ namespace VoatHub
     /// </summary>
     public sealed partial class LoginPage : Page
     {
-        VoatApi voatApi;
+        private VoatApi VOAT_API = App.VOAT_API;
 
         public LoginPage()
         {
@@ -35,17 +35,15 @@ namespace VoatHub
         protected async override void OnNavigatedTo(NavigationEventArgs e)
         {
             base.OnNavigatedTo(e);
-
-            voatApi = new VoatApi("ZbDlC73ndD6TB84WQmKvMA==", "https", "fakevout.azurewebsites.net", "api/v1/", "https://fakevout.azurewebsites.net/api/token");
-
-            if (voatApi.LoggedIn)
+            
+            if (VOAT_API.LoggedIn)
             {
                 // Some scheduling bullshit workaround.
                 // https://social.msdn.microsoft.com/Forums/en-US/af8f62e6-3c0d-4257-adac-4cecf1e8e23c/onnavigatedto-wont-navigate-to-another-page?forum=winappswithcsharp
                 // http://stackoverflow.com/questions/25942567/automatically-navigate-to-another-page
                 await Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
                 {
-                    Frame.Navigate(typeof(MainPage), voatApi);
+                    Frame.Navigate(typeof(MainPage));
                 });
             }
             else
@@ -61,11 +59,11 @@ namespace VoatHub
 
             LoginProgressRing.IsActive = true;
 
-            bool loggedIn = await voatApi.Login(username, password);
+            bool loggedIn = await VOAT_API.Login(username, password);
 
             if (loggedIn)
             {
-                Frame.Navigate(typeof(MainPage), voatApi);
+                Frame.Navigate(typeof(MainPage), VOAT_API);
             }
             else
             {
@@ -85,11 +83,11 @@ namespace VoatHub
 
                 LoginProgressRing.IsActive = true;
 
-                bool loggedIn = await voatApi.Login(username, password);
+                bool loggedIn = await VOAT_API.Login(username, password);
 
                 if (loggedIn)
                 {
-                    Frame.Navigate(typeof(MainPage), voatApi);
+                    Frame.Navigate(typeof(MainPage), VOAT_API);
                 }
                 else
                 {
