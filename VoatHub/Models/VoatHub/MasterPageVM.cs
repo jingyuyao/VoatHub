@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using VoatHub.Models.Voat.v1;
 using VoatHub.Models.VoatHub.LoadingList;
 using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml.Media;
 
 namespace VoatHub.Models.VoatHub
 {
@@ -25,7 +26,7 @@ namespace VoatHub.Models.VoatHub
             // and the list is empty, it will automatically request more data.
             // ALSO: We make a new object because the events from the previous object can still be fired to change state
             // We could try to do some fancy event management to prevent that but I ain't got the time.
-            SubmissionList = new IncrementalLoadingList<ApiSubmission, IncrementalSubmissionList>(new IncrementalSubmissionList(App.VOAT_API, subverse));
+            SubmissionList = new IncrementalLoadingList<SubmissionVM, IncrementalSubmissionList>(new IncrementalSubmissionList(App.VOAT_API, subverse));
             Sort = "Hot";
         }
 
@@ -36,8 +37,8 @@ namespace VoatHub.Models.VoatHub
             set { SetProperty(ref _Subverse, value); }
         }
 
-        private IncrementalLoadingList<ApiSubmission, IncrementalSubmissionList> _SubmissionList;
-        public IncrementalLoadingList<ApiSubmission, IncrementalSubmissionList> SubmissionList
+        private IncrementalLoadingList<SubmissionVM, IncrementalSubmissionList> _SubmissionList;
+        public IncrementalLoadingList<SubmissionVM, IncrementalSubmissionList> SubmissionList
         {
             get { return _SubmissionList; }
             set { Contract.Requires(value != null); SetProperty(ref _SubmissionList, value); }
@@ -58,7 +59,7 @@ namespace VoatHub.Models.VoatHub
 
         public void Refresh()
         {
-            SubmissionList = new IncrementalLoadingList<ApiSubmission, IncrementalSubmissionList>(new IncrementalSubmissionList(App.VOAT_API, Subverse));
+            SubmissionList = new IncrementalLoadingList<SubmissionVM, IncrementalSubmissionList>(new IncrementalSubmissionList(App.VOAT_API, Subverse));
         }
     }
 }

@@ -120,11 +120,9 @@ namespace VoatHub
         /// <param name="e"></param>
         private void MasterListView_ItemClick(object sender, ItemClickEventArgs e)
         {
-            if (e == null || e.ClickedItem == null || !(e.ClickedItem is ApiSubmission)) return;
+            var vm = e.ClickedItem as SubmissionVM;
 
-            var submission = e.ClickedItem as ApiSubmission;
-
-            ViewModel.DetailFrame.Navigate(typeof(DetailPage), new DetailPageVM(submission, false));
+            ViewModel.DetailFrame.Navigate(typeof(DetailPage), new DetailPageVM(vm.Submission, false));
         }
 
         private void SortSubmissions_Click(object sender, RoutedEventArgs e)

@@ -20,7 +20,7 @@ namespace VoatHub.Models.VoatHub
     /// References:
     /// https://marcominerva.wordpress.com/2013/05/22/implementing-the-isupportincrementalloading-interface-in-a-window-store-app/
     /// </summary>
-    public class IncrementalSubmissionList : LoadingObservableCollection<ApiSubmission>
+    public class IncrementalSubmissionList : LoadingObservableCollection<SubmissionVM>
     {
         private VoatApi api;
         private bool hasMoreItems;
@@ -63,7 +63,7 @@ namespace VoatHub.Models.VoatHub
                     {
                         foreach (var submission in response.Data)
                         {
-                            this.Add(submission);
+                            this.Add(SubmissionVM.FromApiSubmission(submission));
                         }
                     });
                     

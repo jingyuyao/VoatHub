@@ -38,7 +38,7 @@
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Style="{StaticResource CommentTreeUserInfoStyle}">
                                 <Run FontWeight="Bold" Text="{x:Bind Comment.UserName}"/>
-                                <Run Text="{x:Bind Comment.TotalVotes}"/> points
+                                <Run Text="{x:Bind Comment.TotalVotes}"/> pts
                                 <Run Text="{x:Bind Comment.Date, Converter={StaticResource TimeAgoConverter}}"/>
                         </TextBlock>
                         <Button Click="CommentUpVote_Click" Style="{StaticResource CommentTreeVoteButtonStyle}">
@@ -69,15 +69,14 @@
                                Style="{StaticResource CommentTreeCommentStyle}"
                                IsTapEnabled="True"/>
 
-                    <StackPanel Grid.Row="1">
+                    <StackPanel Grid.Row="1" Padding="{StaticResource CommentTreePadding}">
                         <StackPanel Orientation="Horizontal">
                             <ToggleButton IsChecked="{x:Bind ReplyOpen, Mode=TwoWay}" Content="Reply" Style="{StaticResource CommentTreeMiscToggleButtonStyle}"/>
                             <Button Click="PrintDataContext_Click" Content="Help" Style="{StaticResource CommentTreeMiscButtonStyle}"/>
                         </StackPanel>
 
                         <!--Reply-->
-                        <StackPanel Visibility="{x:Bind ReplyOpen, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"
-                                Padding="{StaticResource CommentTreePadding}">
+                        <StackPanel Visibility="{x:Bind ReplyOpen, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}">
                             <TextBox Text="{x:Bind ReplyText, Mode=TwoWay}" 
                                  AcceptsReturn="True" TextWrapping="Wrap" 
                                  PlaceholderText="Post reply..."/>
@@ -182,7 +181,7 @@
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Style="{StaticResource CommentTreeUserInfoStyle}">
                             <Run FontWeight="Bold" Text="{x:Bind ViewModel.Submission.UserName, Mode=OneWay}"/>
-                            <Run Text="{x:Bind ViewModel.Submission.TotalVotes, Mode=OneWay}"/> points
+                            <Run Text="{x:Bind ViewModel.Submission.TotalVotes, Mode=OneWay}"/> pts
                             <Run Text="{x:Bind ViewModel.Submission.Date, Converter={StaticResource TimeAgoConverter}, Mode=OneWay}"/>
                         </TextBlock>
 

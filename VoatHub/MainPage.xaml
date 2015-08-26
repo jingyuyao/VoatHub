@@ -107,7 +107,7 @@
                 </Grid.RowDefinitions>
 
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition x:Name="MasterColumn" Width="500" />
+                    <ColumnDefinition x:Name="MasterColumn" Width="400" />
                     <ColumnDefinition x:Name="DetailColumn" Width="*" />
                 </Grid.ColumnDefinitions>
 
