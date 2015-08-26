@@ -40,6 +40,11 @@ namespace VoatHub
             ViewModel = e.Parameter as DetailPageVM;
         }
 
+        protected override void OnNavigatingFrom(NavigatingCancelEventArgs e)
+        {
+            ViewModel.Uri = DetailPageVM.DEFAULT_URI;
+        }
+
         /// <summary>
         /// Fixes WebView size not fit to grid issue.
         /// </summary>
@@ -188,10 +193,10 @@ namespace VoatHub
             var result = await VOAT_API.PostVoteRevokeOnRevote("submission", submission.ID, vote, true);
         }
 
-        private void toggleProgressRing(ProgressRing ring)
+        private void PrintDataContext_Click(object sender, RoutedEventArgs e)
         {
-            ring.Visibility = ring.Visibility == Visibility.Visible ? Visibility.Collapsed : Visibility.Visible;
-            ring.IsActive = ring.IsActive ? false : true;
+            var button = sender as FrameworkElement;
+            Debug.WriteLine(button.DataContext);
         }
     }
 }

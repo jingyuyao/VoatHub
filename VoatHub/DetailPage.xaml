@@ -11,7 +11,7 @@
     mc:Ignorable="d">
 
     <Page.Resources>
-        <!--Converter-->
+        <!--Converter, repeated here because the compiler is too dumb to look for them in Application.Resources-->
         <helpers:StringToUriConverter x:Key="StringToUriConverter" />
         <helpers:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
         <helpers:BoolToNegateVisibilityConverter x:Key="BoolToNegateVisibilityConverter" />
@@ -19,7 +19,7 @@
         <helpers:TimeAgoConverter x:Key="TimeAgoConverter" />
         <helpers:BoolNegateConverter x:Key="BoolNegateConverter" />
         <helpers:LevelToBrushConverter x:Key="LevelToBrushConverter" />
-        
+
         <DataTemplate x:Key="CommentTreeTemplate" x:DataType="voatHubModels:CommentTree">
             <Grid Padding="10,5,0,5" Background="{x:Bind Comment.Level, Converter={StaticResource LevelToBrushConverter}}">
                 <Grid.RowDefinitions>
@@ -64,6 +64,9 @@
                             </Button>
                             <Button Click="OpenCommentReply_Click" Style="{StaticResource CommentTreeVoteButtonStyle}">
                                 <SymbolIcon Symbol="MailReply"/>
+                            </Button>
+                            <Button Click="PrintDataContext_Click" Style="{StaticResource CommentTreeVoteButtonStyle}">
+                                <SymbolIcon Symbol="Help"/>
                             </Button>
                         </StackPanel>
                     </ToggleButton>

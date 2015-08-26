@@ -14,7 +14,7 @@ namespace VoatHub.Models.VoatHub
     /// </summary>
     public class DetailPageVM : BindableBase
     {
-        private static readonly Uri DEFAULT_URI = new Uri("about:blank");
+        public static readonly Uri DEFAULT_URI = new Uri("about:blank");
         private VoatApi VOAT_API = App.VOAT_API;
 
         public DetailPageVM(ApiSubmission submission, bool forceShowComments)

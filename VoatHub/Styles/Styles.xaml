@@ -5,7 +5,7 @@
     
     <!--Brushes-->
     <SolidColorBrush x:Key="LightBackgroundBrush" Color="{ThemeResource SystemChromeLowColor}" />
-    <SolidColorBrush x:Key="DarkBackgroundBrush" Color="{ThemeResource SystemChromeHighColor}" />
+    <SolidColorBrush x:Key="DarkBackgroundBrush" Color="{ThemeResource SystemChromeMediumColor}" />
 
     <Style x:Key="SplitViewTogglePaneButtonStyle" TargetType="ToggleButton">
         <Setter Property="FontSize" Value="20" />

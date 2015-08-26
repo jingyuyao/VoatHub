@@ -116,6 +116,9 @@
     <Compile Include="LoginPage.xaml.cs">
       <DependentUpon>LoginPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="MasterPage.xaml.cs">
+      <DependentUpon>MasterPage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Models\IOauthToken.cs" />
     <Compile Include="Models\VoatHub\BindableBase.cs" />
     <Compile Include="Models\VoatHub\LoadingList\LoadingObservableCollection.cs" />
@@ -123,6 +126,7 @@
     <Compile Include="Models\VoatHub\IncrementalSubmissionList.cs" />
     <Compile Include="Models\VoatHub\LoadingList\LoadingList.cs" />
     <Compile Include="Models\VoatHub\LoadingList\LoadingListBase.cs" />
+    <Compile Include="Models\VoatHub\MasterPageVM.cs" />
     <Compile Include="Models\VoatHub\NavMenuItem.cs" />
     <Compile Include="Models\VoatHub\DetailPageVM.cs" />
     <Compile Include="Models\VoatHub\MainPageVM.cs" />
@@ -151,6 +155,7 @@
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Ui\Helpers\Converters.cs" />
+    <Compile Include="Ui\ProgressRingExtensions.cs" />
     <Compile Include="Ui\WebViewExtensions.cs" />
     <Compile Include="Utils\TimeAgo.cs" />
   </ItemGroup>
@@ -186,6 +191,10 @@
     <Page Include="MainPage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="MasterPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Styles\Styles.xaml">
       <SubType>Designer</SubType>

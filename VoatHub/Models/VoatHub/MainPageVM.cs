@@ -39,12 +39,6 @@ namespace VoatHub.Models.VoatHub
                 }
             });
             Subscriptions = new LoadingList<ApiSubscription>();
-
-            // SubmissionList is left out because it is set by ChangeSubverse()
-            SubmissionSort = "Hot";
-
-            // TODO: loading from settings
-            ChangeSubverse("_front");
         }
 
         #region Properties
@@ -54,26 +48,6 @@ namespace VoatHub.Models.VoatHub
             get { return _Navlist; }
             set { SetProperty(ref _Navlist, value); }
         }
-
-        private string _CurrentSubverse;
-        public string CurrentSubverse
-        {
-            get { return _CurrentSubverse; }
-            set { SetProperty(ref _CurrentSubverse, value); }
-        }
-
-        private IncrementalLoadingList<ApiSubmission, IncrementalSubmissionList> _SubmissionList;
-        public IncrementalLoadingList<ApiSubmission, IncrementalSubmissionList> SubmissionList
-        {
-            get { return _SubmissionList; }
-            set { Contract.Requires(value != null); SetProperty(ref _SubmissionList, value); }
-        }
-
-        private bool? _CurrentlySubscribed;
-        public bool? CurrentlySubscribed { get { return _CurrentlySubscribed; } set { SetProperty(ref _CurrentlySubscribed, value); } }
-
-        private string _SubmissionSort;
-        public string SubmissionSort { get { return _SubmissionSort; } set { SetProperty(ref _SubmissionSort, value); } }
 
         private ApiUserInfo _UserInfo;
         public ApiUserInfo UserInfo
@@ -91,22 +65,7 @@ namespace VoatHub.Models.VoatHub
         #endregion
 
         #region Methods
-        public void ChangeSubverse(string subverse)
-        {
-            // We do not need to explictly load the initial data because if the ListView is visible
-            // and the list is empty, it will automatically request more data.
-            // ALSO: We make a new object because the events from the previous object can still be fired to change state
-            // We could try to do some fancy event management to prevent that but I ain't got the time.
-            SubmissionList = new IncrementalLoadingList<ApiSubmission, IncrementalSubmissionList>(new IncrementalSubmissionList(VOAT_API, subverse));
-            CurrentlySubscribed = isSubscribed(subverse);
-            CurrentSubverse = subverse;
-        }
-
-        public void RefreshCurrentSubverse()
-        {
-            ChangeSubverse(CurrentSubverse);
-        }
-
+        
         public async void LoadSubscriptions()
         {
             if (Subscriptions.Loading)
@@ -120,7 +79,7 @@ namespace VoatHub.Models.VoatHub
             }
         }
 
-        private bool isSubscribed(string subverse)
+        public bool IsSubscribed(string subverse)
         {
             if (subverse == "_front" || subverse == "_all")
             {
@@ -137,6 +96,25 @@ namespace VoatHub.Models.VoatHub
                 }
             }
             return false;
+        }
+
+        public bool CanSubmit(string subverse)
+        {
+            if (subverse == "_front" || subverse == "_all")
+                return false;
+            else if (Subscriptions != null)
+            {
+                foreach (var sub in Subscriptions.List)
+                {
+                    if (string.Equals(subverse, sub.Name, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return sub.Type == SubscriptionType.Subverse;
+                    }
+                }
+            }
+
+            // current subverse is not one of the special ones and its not in the subscription list that contains all the sets.
+            return true;
         }
         #endregion
     }
