@@ -45,6 +45,28 @@ namespace VoatHub
             ViewModel.Uri = DetailPageVM.DEFAULT_URI;
         }
 
+        #region Helpers
+
+        private async void commentVotingHelper(Button button, int vote)
+        {
+            var commentTree = button.DataContext as CommentTree;
+            var comment = commentTree.Comment;
+            var result = await VOAT_API.PostVoteRevokeOnRevote("comment", comment.ID, vote, true);
+            Debug.WriteLine(result.Data);
+        }
+
+        private async void submissionVotingHelper(int vote)
+        {
+            var result = await VOAT_API.PostVoteRevokeOnRevote("submission", ViewModel.Submission.ID, vote, true);
+        }
+
+        private void PrintDataContext_Click(object sender, RoutedEventArgs e)
+        {
+            var button = sender as FrameworkElement;
+            Debug.WriteLine(button.DataContext);
+        }
+        #endregion
+
         /// <summary>
         /// Fixes WebView size not fit to grid issue.
         /// </summary>
@@ -65,12 +87,12 @@ namespace VoatHub
 
         private void SubmissionUpVote_Click(object sender, RoutedEventArgs e)
         {
-            submissionVotingHelper(e.OriginalSource as Button, 1);
+            submissionVotingHelper(1);
         }
 
         private void SubmissionDownVote_Click(object sender, RoutedEventArgs e)
         {
-            submissionVotingHelper(e.OriginalSource as Button, -1);
+            submissionVotingHelper(-1);
         }
 
         private void CommentUpVote_Click(object sender, RoutedEventArgs e)
@@ -81,13 +103,6 @@ namespace VoatHub
         private void CommentDownVote_Click(object sender, RoutedEventArgs e)
         {
             commentVotingHelper(e.OriginalSource as Button, -1);
-        }
-
-        private void OpenCommentReply_Click(object sender, RoutedEventArgs e)
-        {
-            var button = e.OriginalSource as Button;
-            var commentTree = button.DataContext as CommentTree;
-            commentTree.ReplyOpen = true;
         }
 
         private void CloseCommentReply_Click(object sender, RoutedEventArgs e)
@@ -143,20 +158,6 @@ namespace VoatHub
             }
         }
 
-        private void DetailCommandBarButton_Click(object sender, RoutedEventArgs e)
-        {
-            AppBarButton button = e.OriginalSource as AppBarButton;
-
-            Debug.WriteLine(button, "DetailBar");
-
-            switch (button.Tag.ToString())
-            {
-                case "refresh":
-                    ViewModel.Refresh();
-                    break;
-            }
-        }
-
         /// <summary>
         /// This actually doesn't do shit. Voat returns the same thing no matter what sort options we send it...
         /// <para>We actually have to do the sorting ourselves which kind of makes sense.</para>
@@ -179,24 +180,15 @@ namespace VoatHub
             Frame.Navigate(typeof(DetailPage), new DetailPageVM(ViewModel.Submission, true));
         }
 
-        private async void commentVotingHelper(Button button, int vote)
+        private void BackButton_Click(object sender, RoutedEventArgs e)
         {
-            var commentTree = button.DataContext as CommentTree;
-            var comment = commentTree.Comment;
-            var result = await VOAT_API.PostVoteRevokeOnRevote("comment", comment.ID, vote, true);
-            Debug.WriteLine(result.Data);
+            if (Frame.CanGoBack)
+                Frame.GoBack();
         }
 
-        private async void submissionVotingHelper(Button button, int vote)
+        private void RefreshButton_Click(object sender, RoutedEventArgs e)
         {
-            var submission = button.Tag as ApiSubmission;
-            var result = await VOAT_API.PostVoteRevokeOnRevote("submission", submission.ID, vote, true);
-        }
-
-        private void PrintDataContext_Click(object sender, RoutedEventArgs e)
-        {
-            var button = sender as FrameworkElement;
-            Debug.WriteLine(button.DataContext);
+            ViewModel.Refresh();
         }
     }
 }

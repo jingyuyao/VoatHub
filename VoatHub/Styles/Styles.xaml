@@ -115,6 +115,7 @@
 
     <!--Style overrides. Reference: https://msdn.microsoft.com/en-us/library/windows/apps/mt299122.aspx -->
     <Thickness x:Key="CommentTreePadding">10,0,0,0</Thickness>
+    <Thickness x:Key="CommentTreeChildListPadding">10,0,10,10</Thickness>
 
     <Style x:Key="CommentTreeItemStyle" TargetType="ListViewItem">
         <Setter Property="FontFamily" Value="{ThemeResource ContentControlThemeFontFamily}" />
@@ -122,18 +123,20 @@
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="TabNavigation" Value="Local"/>
         <Setter Property="IsHoldingEnabled" Value="True"/>
-        <Setter Property="Margin" Value="0,0,0,0"/>
+        <Setter Property="Margin" Value="0"/>
         <Setter Property="Padding" Value="0" />
         <Setter Property="HorizontalContentAlignment" Value="Left"/>
         <Setter Property="VerticalContentAlignment" Value="Top"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="ListViewItem">
-                    <ContentPresenter 
-                            HorizontalAlignment="Stretch"
-                            ContentTransitions="{TemplateBinding ContentTransitions}"
-                            HorizontalContentAlignment="Stretch"
-                            VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"/>
+                    <ContentPresenter
+                        Padding="0"
+                        Margin="0"
+                        HorizontalAlignment="Stretch"
+                        ContentTransitions="{TemplateBinding ContentTransitions}"
+                        HorizontalContentAlignment="Stretch"
+                        VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"/>
 
                     <!--ListViewItemPresenter includes clicking animations by default which I don't want.-->
                     <!--These are the default settings. Use as reference.-->
@@ -170,10 +173,11 @@
         <Setter Property="FontSize" Value="{ThemeResource TextStyleLargeFontSize}"/>
         <Setter Property="Foreground" Value="{ThemeResource SystemControlForegroundBaseHighBrush}" />
         <Setter Property="HorizontalAlignment" Value="Left" />
+        <Setter Property="TextWrapping" Value="WrapWholeWords" />
         <Setter Property="Padding" Value="{StaticResource CommentTreePadding}"/>
     </Style>
 
-    <Style x:Key="CommentTreeToggleButtonStyle" TargetType="ToggleButton">
+    <Style x:Key="CommentTreeHeaderToggleButtonStyle" TargetType="ToggleButton">
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="Foreground" Value="Transparent"/>
         <Setter Property="BorderBrush" Value="Transparent" />
@@ -298,5 +302,15 @@
     <Style x:Key="CommentTreeVoteButtonStyle" TargetType="Button">
         <Setter Property="Background" Value="Transparent"/>
         <Setter Property="Foreground" Value="{ThemeResource SystemControlForegroundBaseMediumLowBrush}"/>
+    </Style>
+
+    <Style x:Key="CommentTreeMiscButtonStyle" TargetType="Button">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Foreground" Value="{ThemeResource SystemControlForegroundBaseLowBrush}"/>
+    </Style>
+
+    <Style x:Key="CommentTreeMiscToggleButtonStyle" TargetType="ToggleButton">
+        <Setter Property="Background" Value="Transparent"/>
+        <Setter Property="Foreground" Value="{ThemeResource SystemControlForegroundBaseLowBrush}"/>
     </Style>
 </ResourceDictionary>

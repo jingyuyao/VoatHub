@@ -5,7 +5,6 @@
     xmlns:local="using:VoatHub"
     xmlns:voatModels="using:VoatHub.Models.Voat.v1"
     xmlns:voatHubModels="using:VoatHub.Models.VoatHub"
-    xmlns:helpers="using:VoatHub.Ui.Helpers"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
@@ -66,7 +65,7 @@
                     </Grid>
                 </Grid>
 
-                <Button Grid.Column="2" Click="SubmissionCommentsButton_Click" Tag="{Binding}" 
+                <Button Grid.Column="2" Click="SubmissionCommentsButton_Click"
                         Padding="10,10" BorderThickness="2" Background="Transparent">
                     <StackPanel>
                         <SymbolIcon Symbol="Comment" Foreground="Blue" />
@@ -120,7 +119,8 @@
                 </TextBlock>
             </CommandBar.Content>
 
-            <AppBarButton Icon="Back" Label="Back" Tag="Back" Click="MasterCommandBarButton_Click"/>
+            <AppBarButton Icon="Back" Label="Back" Tag="Back" IsEnabled="{x:Bind Frame.CanGoBack, Mode=OneWay}" 
+                          Click="BackButton_Click"/>
             <AppBarButton Icon="Sort" Label="Sort">
                 <AppBarButton.Flyout>
                     <MenuFlyout>
@@ -131,7 +131,7 @@
                 </AppBarButton.Flyout>
             </AppBarButton>
 
-            <AppBarButton Icon="Refresh" Label="Refresh" Tag="refresh" Click="MasterCommandBarButton_Click"/>
+            <AppBarButton Icon="Refresh" Label="Refresh" Tag="refresh" Click="RefreshButton_Click"/>
 
             <CommandBar.SecondaryCommands>
                 <AppBarToggleButton Icon="Favorite" Label="Subscribe" 
@@ -217,16 +217,16 @@
 
                     <!--Only visible and active when there are no items and it is loading-->
                     <ProgressRing Grid.Row="0"
-                                              Margin="0,50" Width="50" Height="50"
-                                              Visibility="{x:Bind ViewModel.SubmissionList.HasItems, Converter={StaticResource BoolToNegateVisibilityConverter}, Mode=OneWay}" 
-                                              IsActive="{x:Bind ViewModel.SubmissionList.Loading, Mode=OneWay}"/>
+                                Margin="0,50" Width="50" Height="50"
+                                Visibility="{x:Bind ViewModel.SubmissionList.HasItems, Converter={StaticResource BoolToNegateVisibilityConverter}, Mode=OneWay}" 
+                                IsActive="{x:Bind ViewModel.SubmissionList.Loading, Mode=OneWay}"/>
 
                     <!--Note: ListView must be visibile in order for it to request more items.-->
                     <ListView x:Name="MasterListView" Grid.Row="1"
-                                          ItemTemplate="{StaticResource SubmissionItemTemplate}"
-                                          ItemsSource="{x:Bind ViewModel.SubmissionList.List, Mode=OneWay}"
-                                          IsItemClickEnabled="True"
-                                          ItemClick="MasterListView_ItemClick">
+                            ItemTemplate="{StaticResource SubmissionItemTemplate}"
+                            ItemsSource="{x:Bind ViewModel.SubmissionList.List, Mode=OneWay}"
+                            IsItemClickEnabled="True"
+                            ItemClick="MasterListView_ItemClick">
                         <ListView.Header>
                             <!--Only show if its not loading and list has no items-->
                             <Grid Visibility="{x:Bind ViewModel.SubmissionList.Loading, Converter={StaticResource BoolToNegateVisibilityConverter}, Mode=OneWay}">
@@ -245,8 +245,8 @@
                     <!--Avoids showing ProgressBar and ProgressRing at the same time-->
                     <Grid Grid.Row="2" Visibility="{x:Bind ViewModel.SubmissionList.HasItems, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}">
                         <ProgressBar  IsIndeterminate="{x:Bind ViewModel.SubmissionList.Loading, Mode=OneWay}"
-                                                  Height="10"
-                                                  Visibility="{x:Bind ViewModel.SubmissionList.Loading, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"/>
+                                Height="10"
+                                Visibility="{x:Bind ViewModel.SubmissionList.Loading, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"/>
                     </Grid>
                 </Grid>
             </ContentPresenter>

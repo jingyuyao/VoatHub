@@ -15,9 +15,9 @@ namespace VoatHub.Models.VoatHub
     public class CommentTree : BindableBase
     {
         private ApiComment comment;
-        private bool replyOpen;
+        private bool? replyOpen;
         private string replyText;
-        private bool? showChildren;
+        private bool? show;
         private ObservableCollection<CommentTree> children;
 
         public CommentTree(ApiComment comment)
@@ -26,7 +26,8 @@ namespace VoatHub.Models.VoatHub
 
             Comment = comment;
             Children = new ObservableCollection<CommentTree>();
-            ShowChildren = true;
+            Show = true;
+            ReplyOpen = false;
         }
 
         #region Properties
@@ -52,13 +53,13 @@ namespace VoatHub.Models.VoatHub
             }
         }
 
-        public bool? ShowChildren
+        public bool? Show
         {
-            get { return showChildren; }
-            set { SetProperty(ref showChildren, value); }
+            get { return show; }
+            set { SetProperty(ref show, value); }
         }
 
-        public bool ReplyOpen
+        public bool? ReplyOpen
         {
             get { return replyOpen; }
             set { SetProperty(ref replyOpen, value); }

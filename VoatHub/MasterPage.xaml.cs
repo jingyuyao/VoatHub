@@ -45,6 +45,74 @@ namespace VoatHub
             ViewModel = e.Parameter as MasterPageVM;
         }
 
+        #region Helpers
+        /// <summary>
+        /// Helper method to post new submission and change current submission if post success
+        /// </summary>
+        /// <param name="submission"></param>
+        private async void postSubmission(UserSubmission submission)
+        {
+            NewSubmissionPopupProgressRing.Toggle();
+
+            var r = await VOAT_API.PostSubmission(ViewModel.Subverse, submission);
+
+            if (r.Success)
+            {
+                ViewModel.DetailFrame.Navigate(typeof(DetailPage), new DetailPageVM(r.Data, false));
+                NewSubmissionPopup.IsOpen = false;
+                NewSubmissionPopupErrorBlock.Text = "";
+                DiscussionTitle.Text = "";
+                DiscussionContent.Text = "";
+            }
+
+            NewSubmissionPopupProgressRing.Toggle();
+        }
+
+        /// <summary>
+        /// Go through every box and highlight it red if it's empty.
+        /// </summary>
+        /// <param name="boxes"></param>
+        /// <returns>Whether all box pass the check.</returns>
+        private bool validateNotEmpty(params TextBox[] boxes)
+        {
+            bool pass = true;
+
+            foreach (var box in boxes)
+            {
+                if (box.Text == "" || box.Text == null)
+                {
+                    invalidateBox(box);
+                    pass = false;
+                }
+            }
+            return pass;
+        }
+
+        private bool validatePostTitle(TextBox box)
+        {
+            if (box.Text.Length < 5)
+            {
+                invalidateBox(box);
+                return false;
+            }
+
+            return true;
+        }
+
+        private bool validateLinkUrl(TextBox box)
+        {
+            Uri uri;
+            bool success = Uri.TryCreate(box.Text, UriKind.Absolute, out uri);
+            if (!success) invalidateBox(box);
+            return success;
+        }
+
+        private void invalidateBox(TextBox box)
+        {
+            box.BorderBrush = RED_BRUSH;
+        }
+        #endregion
+
         /// <summary>
         /// Changes which DataTempalte the ContentPresenter uses based on the type of the submission.
         /// </summary>
@@ -57,20 +125,6 @@ namespace VoatHub
             var submission = e.ClickedItem as ApiSubmission;
 
             ViewModel.DetailFrame.Navigate(typeof(DetailPage), new DetailPageVM(submission, false));
-        }
-
-        private void MasterCommandBarButton_Click(object sender, RoutedEventArgs e)
-        {
-            AppBarButton button = e.OriginalSource as AppBarButton;
-
-            Debug.WriteLine(button, "MasterBar");
-
-            switch (button.Tag.ToString())
-            {
-                case "refresh":
-                    ViewModel.Refresh();
-                    break;
-            }
         }
 
         private void SortSubmissions_Click(object sender, RoutedEventArgs e)
@@ -87,10 +141,7 @@ namespace VoatHub
         private void SubmissionCommentsButton_Click(object sender, RoutedEventArgs e)
         {
             var button = e.OriginalSource as Button;
-            var submission = button.Tag as ApiSubmission;
-
-            // For the initial state where no submission was selected and user presses the comment icon in DetailCommandBar
-            if (submission == null) return;
+            var submission = button.DataContext as ApiSubmission;
 
             ViewModel.DetailFrame.Navigate(typeof(DetailPage), new DetailPageVM(submission, true));
         }
@@ -168,70 +219,15 @@ namespace VoatHub
             }
         }
 
-        /// <summary>
-        /// Helper method to post new submission and change current submission if post success
-        /// </summary>
-        /// <param name="submission"></param>
-        private async void postSubmission(UserSubmission submission)
+        private void BackButton_Click(object sender, RoutedEventArgs e)
         {
-            NewSubmissionPopupProgressRing.Toggle();
-
-            var r = await VOAT_API.PostSubmission(ViewModel.Subverse, submission);
-
-            if (r.Success)
-            {
-                ViewModel.DetailFrame.Navigate(typeof(DetailPage), new DetailPageVM(r.Data, false));
-                NewSubmissionPopup.IsOpen = false;
-                NewSubmissionPopupErrorBlock.Text = "";
-                DiscussionTitle.Text = "";
-                DiscussionContent.Text = "";
-            }
-
-            NewSubmissionPopupProgressRing.Toggle();
+            if (Frame.CanGoBack)
+                Frame.GoBack();
         }
 
-        /// <summary>
-        /// Go through every box and highlight it red if it's empty.
-        /// </summary>
-        /// <param name="boxes"></param>
-        /// <returns>Whether all box pass the check.</returns>
-        private bool validateNotEmpty(params TextBox[] boxes)
+        private void RefreshButton_Click(object sender, RoutedEventArgs e)
         {
-            bool pass = true;
-
-            foreach (var box in boxes)
-            {
-                if (box.Text == "" || box.Text == null)
-                {
-                    invalidateBox(box);
-                    pass = false;
-                }
-            }
-            return pass;
-        }
-
-        private bool validatePostTitle(TextBox box)
-        {
-            if (box.Text.Length < 5)
-            {
-                invalidateBox(box);
-                return false;
-            }
-
-            return true;
-        }
-
-        private bool validateLinkUrl(TextBox box)
-        {
-            Uri uri;
-            bool success = Uri.TryCreate(box.Text, UriKind.Absolute, out uri);
-            if (!success) invalidateBox(box);
-            return success;
-        }
-
-        private void invalidateBox(TextBox box)
-        {
-            box.BorderBrush = RED_BRUSH;
+            ViewModel.Refresh();
         }
     }
 }
