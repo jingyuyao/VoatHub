@@ -10,8 +10,6 @@
     mc:Ignorable="d">
 
     <Page.Resources>
-        <Image x:Key="DefaultSubmissionImage" Source="Assets/SubmissionItemImagePlaceholder.png" />
-
         <DataTemplate x:Key="SubmissionItemTemplate" x:DataType="voatHubModels:SubmissionVM">
             <Grid Margin="0,10,10,10">
                 <Grid.RowDefinitions>

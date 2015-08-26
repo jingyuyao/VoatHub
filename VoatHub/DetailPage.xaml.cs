@@ -125,8 +125,9 @@ namespace VoatHub
 
             if (r.Success)
             {
-                var ct = new CommentTree(r.Data);
-                commentTree.Children.Add(ct);
+                var newComment = r.Data;
+                newComment.Level = comment.Level + 1;  // Fixes api not returning proper level for newly created comments
+                commentTree.Children.Add(new CommentTree(newComment));
             }
         }
 
@@ -153,8 +154,9 @@ namespace VoatHub
 
             if (r.Success)
             {
-                var ct = new CommentTree(r.Data);
-                submissionViewModel.CommentList.List.Add(ct);
+                var newComment = r.Data;
+                newComment.Level = 0;
+                submissionViewModel.CommentList.List.Add(new CommentTree(newComment));
             }
         }
 
@@ -189,6 +191,13 @@ namespace VoatHub
         private void RefreshButton_Click(object sender, RoutedEventArgs e)
         {
             ViewModel.Refresh();
+        }
+
+        private void CommentReplyButton_Click(object sender, RoutedEventArgs e)
+        {
+            var button = sender as Button;
+            var commentTree = button.DataContext as CommentTree;
+            commentTree.ReplyOpen = true;
         }
     }
 }

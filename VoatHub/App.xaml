@@ -6,15 +6,14 @@
     xmlns:voatModels="using:VoatHub.Models.Voat.v1"
     xmlns:voatHubModels="using:VoatHub.Models.VoatHub"
     xmlns:helpers="using:VoatHub.Ui.Helpers"
-    RequestedTheme="Dark">
+    RequestedTheme="Light">
 
     <Application.Resources>
-
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Styles/Styles.xaml"/>
             </ResourceDictionary.MergedDictionaries>
-            
+
             <!--Converter-->
             <helpers:StringToUriConverter x:Key="StringToUriConverter" />
             <helpers:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />

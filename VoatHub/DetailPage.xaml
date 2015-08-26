@@ -36,25 +36,25 @@
                 <ToggleButton Grid.Row="0" IsChecked="{x:Bind Show, Mode=TwoWay}"
                               Style="{StaticResource CommentTreeHeaderToggleButtonStyle}">
                     <StackPanel Orientation="Horizontal">
-                        <TextBlock Style="{StaticResource CommentTreeUserInfoStyle}">
+                        <TextBlock Style="{ThemeResource CaptionTextBlockStyle}"
+                                   VerticalAlignment="Center"
+                                   Foreground="{ThemeResource SystemControlForegroundBaseMediumBrush}">
                                 <Run FontWeight="Bold" Text="{x:Bind Comment.UserName}"/>
                                 <Run Text="{x:Bind Comment.TotalVotes}"/> pts
                                 <Run Text="{x:Bind Comment.Date, Converter={StaticResource TimeAgoConverter}}"/>
                         </TextBlock>
                         <Button Click="CommentUpVote_Click" Style="{StaticResource CommentTreeVoteButtonStyle}">
-                            <SymbolIcon Symbol="Up"/>
+                            <Polygon Points="5,0 10,10, 0,10" Stroke="{ThemeResource SystemControlForegroundBaseMediumLowBrush}" Fill="{ThemeResource SystemControlForegroundBaseMediumLowBrush}" />
                         </Button>
                         <Button Click="CommentDownVote_Click" Style="{StaticResource CommentTreeVoteButtonStyle}">
-                            <SymbolIcon Symbol="Up" RenderTransformOrigin="0.5,0.5">
-                                <SymbolIcon.RenderTransform>
-                                    <ScaleTransform ScaleY="-1" />
-                                </SymbolIcon.RenderTransform>
-                            </SymbolIcon>
+                            <Polygon Points="0,0 5,10, 10,0" Stroke="{ThemeResource SystemControlForegroundBaseMediumLowBrush}" Fill="{ThemeResource SystemControlForegroundBaseMediumLowBrush}" />
                         </Button>
                     </StackPanel>
                 </ToggleButton>
 
-                <Grid Grid.Row="1" Visibility="{x:Bind Show, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}">
+                <Grid Grid.Row="1" 
+                      Padding="{StaticResource CommentTreePadding}"
+                      Visibility="{x:Bind Show, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
@@ -66,13 +66,13 @@
                     </Grid.ColumnDefinitions>
 
                     <TextBlock Grid.Row="0" Text="{x:Bind Comment.Content}"
-                               Style="{StaticResource CommentTreeCommentStyle}"
+                               Style="{ThemeResource BodyTextBlockStyle}"
                                IsTapEnabled="True"/>
 
-                    <StackPanel Grid.Row="1" Padding="{StaticResource CommentTreePadding}">
+                    <StackPanel Grid.Row="1">
                         <StackPanel Orientation="Horizontal">
-                            <ToggleButton IsChecked="{x:Bind ReplyOpen, Mode=TwoWay}" Content="Reply" Style="{StaticResource CommentTreeMiscToggleButtonStyle}"/>
-                            <Button Click="PrintDataContext_Click" Content="Help" Style="{StaticResource CommentTreeMiscButtonStyle}"/>
+                            <HyperlinkButton Click="CommentReplyButton_Click" Content="Reply" Style="{StaticResource CommentTreeMiscButtonStyle}"/>
+                            <HyperlinkButton Click="PrintDataContext_Click" Content="Help" Style="{StaticResource CommentTreeMiscButtonStyle}"/>
                         </StackPanel>
 
                         <!--Reply-->
@@ -93,14 +93,14 @@
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
 
-                        <ListView Grid.Row="0" 
+                        <ListView Grid.Row="0"
                                 SelectionMode="None"
                                 IsItemClickEnabled="False"
                                 ItemTemplate="{StaticResource CommentTreeTemplate}"
                                 ItemContainerStyle="{StaticResource CommentTreeItemStyle}"
                                 ItemsSource="{x:Bind Children, Mode=OneWay}"/>
 
-                        <TextBlock Grid.Row="1" Text="HAS MORE COMMENTS." 
+                        <TextBlock Grid.Row="1" Text="HAS MORE COMMENTS."
                             Visibility="{x:Bind HasMoreComments, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"/>
                     </Grid>
                 </Grid>
@@ -173,34 +173,25 @@
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Grid.Row="0">
-                    <TextBlock Margin="0,8" Style="{ThemeResource TitleTextBlockStyle}"
-                                        Foreground="{ThemeResource SystemControlForegroundBaseHighBrush}"
-                                        FontWeight="Bold"
-                                        HorizontalAlignment="Left" Text="{x:Bind ViewModel.Submission.Title, Mode=OneWay}"/>
+                    <TextBlock Margin="0,8" Style="{ThemeResource SubheaderTextBlockStyle}"
+                               MaxLines="2"
+                               Foreground="{ThemeResource SystemControlForegroundBaseHighBrush}"
+                               HorizontalAlignment="Left" Text="{x:Bind ViewModel.Submission.Title, Mode=OneWay}"/>
 
                     <StackPanel Orientation="Horizontal">
-                        <TextBlock Style="{StaticResource CommentTreeUserInfoStyle}">
+                        <TextBlock Style="{ThemeResource CaptionTextBlockStyle}"
+                                   VerticalAlignment="Center"
+                                   Foreground="{ThemeResource SystemControlForegroundBaseMediumBrush}">
                             <Run FontWeight="Bold" Text="{x:Bind ViewModel.Submission.UserName, Mode=OneWay}"/>
                             <Run Text="{x:Bind ViewModel.Submission.TotalVotes, Mode=OneWay}"/> pts
                             <Run Text="{x:Bind ViewModel.Submission.Date, Converter={StaticResource TimeAgoConverter}, Mode=OneWay}"/>
                         </TextBlock>
 
-                        <Button Click="SubmissionUpVote_Click"
-                                Style="{StaticResource CommentTreeVoteButtonStyle}">
-                            <SymbolIcon Symbol="Up"/>
+                        <Button Click="SubmissionUpVote_Click" Style="{StaticResource CommentTreeVoteButtonStyle}">
+                            <Polygon Points="5,0 10,10, 0,10" Stroke="{ThemeResource SystemControlForegroundBaseMediumLowBrush}" Fill="{ThemeResource SystemControlForegroundBaseMediumLowBrush}" />
                         </Button>
-
-                        <Button Click="SubmissionDownVote_Click"
-                                Style="{StaticResource CommentTreeVoteButtonStyle}">
-                            <SymbolIcon Symbol="Up" RenderTransformOrigin="0.5,0.5">
-                                <SymbolIcon.RenderTransform>
-                                    <ScaleTransform ScaleY="-1" />
-                                </SymbolIcon.RenderTransform>
-                            </SymbolIcon>
-                        </Button>
-
-                        <Button Click="OpenSubmissionReply_Click" Style="{StaticResource CommentTreeVoteButtonStyle}">
-                            <SymbolIcon Symbol="MailReply"/>
+                        <Button Click="SubmissionDownVote_Click" Style="{StaticResource CommentTreeVoteButtonStyle}">
+                            <Polygon Points="0,0 5,10, 10,0" Stroke="{ThemeResource SystemControlForegroundBaseMediumLowBrush}" Fill="{ThemeResource SystemControlForegroundBaseMediumLowBrush}" />
                         </Button>
                     </StackPanel>
                 </StackPanel>
@@ -224,11 +215,13 @@
                     </Grid.ColumnDefinitions>
 
                     <StackPanel Grid.Row="0">
-                        <TextBlock Margin="0,9" HorizontalAlignment="Left" MaxWidth="560"
-                                FontSize="{ThemeResource TextStyleLargeFontSize}"
-                                Foreground="{ThemeResource SystemControlForegroundBaseHighBrush}"
-                                Style="{ThemeResource SubtitleTextBlockStyle}" 
+                        <TextBlock Margin="0,9" HorizontalAlignment="Left"
+                                Style="{ThemeResource BaseTextBlockStyle}" 
                                 Text="{x:Bind ViewModel.Submission.Content, Mode=OneWay}" />
+
+                        <StackPanel Orientation="Horizontal">
+                            <HyperlinkButton Click="OpenSubmissionReply_Click" Content="Reply" Style="{StaticResource CommentTreeMiscButtonStyle}"/>
+                        </StackPanel>
 
                         <StackPanel Visibility="{x:Bind ViewModel.ReplyOpen, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}">
                             <TextBox Text="{x:Bind ViewModel.ReplyText, Mode=TwoWay}" 
