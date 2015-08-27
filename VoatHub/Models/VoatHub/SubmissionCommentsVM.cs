@@ -17,6 +17,8 @@ namespace VoatHub.Models.VoatHub
 
         public SubmissionCommentsVM(SubmissionVM vm) : base(vm)
         {
+            VOAT_API.CommentSearchOptions.page = 1;
+
             // TODO: Load from previous session
             CommentSort = "Hot";
             Comments = new LoadingList<CommentTree>();
@@ -58,10 +60,14 @@ namespace VoatHub.Models.VoatHub
             set { SetProperty(ref _HasMoreComments, value); }
         }
 
+        /// <summary>
+        /// The reassigning the list causes
+        /// some painfully heavy loops. The loops might be cased by feedbacks from observationcollection
+        /// but that has not been verified yet. It definitely have something to do with the xaml visual tree though.
+        /// </summary>
         public async void LoadComments()
         {
-            Comments.Loading = true;
-            Comments.HasItems = false;
+            Comments = new LoadingList<CommentTree>();
 
             var response = await VOAT_API.GetCommentList(Submission.Subverse, Submission.ID);
             if (response.Success)

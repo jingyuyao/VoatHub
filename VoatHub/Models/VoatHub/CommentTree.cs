@@ -108,7 +108,7 @@ namespace VoatHub.Models.VoatHub
 
         public override string ToString()
         {
-            return comment.ToString() + " Children count: " + Count(Children);
+            return comment.ToString();
         }
         #endregion
 

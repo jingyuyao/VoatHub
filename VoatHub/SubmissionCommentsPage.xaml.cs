@@ -51,7 +51,7 @@ namespace VoatHub
 
         private void RefreshButton_Click(object sender, RoutedEventArgs e)
         {
-            ViewModel.LoadComments();
+            Frame.Navigate(typeof(SubmissionCommentsPage), new SubmissionCommentsVM(ViewModel as SubmissionVM));
         }
 
         private void BackButton_Click(object sender, RoutedEventArgs e)
