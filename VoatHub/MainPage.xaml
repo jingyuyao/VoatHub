@@ -113,7 +113,7 @@
 
                 <Frame Grid.Column="0" x:Name="MasterFrame" />
 
-                <Frame Grid.Column="1" x:Name="DetailFrame" />
+                <Frame Grid.Column="1" x:Name="DetailFrame" Background="{ThemeResource SystemControlBackgroundChromeMediumBrush}" />
             </Grid>
         </SplitView>
 

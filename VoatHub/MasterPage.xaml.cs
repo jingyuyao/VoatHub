@@ -139,9 +139,9 @@ namespace VoatHub
         private void SubmissionCommentsButton_Click(object sender, RoutedEventArgs e)
         {
             var button = e.OriginalSource as Button;
-            var submission = button.DataContext as ApiSubmission;
+            var vm = button.DataContext as SubmissionVM;
 
-            ViewModel.DetailFrame.Navigate(typeof(DetailPage), new DetailPageVM(submission, true));
+            ViewModel.DetailFrame.Navigate(typeof(DetailPage), new DetailPageVM(vm.Submission, true));
         }
 
         private void SubscribeButton_Click(object sender, RoutedEventArgs e)

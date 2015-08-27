@@ -195,7 +195,7 @@ namespace VoatHub
 
         private void CommentReplyButton_Click(object sender, RoutedEventArgs e)
         {
-            var button = sender as Button;
+            var button = e.OriginalSource as HyperlinkButton;
             var commentTree = button.DataContext as CommentTree;
             commentTree.ReplyOpen = true;
         }
