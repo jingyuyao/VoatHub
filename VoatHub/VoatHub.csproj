@@ -110,6 +110,9 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="CommentsPage.xaml.cs">
+      <DependentUpon>CommentsPage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="DetailPage.xaml.cs">
       <DependentUpon>DetailPage.xaml</DependentUpon>
     </Compile>
@@ -121,6 +124,7 @@
     </Compile>
     <Compile Include="Models\IOauthToken.cs" />
     <Compile Include="Models\VoatHub\BindableBase.cs" />
+    <Compile Include="Models\VoatHub\CommentsVM.cs" />
     <Compile Include="Models\VoatHub\LoadingList\LoadingObservableCollection.cs" />
     <Compile Include="Models\VoatHub\LoadingList\IncrementalLoadingList.cs" />
     <Compile Include="Models\VoatHub\IncrementalSubmissionList.cs" />
@@ -132,6 +136,7 @@
     <Compile Include="Models\VoatHub\MainPageVM.cs" />
     <Compile Include="Models\VoatHub\CommentTree.cs" />
     <Compile Include="Models\VoatHub\SubmissionVM.cs" />
+    <Compile Include="Models\VoatHub\WebVM.cs" />
     <Compile Include="Models\Voat\FormattedContentContainer.cs" />
     <Compile Include="Models\Voat\Score.cs" />
     <Compile Include="Models\Voat\v1\ApiBadge.cs" />
@@ -159,6 +164,9 @@
     <Compile Include="Ui\ProgressRingExtensions.cs" />
     <Compile Include="Ui\WebViewExtensions.cs" />
     <Compile Include="Utils\TimeAgo.cs" />
+    <Compile Include="WebPage.xaml.cs">
+      <DependentUpon>WebPage.xaml</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest">
@@ -183,6 +191,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Page Include="CommentsPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="DetailPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -200,6 +212,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Styles\Styles.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="WebPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

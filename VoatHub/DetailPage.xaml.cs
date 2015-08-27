@@ -38,21 +38,23 @@ namespace VoatHub
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             ViewModel = e.Parameter as DetailPageVM;
-        }
 
-        protected override void OnNavigatingFrom(NavigatingCancelEventArgs e)
-        {
-            ViewModel.Uri = DetailPageVM.DEFAULT_URI;
+            if (ViewModel.Submission.Type == ApiSubmissionType.Self || ViewModel.ShowComments)
+                goToComments();
+            else
+                goToLink();
         }
 
         #region Helpers
 
-        private async void commentVotingHelper(Button button, int vote)
+        private void goToComments()
         {
-            var commentTree = button.DataContext as CommentTree;
-            var comment = commentTree.Comment;
-            var result = await VOAT_API.PostVoteRevokeOnRevote("comment", comment.ID, vote, true);
-            Debug.WriteLine(result.Data);
+            DetailContentFrame.Navigate(typeof(CommentsPage), new CommentsVM(ViewModel.Submission));
+        }
+
+        private void goToLink()
+        {
+            DetailContentFrame.Navigate(typeof(WebPage), new WebVM(ViewModel.Submission.Url));
         }
 
         private async void submissionVotingHelper(int vote)
@@ -67,24 +69,6 @@ namespace VoatHub
         }
         #endregion
 
-        /// <summary>
-        /// Fixes WebView size not fit to grid issue.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void RootGrid_SizeChanged(object sender, SizeChangedEventArgs e)
-        {
-            try
-            {
-                DetailWebView.Height = DetailContentViewer.ActualHeight - DetailTitleRow.ActualHeight;
-                DetailWebView.Width = DetailInnerColumn.ActualWidth;
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex);
-            }
-        }
-
         private void SubmissionUpVote_Click(object sender, RoutedEventArgs e)
         {
             submissionVotingHelper(1);
@@ -93,42 +77,6 @@ namespace VoatHub
         private void SubmissionDownVote_Click(object sender, RoutedEventArgs e)
         {
             submissionVotingHelper(-1);
-        }
-
-        private void CommentUpVote_Click(object sender, RoutedEventArgs e)
-        {
-            commentVotingHelper(e.OriginalSource as Button, 1);
-        }
-
-        private void CommentDownVote_Click(object sender, RoutedEventArgs e)
-        {
-            commentVotingHelper(e.OriginalSource as Button, -1);
-        }
-
-        private void CloseCommentReply_Click(object sender, RoutedEventArgs e)
-        {
-            var button = e.OriginalSource as Button;
-            var commentTree = button.DataContext as CommentTree;
-            commentTree.ReplyOpen = false;
-        }
-
-        private async void SendCommentReply_Click(object sender, RoutedEventArgs e)
-        {
-            var button = e.OriginalSource as Button;
-            var commentTree = button.DataContext as CommentTree;
-            var comment = commentTree.Comment;
-
-            commentTree.ReplyOpen = false;
-
-            var value = new UserValue { Value = commentTree.ReplyText };
-            var r = await VOAT_API.PostCommentReply(comment.Subverse, (int)comment.SubmissionID, comment.ID, value);
-
-            if (r.Success)
-            {
-                var newComment = r.Data;
-                newComment.Level = comment.Level + 1;  // Fixes api not returning proper level for newly created comments
-                commentTree.Children.Add(new CommentTree(newComment));
-            }
         }
 
         private void OpenSubmissionReply_Click(object sender, RoutedEventArgs e)
@@ -156,7 +104,8 @@ namespace VoatHub
             {
                 var newComment = r.Data;
                 newComment.Level = 0;
-                submissionViewModel.CommentList.List.Add(new CommentTree(newComment));
+                var page = DetailContentFrame.Content as CommentsPage;
+                page.ViewModel.Comments.List.Add(new CommentTree(newComment));
             }
         }
 
@@ -174,7 +123,7 @@ namespace VoatHub
 
             ViewModel.CommentSort = item.Text;
 
-            ViewModel.Refresh();
+            goToComments();
         }
 
         private void ShowComments_Click(object sender, RoutedEventArgs e)
@@ -190,14 +139,7 @@ namespace VoatHub
 
         private void RefreshButton_Click(object sender, RoutedEventArgs e)
         {
-            ViewModel.Refresh();
-        }
-
-        private void CommentReplyButton_Click(object sender, RoutedEventArgs e)
-        {
-            var button = sender as Button;
-            var commentTree = button.DataContext as CommentTree;
-            commentTree.ReplyOpen = true;
+            goToComments();
         }
     }
 }

@@ -1,0 +1,141 @@
+﻿<Page
+    x:Class="VoatHub.CommentsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:VoatHub"
+    xmlns:voatModels="using:VoatHub.Models.Voat.v1"
+    xmlns:voatHubModels="using:VoatHub.Models.VoatHub"
+    xmlns:helpers="using:VoatHub.Ui.Helpers"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Page.Resources>
+        <!--Converter, repeated here because the compiler is too dumb to look for them in Application.Resources-->
+        <helpers:StringToUriConverter x:Key="StringToUriConverter" />
+        <helpers:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+        <helpers:BoolToNegateVisibilityConverter x:Key="BoolToNegateVisibilityConverter" />
+        <helpers:NullToVisibilityConverter x:Key="NullToVisibilityConverter" />
+        <helpers:TimeAgoConverter x:Key="TimeAgoConverter" />
+        <helpers:BoolNegateConverter x:Key="BoolNegateConverter" />
+        <helpers:LevelToBrushConverter x:Key="LevelToBrushConverter" />
+
+        <DataTemplate x:Key="CommentTreeTemplate" x:DataType="voatHubModels:CommentTree">
+            <Grid Background="{x:Bind Comment.Level, Converter={StaticResource LevelToBrushConverter}}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <ToggleButton Grid.Row="0" IsChecked="{x:Bind Show, Mode=TwoWay}"
+                              Style="{StaticResource CommentTreeHeaderToggleButtonStyle}">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Style="{ThemeResource CaptionTextBlockStyle}"
+                                   VerticalAlignment="Center"
+                                   Foreground="{ThemeResource SystemControlForegroundBaseMediumBrush}">
+                                <Run FontWeight="Bold" Text="{x:Bind Comment.UserName}"/>
+                                <Run Text="{x:Bind Comment.TotalVotes}"/> pts
+                                <Run Text="{x:Bind Comment.Date, Converter={StaticResource TimeAgoConverter}}"/>
+                        </TextBlock>
+                        <Button Click="CommentUpVote_Click" Style="{StaticResource CommentTreeVoteButtonStyle}">
+                            <Polygon Points="5,0 10,10, 0,10" Stroke="{ThemeResource SystemControlForegroundBaseMediumLowBrush}" Fill="{ThemeResource SystemControlForegroundBaseMediumLowBrush}" />
+                        </Button>
+                        <Button Click="CommentDownVote_Click" Style="{StaticResource CommentTreeVoteButtonStyle}">
+                            <Polygon Points="0,0 5,10, 10,0" Stroke="{ThemeResource SystemControlForegroundBaseMediumLowBrush}" Fill="{ThemeResource SystemControlForegroundBaseMediumLowBrush}" />
+                        </Button>
+                    </StackPanel>
+                </ToggleButton>
+
+                <Grid Grid.Row="1" 
+                      Padding="{StaticResource CommentTreePadding}"
+                      Visibility="{x:Bind Show, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <TextBlock Grid.Row="0" Text="{x:Bind Comment.Content}"
+                               Style="{ThemeResource BodyTextBlockStyle}"
+                               IsTapEnabled="True"/>
+
+                    <StackPanel Grid.Row="1">
+                        <StackPanel Orientation="Horizontal">
+                            <HyperlinkButton Click="CommentReplyButton_Click" Content="Reply" Style="{StaticResource CommentTreeMiscButtonStyle}"/>
+                            <HyperlinkButton Click="PrintDataContext_Click" Content="Help" Style="{StaticResource CommentTreeMiscButtonStyle}"/>
+                        </StackPanel>
+
+                        <!--Reply-->
+                        <StackPanel Visibility="{x:Bind ReplyOpen, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}">
+                            <TextBox Text="{x:Bind ReplyText, Mode=TwoWay}" 
+                                 AcceptsReturn="True" TextWrapping="Wrap" 
+                                 PlaceholderText="Post reply..."/>
+                            <StackPanel Orientation="Horizontal">
+                                <Button Click="CloseCommentReply_Click" Content="Close" />
+                                <Button Click="SendCommentReply_Click" Content="Submit"/>
+                            </StackPanel>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <Grid Grid.Row="2" Padding="{StaticResource CommentTreeChildListPadding}">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <ListView Grid.Row="0"
+                                SelectionMode="None"
+                                IsItemClickEnabled="False"
+                                ItemTemplate="{StaticResource CommentTreeTemplate}"
+                                ItemContainerStyle="{StaticResource CommentTreeItemStyle}"
+                                ItemsSource="{x:Bind Children, Mode=OneWay}"/>
+
+                        <TextBlock Grid.Row="1" Text="HAS MORE COMMENTS."
+                            Visibility="{x:Bind HasMoreComments, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"/>
+                    </Grid>
+                </Grid>
+            </Grid>
+        </DataTemplate>
+    </Page.Resources>
+
+    <Grid x:Name="RootGrid" 
+          Background="Transparent">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!--Only visible and active when there are no items and it is loading-->
+        <ProgressRing Margin="0,50" 
+                      Width="50" 
+                      Height="50"
+                      Visibility="{x:Bind ViewModel.Comments.HasItems, Converter={StaticResource BoolToNegateVisibilityConverter}, Mode=OneWay}" 
+                      IsActive="{x:Bind ViewModel.Comments.Loading, Mode=OneWay}"/>
+
+        <ListView Grid.Row="1" 
+                SelectionMode="None"
+                IsItemClickEnabled="False"
+                ItemContainerStyle="{StaticResource CommentTreeItemStyle}"
+                ItemTemplate="{StaticResource CommentTreeTemplate}"
+                ItemsSource="{x:Bind ViewModel.Comments.List, Mode=OneWay}">
+        </ListView>
+
+        <TextBlock Grid.Row="2" Text="HAS MORE COMMENTS." 
+                   Visibility="{x:Bind ViewModel.HasMoreComments, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"/>
+    </Grid>
+</Page>
