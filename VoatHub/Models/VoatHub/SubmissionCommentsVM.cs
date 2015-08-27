@@ -11,25 +11,37 @@ using VoatHub.Models.VoatHub.LoadingList;
 
 namespace VoatHub.Models.VoatHub
 {
-    public class CommentsVM : BindableBase
+    public class SubmissionCommentsVM : SubmissionVM
     {
         private VoatApi VOAT_API = App.VOAT_API;
 
-        public CommentsVM()
+        public SubmissionCommentsVM(SubmissionVM vm) : base(vm)
         {
-            // Fixes item source null binding errors.
+            // TODO: Load from previous session
+            CommentSort = "Hot";
             Comments = new LoadingList<CommentTree>();
+            LoadComments();
         }
 
-        public CommentsVM(ApiSubmission submission) : this()
+        private string _CommentSort;
+        public string CommentSort
         {
-            loadSubmissionComments(submission);
+            get { return _CommentSort; }
+            set { SetProperty(ref _CommentSort, value); }
         }
 
-        public CommentsVM(ApiComment comment) : this()
+        private bool _ReplyOpen;
+        public bool ReplyOpen
         {
-            // TODO: load child comments
-            throw new NotImplementedException();
+            get { return _ReplyOpen; }
+            set { SetProperty(ref _ReplyOpen, value); }
+        }
+
+        private string _ReplyText;
+        public string ReplyText
+        {
+            get { return _ReplyText; }
+            set { SetProperty(ref _ReplyText, value); }
         }
 
         private LoadingList<CommentTree> _Comments;
@@ -46,17 +58,21 @@ namespace VoatHub.Models.VoatHub
             set { SetProperty(ref _HasMoreComments, value); }
         }
 
-        private async void loadSubmissionComments(ApiSubmission submission)
+        public async void LoadComments()
         {
-            var response = await VOAT_API.GetCommentList(submission.Subverse, submission.ID);
+            Comments.Loading = true;
+            Comments.HasItems = false;
+
+            var response = await VOAT_API.GetCommentList(Submission.Subverse, Submission.ID);
             if (response.Success)
             {
                 // TODO: Shit man, we going through the list at least 3 times. Might have to write more
                 // specific code if performance becomes a problem.
                 var commentTreeList = CommentTree.FromApiCommentList(response.Data, null);
                 var sortedList = commentTreeSorter(commentTreeList);
+                if (Submission.CommentCount > response.Data.Count) HasMoreComments = true;
+
                 Comments.List = sortedList;
-                if (submission.CommentCount > CommentTree.Count(sortedList)) HasMoreComments = true;
             }
 
             Comments.Loading = false;
@@ -78,6 +94,19 @@ namespace VoatHub.Models.VoatHub
             }
 
             return commentTreeList; ;
+        }
+
+        public async void SendReply()
+        {
+            var value = new UserValue { Value = ReplyText };
+            var r = await VOAT_API.PostComment(Submission.Subverse, Submission.ID, value);
+
+            if (r.Success)
+            {
+                var newComment = r.Data;
+                newComment.Level = 0;
+                Comments.List.Add(new CommentTree(newComment));
+            }
         }
     }
 }

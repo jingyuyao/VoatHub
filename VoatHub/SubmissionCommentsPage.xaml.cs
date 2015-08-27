@@ -7,7 +7,6 @@ using System.Runtime.InteropServices.WindowsRuntime;
 using VoatHub.Api.Voat;
 using VoatHub.Models.Voat;
 using VoatHub.Models.VoatHub;
-using VoatHub.Models.VoatHub.LoadingList;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.UI.Xaml;
@@ -25,23 +24,42 @@ namespace VoatHub
     /// <summary>
     /// An empty page that can be used on its own or navigated to within a Frame.
     /// </summary>
-    public sealed partial class CommentsPage : Page
+    public sealed partial class SubmissionCommentsPage : Page
     {
         private VoatApi VOAT_API = App.VOAT_API;
-        public CommentsVM ViewModel;
+        private SubmissionCommentsVM ViewModel;
 
-        public CommentsPage()
+        public SubmissionCommentsPage()
         {
             this.InitializeComponent();
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            ViewModel = e.Parameter as CommentsVM;
+            ViewModel = e.Parameter as SubmissionCommentsVM;
         }
 
-        #region Helpers
+        private void SubmissionUpVote_Click(object sender, RoutedEventArgs e)
+        {
+            ViewModel.UpVote();
+        }
 
+        private void SubmissionDownVote_Click(object sender, RoutedEventArgs e)
+        {
+            ViewModel.DownVote();
+        }
+
+        private void RefreshButton_Click(object sender, RoutedEventArgs e)
+        {
+            ViewModel.LoadComments();
+        }
+
+        private void BackButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (Frame.CanGoBack)
+                Frame.GoBack();
+        }
+        
         private async void commentVotingHelper(Button button, int vote)
         {
             var commentTree = button.DataContext as CommentTree;
@@ -55,7 +73,6 @@ namespace VoatHub
             var button = sender as FrameworkElement;
             Debug.WriteLine(button.DataContext);
         }
-        #endregion
 
         private void CommentUpVote_Click(object sender, RoutedEventArgs e)
         {
@@ -98,6 +115,51 @@ namespace VoatHub
             var button = sender as Button;
             var commentTree = button.DataContext as CommentTree;
             commentTree.ReplyOpen = true;
+        }
+
+        /// <summary>
+        /// This actually doesn't do shit. Voat returns the same thing no matter what sort options we send it...
+        /// <para>We actually have to do the sorting ourselves which kind of makes sense.</para>
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void SortComments_Click(object sender, RoutedEventArgs e)
+        {
+            var item = e.OriginalSource as MenuFlyoutItem;
+
+            VOAT_API.CommentSearchOptions.sort = (SortAlgorithm)Enum.Parse(typeof(SortAlgorithm), item.Text);
+
+            ViewModel.CommentSort = item.Text;
+            ViewModel.LoadComments();
+        }
+
+        private void OpenSubmissionReply_Click(object sender, RoutedEventArgs e)
+        {
+            ViewModel.ReplyOpen = true;
+        }
+
+        private void CloseSubmissionReply_Click(object sender, RoutedEventArgs e)
+        {
+            ViewModel.ReplyOpen = false;
+        }
+
+        private async void SendSubmissionReply_Click(object sender, RoutedEventArgs e)
+        {
+            var button = e.OriginalSource as Button;
+            var submissionViewModel = ViewModel;
+            var submission = submissionViewModel.Submission;
+
+            submissionViewModel.ReplyOpen = false;
+
+            var value = new UserValue { Value = submissionViewModel.ReplyText };
+            var r = await VOAT_API.PostComment(submission.Subverse, submission.ID, value);
+
+            if (r.Success)
+            {
+                var newComment = r.Data;
+                newComment.Level = 0;
+                ViewModel.Comments.List.Add(new CommentTree(newComment));
+            }
         }
     }
 }

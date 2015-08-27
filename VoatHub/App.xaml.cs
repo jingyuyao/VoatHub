@@ -24,6 +24,7 @@ namespace VoatHub
     sealed partial class App : Application
     {
         public static readonly VoatApi VOAT_API = new VoatApi("ZbDlC73ndD6TB84WQmKvMA==", "https", "fakevout.azurewebsites.net", "api/v1/", "https://fakevout.azurewebsites.net/api/token");
+        public static readonly Uri DEFAULT_URI = new Uri("about:blank", UriKind.Absolute);
 
         /// <summary>
         /// Initializes the singleton application object.  This is the first line of authored code

@@ -58,7 +58,7 @@ namespace VoatHub
 
             if (r.Success)
             {
-                ViewModel.DetailFrame.Navigate(typeof(DetailPage), new DetailPageVM(r.Data, false));
+                ViewModel.DetailFrame.Navigate(typeof(SubmissionCommentsPage), new SubmissionCommentsVM(SubmissionVM.FromApiSubmission(r.Data)));
                 NewSubmissionPopup.IsOpen = false;
                 NewSubmissionPopupErrorBlock.Text = "";
                 DiscussionTitle.Text = "";
@@ -111,6 +111,7 @@ namespace VoatHub
         {
             box.BorderBrush = RED_BRUSH;
         }
+
         #endregion
 
         /// <summary>
@@ -122,7 +123,10 @@ namespace VoatHub
         {
             var vm = e.ClickedItem as SubmissionVM;
 
-            ViewModel.DetailFrame.Navigate(typeof(DetailPage), new DetailPageVM(vm.Submission, false));
+            if (vm.Submission.Type == ApiSubmissionType.Link)
+                ViewModel.DetailFrame.Navigate(typeof(SubmissionLinkPage), new SubmissionLinkVM(vm));
+            else
+                ViewModel.DetailFrame.Navigate(typeof(SubmissionCommentsPage), new SubmissionCommentsVM(vm));
         }
 
         private void SortSubmissions_Click(object sender, RoutedEventArgs e)
@@ -141,7 +145,7 @@ namespace VoatHub
             var button = e.OriginalSource as Button;
             var vm = button.DataContext as SubmissionVM;
 
-            ViewModel.DetailFrame.Navigate(typeof(DetailPage), new DetailPageVM(vm.Submission, true));
+            ViewModel.DetailFrame.Navigate(typeof(SubmissionCommentsPage), new SubmissionCommentsVM(vm));
         }
 
         private void SubscribeButton_Click(object sender, RoutedEventArgs e)

@@ -113,7 +113,10 @@
 
                 <Frame Grid.Column="0" x:Name="MasterFrame" />
 
-                <Frame Grid.Column="1" x:Name="DetailFrame" />
+                <Frame Grid.Column="1" 
+                       BorderThickness="1,0,0,0"
+                       BorderBrush="{ThemeResource SystemControlForegroundBaseLowBrush}"
+                       x:Name="DetailFrame" />
             </Grid>
         </SplitView>
 

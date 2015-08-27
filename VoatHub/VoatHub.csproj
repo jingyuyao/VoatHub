@@ -110,12 +110,6 @@
     <Compile Include="App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
-    <Compile Include="CommentsPage.xaml.cs">
-      <DependentUpon>CommentsPage.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="DetailPage.xaml.cs">
-      <DependentUpon>DetailPage.xaml</DependentUpon>
-    </Compile>
     <Compile Include="LoginPage.xaml.cs">
       <DependentUpon>LoginPage.xaml</DependentUpon>
     </Compile>
@@ -124,7 +118,6 @@
     </Compile>
     <Compile Include="Models\IOauthToken.cs" />
     <Compile Include="Models\VoatHub\BindableBase.cs" />
-    <Compile Include="Models\VoatHub\CommentsVM.cs" />
     <Compile Include="Models\VoatHub\LoadingList\LoadingObservableCollection.cs" />
     <Compile Include="Models\VoatHub\LoadingList\IncrementalLoadingList.cs" />
     <Compile Include="Models\VoatHub\IncrementalSubmissionList.cs" />
@@ -132,9 +125,10 @@
     <Compile Include="Models\VoatHub\LoadingList\LoadingListBase.cs" />
     <Compile Include="Models\VoatHub\MasterPageVM.cs" />
     <Compile Include="Models\VoatHub\NavMenuItem.cs" />
-    <Compile Include="Models\VoatHub\DetailPageVM.cs" />
     <Compile Include="Models\VoatHub\MainPageVM.cs" />
     <Compile Include="Models\VoatHub\CommentTree.cs" />
+    <Compile Include="Models\VoatHub\SubmissionCommentsVM.cs" />
+    <Compile Include="Models\VoatHub\SubmissionLinkVM.cs" />
     <Compile Include="Models\VoatHub\SubmissionVM.cs" />
     <Compile Include="Models\VoatHub\WebVM.cs" />
     <Compile Include="Models\Voat\FormattedContentContainer.cs" />
@@ -160,6 +154,12 @@
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SubmissionCommentsPage.xaml.cs">
+      <DependentUpon>SubmissionCommentsPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="SubmissionLinkPage.xaml.cs">
+      <DependentUpon>SubmissionLinkPage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Ui\Helpers\Converters.cs" />
     <Compile Include="Ui\ProgressRingExtensions.cs" />
     <Compile Include="Ui\WebViewExtensions.cs" />
@@ -191,14 +191,6 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Page Include="CommentsPage.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="DetailPage.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="LoginPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -212,6 +204,14 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Styles\Styles.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="SubmissionCommentsPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="SubmissionLinkPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
