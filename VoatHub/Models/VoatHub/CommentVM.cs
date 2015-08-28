@@ -4,7 +4,8 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using VoatHub.Api.Voat;
+using VoatHub.Models.Voat;
 using VoatHub.Models.Voat.v1;
 
 namespace VoatHub.Models.VoatHub
@@ -12,20 +13,16 @@ namespace VoatHub.Models.VoatHub
     /// <summary>
     /// A ViewModel for comments.
     /// </summary>
-    public class CommentTree : BindableBase
+    public class CommentVM : BindableBase
     {
-        private ApiComment comment;
-        private bool? replyOpen;
-        private string replyText;
-        private bool? show;
-        private ObservableCollection<CommentTree> children;
+        private static readonly VoatApi VOAT_API = App.VOAT_API;
 
-        public CommentTree(ApiComment comment)
+        public CommentVM(ApiComment comment)
         {
             if (comment == null) throw new ArgumentException("Comment cannot be null.");
 
             Comment = comment;
-            Children = new ObservableCollection<CommentTree>();
+            Children = new ObservableCollection<CommentVM>();
             Show = true;
             ReplyOpen = false;
         }
@@ -34,41 +31,46 @@ namespace VoatHub.Models.VoatHub
         /// <summary>
         /// Invariant: never null.
         /// </summary>
+        private ApiComment _Comment;
         public ApiComment Comment
         {
-            get { return comment; }
-            set { SetProperty(ref comment, value); }
+            get { return _Comment; }
+            set { SetProperty(ref _Comment, value); }
         }
         /// <summary>
         /// Invariant: never null.
         /// </summary>
-        public ObservableCollection<CommentTree> Children
+        private ObservableCollection<CommentVM> _Children;
+        public ObservableCollection<CommentVM> Children
         {
-            get { return children; }
+            get { return _Children; }
             set
             {
-                SetProperty(ref children, value);
+                SetProperty(ref _Children, value);
                 HasMoreComments = Comment.ChildCount > value.Count;  // ChildCount include direct descendents only.
                 value.CollectionChanged += new System.Collections.Specialized.NotifyCollectionChangedEventHandler(ListChangedHandler);
             }
         }
 
+        private bool? _Show;
         public bool? Show
         {
-            get { return show; }
-            set { SetProperty(ref show, value); }
+            get { return _Show; }
+            set { SetProperty(ref _Show, value); }
         }
 
+        private bool? _ReplyOpen;
         public bool? ReplyOpen
         {
-            get { return replyOpen; }
-            set { SetProperty(ref replyOpen, value); }
+            get { return _ReplyOpen; }
+            set { SetProperty(ref _ReplyOpen, value); }
         }
 
+        private string _ReplyText;
         public string ReplyText
         {
-            get { return replyText; }
-            set { SetProperty(ref replyText, value); }
+            get { return _ReplyText; }
+            set { SetProperty(ref _ReplyText, value); }
         }
 
         private bool _HasMoreComments;
@@ -79,22 +81,7 @@ namespace VoatHub.Models.VoatHub
         }
         #endregion
 
-        #region Methods
-        /// <summary>
-        /// Assumptions: Comment.Level is accurate.
-        /// </summary>
-        /// <param name="id"></param>
-        /// <returns></returns>
-        public CommentTree FindParent(ApiComment target)
-        {
-            // Optomization: Parent's level must be less than target's level
-            if (Comment.Level >= target.Level) return null;
-
-            if (target.ParentID != null && Comment.ID == target.ParentID) return this;
-
-            return FindParentList(target, Children);
-        }
-
+        #region Private
         /// <summary>
         /// Oh boy, hopefully this isn't called a lot.
         /// </summary>
@@ -102,18 +89,11 @@ namespace VoatHub.Models.VoatHub
         /// <param name="e"></param>
         private void ListChangedHandler(object sender, EventArgs e)
         {
-            var collection = sender as ObservableCollection<CommentTree>;
+            var collection = sender as ObservableCollection<CommentVM>;
             HasMoreComments = Comment.ChildCount > collection.Count; // ChildCount include direct descendents only.
         }
 
-        public override string ToString()
-        {
-            return comment.ToString();
-        }
-        #endregion
-
-        #region StaticHelpers
-        private static CommentTree FindParentList(ApiComment target, ObservableCollection<CommentTree> source)
+        private static CommentVM FindParentList(ApiComment target, ObservableCollection<CommentVM> source)
         {
             for (var i = 0; i < source.Count; i++)
             {
@@ -123,14 +103,64 @@ namespace VoatHub.Models.VoatHub
 
             return null;
         }
+        #endregion
 
-        public static ObservableCollection<CommentTree> FromApiCommentList(List<ApiComment> apiComments, ObservableCollection<CommentTree> source)
+        #region Methods
+        public async void UpVote()
         {
-            var rootNestedComments = source ?? new ObservableCollection<CommentTree>();
+            var result = await VOAT_API.PostVoteRevokeOnRevote("comment", _Comment.ID, 1, true);
+        }
+
+        public async void DownVote()
+        {
+            var result = await VOAT_API.PostVoteRevokeOnRevote("comment", _Comment.ID, -1, true);
+        }
+
+        public async void SendReply()
+        {
+            ReplyOpen = false;
+
+            var value = new UserValue { Value = ReplyText };
+            var r = await VOAT_API.PostCommentReply(Comment.Subverse, (int)Comment.SubmissionID, Comment.ID, value);
+
+            if (r.Success)
+            {
+                var newComment = r.Data;
+                newComment.Level = Comment.Level + 1;  // Fixes api not returning proper level for newly created comments
+                Children.Add(new CommentVM(newComment));
+                ReplyText = "";
+            }
+        }
+
+        /// <summary>
+        /// Assumptions: Comment.Level is accurate.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public CommentVM FindParent(ApiComment target)
+        {
+            // Optomization: Parent's level must be less than target's level
+            if (Comment.Level >= target.Level) return null;
+
+            if (target.ParentID != null && Comment.ID == target.ParentID) return this;
+
+            return FindParentList(target, Children);
+        }
+
+        public override string ToString()
+        {
+            return _Comment.ToString();
+        }
+        #endregion
+
+        #region StaticHelpers
+        public static ObservableCollection<CommentVM> FromApiCommentList(List<ApiComment> apiComments, ObservableCollection<CommentVM> source)
+        {
+            var rootNestedComments = source ?? new ObservableCollection<CommentVM>();
 
             foreach (var apiComment in apiComments)
             {
-                var nestedComment = new CommentTree(apiComment);
+                var nestedComment = new CommentVM(apiComment);
 
                 var parentComment = FindParentList(apiComment, rootNestedComments);
 
@@ -148,14 +178,14 @@ namespace VoatHub.Models.VoatHub
         }
 
         /// <summary>
-        /// Recursively sorts the list of <see cref="CommentTree"/> from oldest to newest.
+        /// Recursively sorts the list of <see cref="CommentVM"/> from oldest to newest.
         /// <para>VERY EXPENSIVE OPERATION!</para>
         /// <para>Sort so oldest goes first becaues list view displays the first item on the bottom</para>
         /// </summary>
         /// <param name="list"></param>
-        public static ObservableCollection<CommentTree> SortNew(ObservableCollection<CommentTree> list)
+        public static ObservableCollection<CommentVM> SortNew(ObservableCollection<CommentVM> list)
         {
-            var sortedList = new List<CommentTree>(list);
+            var sortedList = new List<CommentVM>(list);
 
             sortedList.Sort((x, y) =>
             {
@@ -167,23 +197,23 @@ namespace VoatHub.Models.VoatHub
                     return 0;
             });
 
-            foreach (var commentTree in sortedList)
+            foreach (var commentVM in sortedList)
             {
-                commentTree.Children = SortNew(commentTree.Children);
+                commentVM.Children = SortNew(commentVM.Children);
             }
 
-            return new ObservableCollection<CommentTree>(sortedList);
+            return new ObservableCollection<CommentVM>(sortedList);
         }
 
         /// <summary>
-        /// Recursively sorts the list of <see cref="CommentTree"/> from least votes to most votes.
+        /// Recursively sorts the list of <see cref="CommentVM"/> from least votes to most votes.
         /// <para>VERY EXPENSIVE OPERATION!</para>
         /// <para>Sort so least votes goes first becaues list view displays the first item on the bottom</para>
         /// </summary>
         /// <param name="list"></param>
-        public static ObservableCollection<CommentTree> SortTop(ObservableCollection<CommentTree> list)
+        public static ObservableCollection<CommentVM> SortTop(ObservableCollection<CommentVM> list)
         {
-            var sortedList = new List<CommentTree>(list);
+            var sortedList = new List<CommentVM>(list);
 
             sortedList.Sort((x, y) =>
             {
@@ -195,20 +225,20 @@ namespace VoatHub.Models.VoatHub
                     return 0;
             });
 
-            foreach (var commentTree in sortedList)
+            foreach (var commentVM in sortedList)
             {
-                commentTree.Children = SortNew(commentTree.Children);
+                commentVM.Children = SortNew(commentVM.Children);
             }
 
-            return new ObservableCollection<CommentTree>(sortedList);
+            return new ObservableCollection<CommentVM>(sortedList);
         }
 
         /// <summary>
-        /// Recursively count the number of comments in a list of <see cref="CommentTree"/>.
+        /// Recursively count the number of comments in a list of <see cref="CommentVM"/>.
         /// </summary>
         /// <param name="list"></param>
         /// <returns></returns>
-        public static int Count(ObservableCollection<CommentTree> list)
+        public static int Count(ObservableCollection<CommentVM> list)
         {
             int counter = 0;
 
@@ -221,11 +251,11 @@ namespace VoatHub.Models.VoatHub
         }
 
         /// <summary>
-        /// Recursively count the number of comments in a <see cref="CommentTree"/>.
+        /// Recursively count the number of comments in a <see cref="CommentVM"/>.
         /// </summary>
         /// <param name="tree"></param>
         /// <returns></returns>
-        public static int Count(CommentTree tree)
+        public static int Count(CommentVM tree)
         {
             int counter = 0;
             if (tree != null)

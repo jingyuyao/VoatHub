@@ -19,24 +19,12 @@ namespace VoatHub.Models.VoatHub
         public SubmissionCommentsVM(SubmissionVM vm) : base(vm)
         {
             VOAT_API.CommentSearchOptions.page = 1;
-
-            // TODO: Load from previous session
-            var apiCommentSort = VOAT_API.CommentSearchOptions.sort;
-
-            if (apiCommentSort == null)
-                CommentSort = "Hot";
-            else
-                CommentSort = apiCommentSort.ToString();
-            
-            Comments = new LoadingList<CommentTree>();
+            CommentSort = VOAT_API.CommentSearchOptions.sort.ToString();
+            Comments = new LoadingList<CommentVM>();
             LoadComments();
         }
 
-        ~SubmissionCommentsVM()
-        {
-            Debug.WriteLine("SubmissionCommentsVM destroyed");
-        }
-
+        #region Properties
         private string _CommentSort;
         public string CommentSort
         {
@@ -58,8 +46,8 @@ namespace VoatHub.Models.VoatHub
             set { SetProperty(ref _ReplyText, value); }
         }
 
-        private LoadingList<CommentTree> _Comments;
-        public LoadingList<CommentTree> Comments
+        private LoadingList<CommentVM> _Comments;
+        public LoadingList<CommentVM> Comments
         {
             get { return _Comments; }
             set { SetProperty(ref _Comments, value); }
@@ -71,7 +59,9 @@ namespace VoatHub.Models.VoatHub
             get { return _HasMoreComments; }
             set { SetProperty(ref _HasMoreComments, value); }
         }
+        #endregion
 
+        #region PrivateMethods
         /// <summary>
         /// This method is kept private because somehow making bulk changes to the comments collection causes
         /// some painfully heavy memory problems. The problem might be caused by some redrawing or the visual
@@ -85,8 +75,8 @@ namespace VoatHub.Models.VoatHub
             {
                 // TODO: Shit man, we going through the list at least 3 times. Might have to write more
                 // specific code if performance becomes a problem.
-                var commentTreeList = CommentTree.FromApiCommentList(response.Data, null);
-                var sortedList = commentTreeSorter(commentTreeList);
+                var commentVMList = CommentVM.FromApiCommentList(response.Data, null);
+                var sortedList = commentVMSorter(commentVMList);
                 if (Submission.CommentCount > response.Data.Count) HasMoreComments = true;
 
                 Comments.List = sortedList;
@@ -96,25 +86,28 @@ namespace VoatHub.Models.VoatHub
         }
 
         /// <summary>
-        /// Sorts the commentTreeList based on <see cref="commentSearchOptions"/>.
+        /// Sorts the commentVMList based on <see cref="commentSearchOptions"/>.
         /// <para>Expensive operation</para>
         /// </summary>
-        /// <param name="commentTree"></param>
-        private ObservableCollection<CommentTree> commentTreeSorter(ObservableCollection<CommentTree> commentTreeList)
+        /// <param name="commentVM"></param>
+        private ObservableCollection<CommentVM> commentVMSorter(ObservableCollection<CommentVM> commentVMList)
         {
             switch (VOAT_API.CommentSearchOptions.sort)
             {
                 case SortAlgorithm.New:
-                    return CommentTree.SortNew(commentTreeList);
+                    return CommentVM.SortNew(commentVMList);
                 case SortAlgorithm.Top:
-                    return CommentTree.SortTop(commentTreeList);
+                    return CommentVM.SortTop(commentVMList);
             }
 
-            return commentTreeList; ;
+            return commentVMList; ;
         }
+        #endregion
 
-        public async void SendReply()
+        public async void SendSubmissionReply()
         {
+            ReplyOpen = false;
+
             var value = new UserValue { Value = ReplyText };
             var r = await VOAT_API.PostComment(Submission.Subverse, Submission.ID, value);
 
@@ -122,7 +115,8 @@ namespace VoatHub.Models.VoatHub
             {
                 var newComment = r.Data;
                 newComment.Level = 0;
-                Comments.List.Add(new CommentTree(newComment));
+                Comments.List.Insert(0, new CommentVM(newComment));
+                ReplyText = "";
             }
         }
     }

@@ -109,7 +109,7 @@
                 <AppBarToggleButton Icon="Favorite" Label="Subscribe" 
                                     IsChecked="{x:Bind ViewModel.IsSubscribed, Mode=TwoWay}"
                                     Click="SubscribeButton_Click"/>
-                <AppBarButton Icon="Add" Label="New Post" Click="NewPost_Click" />
+                <AppBarButton Icon="Add" Label="New Post" IsEnabled="{x:Bind ViewModel.CanPost}" Click="NewSubmission_Click" />
             </CommandBar.SecondaryCommands>
         </CommandBar>
 
@@ -124,56 +124,47 @@
             </Grid.ColumnDefinitions>
 
             <!--TODO: Added other submission options when they became avaiable in the API-->
-            <Popup x:Name="NewSubmissionPopup">
+            <Popup x:Name="NewSubmissionPopup" IsOpen="{x:Bind ViewModel.IsNewSubmissionPopupOpen, Mode=OneWay}">
                 <Grid Height="{Binding ActualHeight, ElementName=MasterContentGrid, Mode=OneWay}"
                     Width="{Binding ActualWidth, ElementName=MasterContentGrid, Mode=OneWay}"
                     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
                     <StackPanel>
                         <Pivot>
                             <PivotItem Header="New Link">
-                                <Grid>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition />
-                                        <RowDefinition />
-                                        <RowDefinition />
-                                    </Grid.RowDefinitions>
+                                <StackPanel>
+                                    <TextBox Text="{x:Bind ViewModel.NewSubmissionTitle, Mode=TwoWay}" 
+                                             PlaceholderText="Title (Min length: 5)"/>
+                                    <TextBox Text="{x:Bind ViewModel.NewSubmissionUrl, Mode=TwoWay}" 
+                                             PlaceholderText="Url (Full path)"/>
 
-                                    <TextBox Grid.Row="0" x:Name="LinkTitle" PlaceholderText="Title (Min length: 5)"/>
-                                    <TextBox Grid.Row="1" x:Name="LinkUrl" PlaceholderText="Url (Full path)"/>
-
-                                    <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                                         <Button Content="Close"
-                                                            Tag="{Binding ElementName=NewSubmissionPopup}" 
-                                                            Click="ClosePopup_Click"/>
+                                                Tag="{Binding ElementName=NewSubmissionPopup}" 
+                                                Click="ClosePopup_Click"/>
                                         <Button Content="New Link" Click="NewLink_Click" />
                                     </StackPanel>
-                                </Grid>
+                                </StackPanel>
                             </PivotItem>
 
                             <PivotItem Header="New Discussion">
-                                <Grid>
-                                    <Grid.RowDefinitions>
-                                        <RowDefinition />
-                                        <RowDefinition />
-                                        <RowDefinition />
-                                    </Grid.RowDefinitions>
+                                <StackPanel>
+                                    <TextBox Text="{x:Bind ViewModel.NewSubmissionTitle, Mode=TwoWay}" 
+                                             PlaceholderText="Title (Min length: 5)"/>
+                                    <TextBox Text="{x:Bind ViewModel.NewSubmissionContent, Mode=TwoWay}"
+                                            AcceptsReturn="True" TextWrapping="Wrap" 
+                                            PlaceholderText="Content"/>
 
-                                    <TextBox Grid.Row="0" x:Name="DiscussionTitle" PlaceholderText="Title (Min length: 5)"/>
-                                    <TextBox Grid.Row="1" x:Name="DiscussionContent" 
-                                                            AcceptsReturn="True" TextWrapping="Wrap" 
-                                                            PlaceholderText="Content"/>
-
-                                    <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                                         <Button Content="Close"
-                                                            Tag="{Binding ElementName=NewSubmissionPopup}" 
-                                                            Click="ClosePopup_Click"/>
+                                                Tag="{Binding ElementName=NewSubmissionPopup}" 
+                                                Click="ClosePopup_Click"/>
                                         <Button Content="New Discussion" Click="NewDiscussion_Click" />
                                     </StackPanel>
-                                </Grid>
+                                </StackPanel>
                             </PivotItem>
                         </Pivot>
-                        <TextBlock x:Name="NewSubmissionPopupErrorBlock" />
-                        <ProgressRing x:Name="NewSubmissionPopupProgressRing" Style="{StaticResource DefaultProgressRingStyle}" />
+                        <TextBlock Text="{x:Bind ViewModel.NewSubmissionError, Mode=OneWay}" TextWrapping="WrapWholeWords"/>
+                        <ProgressRing IsActive="{x:Bind ViewModel.PostingNewSubmission, Mode=OneWay}" />
                     </StackPanel>
                 </Grid>
             </Popup>

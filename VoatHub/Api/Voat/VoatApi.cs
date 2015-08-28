@@ -65,13 +65,17 @@ namespace VoatHub.Api.Voat
             uriBuilder = new ApiUriBuilder(scheme, host, apiPath);
 
             // TODO: Load options from settings
+            // Page and sort should never be null since they are used in UI
+            // that will prevent a bunch of sort == null sort = "Hot" lines.
             SubmissionSearchOptions = new SearchOptions()
             {
-                page = 1
+                page = 1,
+                sort = SortAlgorithm.Hot
             };
             CommentSearchOptions = new SearchOptions()
             {
-                page = 1
+                page = 1,
+                sort = SortAlgorithm.Hot
             };
         }
 

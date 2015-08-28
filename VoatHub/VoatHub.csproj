@@ -126,7 +126,7 @@
     <Compile Include="Models\VoatHub\MasterPageVM.cs" />
     <Compile Include="Models\VoatHub\NavMenuItem.cs" />
     <Compile Include="Models\VoatHub\MainPageVM.cs" />
-    <Compile Include="Models\VoatHub\CommentTree.cs" />
+    <Compile Include="Models\VoatHub\CommentVM.cs" />
     <Compile Include="Models\VoatHub\SubmissionCommentsVM.cs" />
     <Compile Include="Models\VoatHub\SubmissionLinkVM.cs" />
     <Compile Include="Models\VoatHub\SubmissionVM.cs" />

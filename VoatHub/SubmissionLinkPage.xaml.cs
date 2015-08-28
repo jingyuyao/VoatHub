@@ -31,26 +31,29 @@ namespace VoatHub
             this.InitializeComponent();
         }
 
+        #region Page
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             ViewModel = e.Parameter as SubmissionLinkVM;
         }
 
-        private void SubmissionUpVote_Click(object sender, RoutedEventArgs e)
+        protected override void OnNavigatedFrom(NavigationEventArgs e)
         {
-            ViewModel.UpVote();
+            SubmissionWebView.Stop();
         }
+        #endregion
 
-        private void SubmissionDownVote_Click(object sender, RoutedEventArgs e)
-        {
-            ViewModel.DownVote();
-        }
-
+        #region AppBar
         private void RefreshButton_Click(object sender, RoutedEventArgs e)
         {
             SubmissionWebView.Refresh();
         }
 
+        /// <summary>
+        /// Go to the comment page. Current page is perseved on the stack.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void ShowComments_Click(object sender, RoutedEventArgs e)
         {
             Frame.Navigate(typeof(SubmissionCommentsPage), new SubmissionCommentsVM(ViewModel as SubmissionVM));
@@ -61,7 +64,21 @@ namespace VoatHub
             if (Frame.CanGoBack)
                 Frame.GoBack();
         }
+        #endregion
 
+        #region SubmissionHeader
+        private void SubmissionUpVote_Click(object sender, RoutedEventArgs e)
+        {
+            ViewModel.UpVote();
+        }
+
+        private void SubmissionDownVote_Click(object sender, RoutedEventArgs e)
+        {
+            ViewModel.DownVote();
+        }
+        #endregion
+
+        #region WebView
         private void Grid_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             try
@@ -74,5 +91,6 @@ namespace VoatHub
                 Debug.WriteLine(ex);
             }
         }
+        #endregion
     }
 }

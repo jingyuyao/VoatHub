@@ -33,17 +33,16 @@
 
         <StackPanel Grid.Row="1" Padding="10,0">
             <TextBlock Margin="0,8" Style="{ThemeResource SubheaderTextBlockStyle}"
-                               MaxLines="2"
-                               Foreground="{ThemeResource SystemControlForegroundBaseHighBrush}"
-                               HorizontalAlignment="Left" Text="{x:Bind ViewModel.Submission.Title, Mode=OneWay}"/>
+                    MaxLines="2" TextTrimming="CharacterEllipsis"
+                    HorizontalAlignment="Left" Text="{x:Bind ViewModel.Submission.Title, Mode=OneWay}"/>
 
             <StackPanel Orientation="Horizontal">
                 <TextBlock Style="{ThemeResource CaptionTextBlockStyle}"
-                                   VerticalAlignment="Center"
-                                   Foreground="{ThemeResource SystemControlForegroundBaseMediumBrush}">
-                            <Run FontWeight="Bold" Text="{x:Bind ViewModel.Submission.UserName, Mode=OneWay}"/>
-                            <Run Text="{x:Bind ViewModel.Submission.TotalVotes, Mode=OneWay}"/> pts
-                            <Run Text="{x:Bind ViewModel.Submission.Date, Converter={StaticResource TimeAgoConverter}, Mode=OneWay}"/>
+                            VerticalAlignment="Center"
+                            Foreground="{ThemeResource SystemControlForegroundBaseMediumBrush}">
+                    <Run FontWeight="Bold" Text="{x:Bind ViewModel.Submission.UserName, Mode=OneWay}"/>
+                    <Run Text="{x:Bind ViewModel.Submission.TotalVotes, Mode=OneWay}"/> pts
+                    <Run Text="{x:Bind ViewModel.Submission.Date, Converter={StaticResource TimeAgoConverter}, Mode=OneWay}"/>
                 </TextBlock>
 
                 <Button Click="SubmissionUpVote_Click" Style="{StaticResource CommentTreeVoteButtonStyle}">

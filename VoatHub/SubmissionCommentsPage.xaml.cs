@@ -34,16 +34,12 @@ namespace VoatHub
             this.InitializeComponent();
         }
 
-        ~SubmissionCommentsPage()
-        {
-            Debug.WriteLine("SubmissionCommentsPage destroyed");
-        }
-
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             ViewModel = e.Parameter as SubmissionCommentsVM;
         }
 
+        #region Misc
         /// <summary>
         /// Refresh the page and removes the previous page from the backstack
         /// </summary>
@@ -53,16 +49,51 @@ namespace VoatHub
             Frame.BackStack.RemoveAt(Frame.BackStack.Count - 1);
         }
 
-        private void SubmissionUpVote_Click(object sender, RoutedEventArgs e)
+        private void PrintDataContext_Click(object sender, RoutedEventArgs e)
         {
-            ViewModel.UpVote();
+            var button = sender as FrameworkElement;
+            Debug.WriteLine(button.DataContext);
+        }
+        #endregion
+
+        #region CommentTree
+        private void CommentUpVote_Click(object sender, RoutedEventArgs e)
+        {
+            var button = e.OriginalSource as Button;
+            var commentVM = button.DataContext as CommentVM;
+            commentVM.UpVote();
         }
 
-        private void SubmissionDownVote_Click(object sender, RoutedEventArgs e)
+        private void CommentDownVote_Click(object sender, RoutedEventArgs e)
         {
-            ViewModel.DownVote();
+            var button = e.OriginalSource as Button;
+            var commentVM = button.DataContext as CommentVM;
+            commentVM.DownVote();
         }
 
+        private void CommentReplyButton_Click(object sender, RoutedEventArgs e)
+        {
+            var button = sender as HyperlinkButton;
+            var vm = button.DataContext as CommentVM;
+            vm.ReplyOpen = true;
+        }
+
+        private void CloseCommentReply_Click(object sender, RoutedEventArgs e)
+        {
+            var button = e.OriginalSource as Button;
+            var vm = button.DataContext as CommentVM;
+            vm.ReplyOpen = false;
+        }
+
+        private void SendCommentReply_Click(object sender, RoutedEventArgs e)
+        {
+            var button = e.OriginalSource as Button;
+            var vm = button.DataContext as CommentVM;
+            vm.SendReply();
+        }
+        #endregion
+
+        #region AppBar
         private void RefreshButton_Click(object sender, RoutedEventArgs e)
         {
             _refresh();
@@ -73,77 +104,29 @@ namespace VoatHub
             if (Frame.CanGoBack)
                 Frame.GoBack();
         }
-        
-        private async void commentVotingHelper(Button button, int vote)
-        {
-            var commentTree = button.DataContext as CommentTree;
-            var comment = commentTree.Comment;
-            var result = await VOAT_API.PostVoteRevokeOnRevote("comment", comment.ID, vote, true);
-            Debug.WriteLine(result.Data);
-        }
-
-        private void PrintDataContext_Click(object sender, RoutedEventArgs e)
-        {
-            var button = sender as FrameworkElement;
-            Debug.WriteLine(button.DataContext);
-        }
-
-        private void CommentUpVote_Click(object sender, RoutedEventArgs e)
-        {
-            commentVotingHelper(e.OriginalSource as Button, 1);
-        }
-
-        private void CommentDownVote_Click(object sender, RoutedEventArgs e)
-        {
-            commentVotingHelper(e.OriginalSource as Button, -1);
-        }
-
-        private void CloseCommentReply_Click(object sender, RoutedEventArgs e)
-        {
-            var button = e.OriginalSource as Button;
-            var commentTree = button.DataContext as CommentTree;
-            commentTree.ReplyOpen = false;
-        }
-
-        private async void SendCommentReply_Click(object sender, RoutedEventArgs e)
-        {
-            var button = e.OriginalSource as Button;
-            var commentTree = button.DataContext as CommentTree;
-            var comment = commentTree.Comment;
-
-            commentTree.ReplyOpen = false;
-
-            var value = new UserValue { Value = commentTree.ReplyText };
-            var r = await VOAT_API.PostCommentReply(comment.Subverse, (int)comment.SubmissionID, comment.ID, value);
-
-            if (r.Success)
-            {
-                var newComment = r.Data;
-                newComment.Level = comment.Level + 1;  // Fixes api not returning proper level for newly created comments
-                commentTree.Children.Add(new CommentTree(newComment));
-            }
-        }
-
-        private void CommentReplyButton_Click(object sender, RoutedEventArgs e)
-        {
-            var button = sender as HyperlinkButton;
-            var commentTree = button.DataContext as CommentTree;
-            commentTree.ReplyOpen = true;
-        }
 
         /// <summary>
-        /// This actually doesn't do shit. Voat returns the same thing no matter what sort options we send it...
-        /// <para>We actually have to do the sorting ourselves which kind of makes sense.</para>
+        /// Change the sorting options and refresh the page. 
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void SortComments_Click(object sender, RoutedEventArgs e)
         {
             var item = e.OriginalSource as MenuFlyoutItem;
-
             VOAT_API.CommentSearchOptions.sort = (SortAlgorithm)Enum.Parse(typeof(SortAlgorithm), item.Text);
-            
             _refresh();
+        }
+        #endregion
+
+        #region Submission
+        private void SubmissionUpVote_Click(object sender, RoutedEventArgs e)
+        {
+            ViewModel.UpVote();
+        }
+
+        private void SubmissionDownVote_Click(object sender, RoutedEventArgs e)
+        {
+            ViewModel.DownVote();
         }
 
         private void OpenSubmissionReply_Click(object sender, RoutedEventArgs e)
@@ -156,23 +139,10 @@ namespace VoatHub
             ViewModel.ReplyOpen = false;
         }
 
-        private async void SendSubmissionReply_Click(object sender, RoutedEventArgs e)
+        private void SendSubmissionReply_Click(object sender, RoutedEventArgs e)
         {
-            var button = e.OriginalSource as Button;
-            var submissionViewModel = ViewModel;
-            var submission = submissionViewModel.Submission;
-
-            submissionViewModel.ReplyOpen = false;
-
-            var value = new UserValue { Value = submissionViewModel.ReplyText };
-            var r = await VOAT_API.PostComment(submission.Subverse, submission.ID, value);
-
-            if (r.Success)
-            {
-                var newComment = r.Data;
-                newComment.Level = 0;
-                ViewModel.Comments.List.Add(new CommentTree(newComment));
-            }
+            ViewModel.SendSubmissionReply();
         }
+        #endregion
     }
 }

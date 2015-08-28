@@ -38,75 +38,64 @@ namespace VoatHub
             ViewModel = e.Parameter as MasterPageVM;
         }
 
-        #region Helpers
-        /// <summary>
-        /// Helper method to post new submission and change current submission if post success
-        /// </summary>
-        /// <param name="submission"></param>
-        private async void postSubmission(UserSubmission submission)
+        #region NewSubmission
+        private void NewSubmission_Click(object sender, RoutedEventArgs e)
         {
-            NewSubmissionPopupProgressRing.Toggle();
-
-            var r = await VOAT_API.PostSubmission(ViewModel.Subverse, submission);
-
-            if (r.Success)
-            {
-                ViewModel.DetailFrame.Navigate(typeof(SubmissionCommentsPage), new SubmissionCommentsVM(SubmissionVM.FromApiSubmission(r.Data)));
-                NewSubmissionPopup.IsOpen = false;
-                NewSubmissionPopupErrorBlock.Text = "";
-                DiscussionTitle.Text = "";
-                DiscussionContent.Text = "";
-            }
-
-            NewSubmissionPopupProgressRing.Toggle();
+            ViewModel.IsNewSubmissionPopupOpen = true;
         }
 
         /// <summary>
-        /// Go through every box and highlight it red if it's empty.
+        /// TODO: Better validation
         /// </summary>
-        /// <param name="boxes"></param>
-        /// <returns>Whether all box pass the check.</returns>
-        private bool validateNotEmpty(params TextBox[] boxes)
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void NewLink_Click(object sender, RoutedEventArgs e)
         {
-            bool pass = true;
-
-            foreach (var box in boxes)
-            {
-                if (box.Text == "" || box.Text == null)
-                {
-                    invalidateBox(box);
-                    pass = false;
-                }
-            }
-            return pass;
+            ViewModel.NewLink();
         }
 
-        private bool validatePostTitle(TextBox box)
+        private void NewDiscussion_Click(object sender, RoutedEventArgs e)
         {
-            if (box.Text.Length < 5)
-            {
-                invalidateBox(box);
-                return false;
-            }
-
-            return true;
+            ViewModel.NewDiscussion();
         }
-
-        private bool validateLinkUrl(TextBox box)
-        {
-            Uri uri;
-            bool success = Uri.TryCreate(box.Text, UriKind.Absolute, out uri);
-            if (!success) invalidateBox(box);
-            return success;
-        }
-
-        private void invalidateBox(TextBox box)
-        {
-            box.BorderBrush = RED_BRUSH;
-        }
-
         #endregion
 
+        #region AppBar
+        private void SortSubmissions_Click(object sender, RoutedEventArgs e)
+        {
+            var item = e.OriginalSource as MenuFlyoutItem;
+
+            VOAT_API.SubmissionSearchOptions.sort = (SortAlgorithm)Enum.Parse(typeof(SortAlgorithm), item.Text);
+            ViewModel.Sort = item.Text; // Need this since we are not refreshing the page
+
+            ViewModel.Refresh();
+        }
+
+        private void SubscribeButton_Click(object sender, RoutedEventArgs e)
+        {
+            var toggleButton = e.OriginalSource as AppBarToggleButton;
+
+            // TODO: This is the part where we subscribe and unsubscribe the subverse.
+            // Currently the feature is not available in the v1 api as of 8/19/15
+            //if (toggleButton.IsChecked == true)
+            //{
+
+            //}
+        }
+
+        private void BackButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (Frame.CanGoBack)
+                Frame.GoBack();
+        }
+
+        private void RefreshButton_Click(object sender, RoutedEventArgs e)
+        {
+            ViewModel.Refresh();
+        }
+        #endregion
+
+        #region SubmissionList
         /// <summary>
         /// Changes which DataTempalte the ContentPresenter uses based on the type of the submission.
         /// </summary>
@@ -132,29 +121,7 @@ namespace VoatHub
             ViewModel.DetailFrame.Navigate(typeof(SubmissionCommentsPage), new SubmissionCommentsVM(vm));
             ViewModel.DetailFrame.BackStack.Clear();
         }
-
-        private void SortSubmissions_Click(object sender, RoutedEventArgs e)
-        {
-            Debug.WriteLine(e.OriginalSource, "SortItem");
-            var item = e.OriginalSource as MenuFlyoutItem;
-
-            VOAT_API.SubmissionSearchOptions.sort = (SortAlgorithm)Enum.Parse(typeof(SortAlgorithm), item.Text);
-            ViewModel.Sort = item.Text;
-
-            ViewModel.Refresh();
-        }
-
-        private void SubscribeButton_Click(object sender, RoutedEventArgs e)
-        {
-            var toggleButton = e.OriginalSource as AppBarToggleButton;
-
-            // TODO: This is the part where we subscribe and unsubscribe the subverse.
-            // Currently the feature is not available in the v1 api as of 8/19/15
-            //if (toggleButton.IsChecked == true)
-            //{
-
-            //}
-        }
+        #endregion
 
         /// <summary>
         /// Assumes the button has the popup in its tag property.
@@ -166,66 +133,6 @@ namespace VoatHub
             var button = e.OriginalSource as Button;
             var popup = button.Tag as Popup;
             popup.IsOpen = false;
-        }
-
-        private void NewPost_Click(object sender, RoutedEventArgs e)
-        {
-            NewSubmissionPopup.IsOpen = true;
-        }
-
-        /// <summary>
-        /// TODO: Better validation
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void NewLink_Click(object sender, RoutedEventArgs e)
-        {
-            if (!ViewModel.CanPost)
-            {
-                NewSubmissionPopupErrorBlock.Text = "Cannot submit to subscription sets.";
-            }
-
-            if (validateNotEmpty(LinkTitle, LinkUrl) && validatePostTitle(LinkTitle) && validateLinkUrl(LinkUrl))
-            {
-                var submission = new UserSubmission
-                {
-                    Title = LinkTitle.Text,
-                    Url = LinkUrl.Text
-                };
-
-                postSubmission(submission);
-            }
-        }
-
-        private void NewDiscussion_Click(object sender, RoutedEventArgs e)
-        {
-            if (!ViewModel.CanPost)
-            {
-                NewSubmissionPopupErrorBlock.Text = "Cannot submit to subscription sets.";
-            }
-
-            // TODO: Eh, API says content is optional but it actually isn't. wtf
-            if (validateNotEmpty(DiscussionTitle, DiscussionContent) && validatePostTitle(DiscussionTitle))
-            {
-                var submission = new UserSubmission
-                {
-                    Title = DiscussionTitle.Text,
-                    Content = DiscussionContent.Text
-                };
-
-                postSubmission(submission);
-            }
-        }
-
-        private void BackButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (Frame.CanGoBack)
-                Frame.GoBack();
-        }
-
-        private void RefreshButton_Click(object sender, RoutedEventArgs e)
-        {
-            ViewModel.Refresh();
         }
     }
 }
