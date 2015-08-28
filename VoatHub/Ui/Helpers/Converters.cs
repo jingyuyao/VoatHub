@@ -86,13 +86,14 @@ namespace VoatHub.Ui.Helpers
 
     public class LevelToBrushConverter : IValueConverter
     {
-        private static readonly SolidColorBrush lightBrush = Application.Current.Resources["LightBackgroundBrush"] as SolidColorBrush;
-        private static readonly SolidColorBrush darkBrush = Application.Current.Resources["DarkBackgroundBrush"] as SolidColorBrush;
-
+        // TODO: Someday we'll have to define our own light/dark theme dictionaries to make the background look nice.
+        private static readonly SolidColorBrush lightBrush = Application.Current.Resources.ThemeDictionaries["SystemControlBackgroundAltHighBrush"] as SolidColorBrush;
+        private static readonly SolidColorBrush darkBrush = Application.Current.Resources.ThemeDictionaries["SystemControlBackgroundChromeMediumBrush"] as SolidColorBrush;
+        
         public object Convert(object value, Type targetType, object parameter, string language)
         {
             if (value == null) return lightBrush;
-            return (int)value % 2 == 0 ? lightBrush : darkBrush;
+            return (int)value % 2 == 0 ? darkBrush : lightBrush;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, string language)

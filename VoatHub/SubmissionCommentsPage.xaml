@@ -120,7 +120,7 @@
         <ScrollViewer Grid.Row="1" 
                     HorizontalScrollBarVisibility="Disabled" 
                     VerticalScrollBarVisibility="Auto"
-                    Background="{StaticResource DarkBackgroundBrush}"
+                    Background="{ThemeResource SystemControlBackgroundAltHighBrush}"
                     Padding="10,0">
             <StackPanel>
                 <TextBlock Margin="0,8" Style="{ThemeResource SubheaderTextBlockStyle}"
