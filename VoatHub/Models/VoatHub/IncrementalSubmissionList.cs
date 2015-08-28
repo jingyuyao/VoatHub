@@ -31,15 +31,14 @@ namespace VoatHub.Models.VoatHub
         /// </summary>
         public IncrementalSubmissionList() : base()
         {
-
         }
 
-        public IncrementalSubmissionList(VoatApi api, string subverse)
+        public IncrementalSubmissionList(VoatApi api, string subverse) : this()
         {
             this.api = api;
             this.subverse = subverse;
             hasMoreItems = true;
-            api.SubmissionSearchOptions.page = 1;  // Voat's page starts with 1
+            api.ResetSubmissionPage();
         }
 
         #region IncrementalLoadingBase

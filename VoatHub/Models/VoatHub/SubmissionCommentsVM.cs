@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -20,9 +21,20 @@ namespace VoatHub.Models.VoatHub
             VOAT_API.CommentSearchOptions.page = 1;
 
             // TODO: Load from previous session
-            CommentSort = "Hot";
+            var apiCommentSort = VOAT_API.CommentSearchOptions.sort;
+
+            if (apiCommentSort == null)
+                CommentSort = "Hot";
+            else
+                CommentSort = apiCommentSort.ToString();
+            
             Comments = new LoadingList<CommentTree>();
             LoadComments();
+        }
+
+        ~SubmissionCommentsVM()
+        {
+            Debug.WriteLine("SubmissionCommentsVM destroyed");
         }
 
         private string _CommentSort;
@@ -61,14 +73,13 @@ namespace VoatHub.Models.VoatHub
         }
 
         /// <summary>
-        /// The reassigning the list causes
-        /// some painfully heavy loops. The loops might be cased by feedbacks from observationcollection
-        /// but that has not been verified yet. It definitely have something to do with the xaml visual tree though.
+        /// This method is kept private because somehow making bulk changes to the comments collection causes
+        /// some painfully heavy memory problems. The problem might be caused by some redrawing or the visual
+        /// tree or some other xaml bullshit. So to change the comments collection you just have to recreate
+        /// the model/page. This is a temporary solution until I can find the root casue of the memory problem
         /// </summary>
-        public async void LoadComments()
+        private async void LoadComments()
         {
-            Comments = new LoadingList<CommentTree>();
-
             var response = await VOAT_API.GetCommentList(Submission.Subverse, Submission.ID);
             if (response.Success)
             {

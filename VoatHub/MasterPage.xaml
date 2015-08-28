@@ -38,7 +38,7 @@
                     </TextBlock>
                 </StackPanel>
 
-                <Button Grid.Column="2" Click="SubmissionCommentsButton_Click"
+                <Button Grid.Column="2" Click="SubmissionListCommentsButton_Click"
                         Padding="10,10" BorderThickness="2" Background="Transparent">
                     <StackPanel>
                         <SymbolIcon Symbol="Comment" Foreground="Blue" />
@@ -86,8 +86,8 @@
         <CommandBar Grid.Row="0" x:Name="MasterCommandBar">
             <CommandBar.Content>
                 <TextBlock HorizontalAlignment="Left" Margin="12,14">
-                                <Run FontWeight="Bold" Text="{x:Bind ViewModel.Subverse, Mode=OneWay}" /> 
-                                :: <Run Text="{x:Bind ViewModel.Sort, Mode=OneWay}"/>
+                    <Run FontWeight="Bold" Text="{x:Bind ViewModel.Subverse, Mode=OneWay}" /> 
+                    :: <Run Text="{x:Bind ViewModel.Sort, Mode=OneWay}"/>
                 </TextBlock>
             </CommandBar.Content>
 
@@ -107,8 +107,8 @@
 
             <CommandBar.SecondaryCommands>
                 <AppBarToggleButton Icon="Favorite" Label="Subscribe" 
-                                                IsChecked="{x:Bind ViewModel.IsSubscribed, Mode=TwoWay}"
-                                                Click="SubscribeButton_Click"/>
+                                    IsChecked="{x:Bind ViewModel.IsSubscribed, Mode=TwoWay}"
+                                    Click="SubscribeButton_Click"/>
                 <AppBarButton Icon="Add" Label="New Post" Click="NewPost_Click" />
             </CommandBar.SecondaryCommands>
         </CommandBar>
@@ -126,8 +126,8 @@
             <!--TODO: Added other submission options when they became avaiable in the API-->
             <Popup x:Name="NewSubmissionPopup">
                 <Grid Height="{Binding ActualHeight, ElementName=MasterContentGrid, Mode=OneWay}"
-                                  Width="{Binding ActualWidth, ElementName=MasterContentGrid, Mode=OneWay}"
-                                  Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+                    Width="{Binding ActualWidth, ElementName=MasterContentGrid, Mode=OneWay}"
+                    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
                     <StackPanel>
                         <Pivot>
                             <PivotItem Header="New Link">
@@ -178,50 +178,46 @@
                 </Grid>
             </Popup>
 
-            <!--TODO: Put this into its own control template or something that can be reused-->
-            <ContentPresenter x:Name="MasterContent" Grid.Row="1">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="*" />
-                        <RowDefinition Height="Auto" />
-                    </Grid.RowDefinitions>
+            <Grid Grid.Row="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
 
-                    <!--Only visible and active when there are no items and it is loading-->
-                    <ProgressRing Grid.Row="0"
-                                Margin="0,50" Width="50" Height="50"
-                                Visibility="{x:Bind ViewModel.SubmissionList.HasItems, Converter={StaticResource BoolToNegateVisibilityConverter}, Mode=OneWay}" 
-                                IsActive="{x:Bind ViewModel.SubmissionList.Loading, Mode=OneWay}"/>
+                <!--Only visible and active when there are no items and it is loading-->
+                <ProgressRing Grid.Row="0"
+                            Margin="0,50" Width="50" Height="50"
+                            Visibility="{x:Bind ViewModel.SubmissionList.HasItems, Converter={StaticResource BoolToNegateVisibilityConverter}, Mode=OneWay}" 
+                            IsActive="{x:Bind ViewModel.SubmissionList.Loading, Mode=OneWay}"/>
 
-                    <!--Note: ListView must be visibile in order for it to request more items.-->
-                    <ListView x:Name="MasterListView" Grid.Row="1"
-                            ItemTemplate="{StaticResource SubmissionItemTemplate}"
-                            ItemsSource="{x:Bind ViewModel.SubmissionList.List, Mode=OneWay}"
-                            IsItemClickEnabled="True"
-                            ItemClick="MasterListView_ItemClick">
-                        <ListView.Header>
-                            <!--Only show if its not loading and list has no items-->
-                            <Grid Visibility="{x:Bind ViewModel.SubmissionList.Loading, Converter={StaticResource BoolToNegateVisibilityConverter}, Mode=OneWay}">
-                                <TextBlock Text="There is nothing here." 
-                                               Visibility="{x:Bind ViewModel.SubmissionList.HasItems, Converter={StaticResource BoolToNegateVisibilityConverter}, Mode=OneWay}" />
-                            </Grid>
-                        </ListView.Header>
+                <!--Note: ListView must be visibile in order for it to request more items.-->
+                <ListView x:Name="MasterListView" Grid.Row="1"
+                        ItemTemplate="{StaticResource SubmissionItemTemplate}"
+                        ItemsSource="{x:Bind ViewModel.SubmissionList.List, Mode=OneWay}"
+                        IsItemClickEnabled="True"
+                        ItemClick="SubmissionList_ItemClick">
+                    <ListView.Header>
+                        <!--Only show if its not loading and list has no items-->
+                        <Grid Visibility="{x:Bind ViewModel.SubmissionList.Loading, Converter={StaticResource BoolToNegateVisibilityConverter}, Mode=OneWay}">
+                            <TextBlock Text="There is nothing here." 
+                                            Visibility="{x:Bind ViewModel.SubmissionList.HasItems, Converter={StaticResource BoolToNegateVisibilityConverter}, Mode=OneWay}" />
+                        </Grid>
+                    </ListView.Header>
 
-                        <ListView.ItemContainerStyle>
-                            <Style TargetType="ListViewItem">
-                                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                            </Style>
-                        </ListView.ItemContainerStyle>
-                    </ListView>
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="ListViewItem">
+                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                        </Style>
+                    </ListView.ItemContainerStyle>
+                </ListView>
 
-                    <!--Avoids showing ProgressBar and ProgressRing at the same time-->
-                    <Grid Grid.Row="2" Visibility="{x:Bind ViewModel.SubmissionList.HasItems, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}">
-                        <ProgressBar  IsIndeterminate="{x:Bind ViewModel.SubmissionList.Loading, Mode=OneWay}"
-                                Height="10"
-                                Visibility="{x:Bind ViewModel.SubmissionList.Loading, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"/>
-                    </Grid>
+                <!--Avoids showing ProgressBar and ProgressRing at the same time-->
+                <Grid Grid.Row="2" Visibility="{x:Bind ViewModel.SubmissionList.HasItems, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}">
+                    <ProgressBar IsIndeterminate="{x:Bind ViewModel.SubmissionList.Loading, Mode=OneWay}" Height="10"
+                                 Visibility="{x:Bind ViewModel.SubmissionList.Loading, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}"/>
                 </Grid>
-            </ContentPresenter>
+            </Grid>
         </Grid>
     </Grid>
 </Page>

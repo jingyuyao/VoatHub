@@ -31,7 +31,7 @@
             </CommandBar.SecondaryCommands>
         </CommandBar>
 
-        <StackPanel Grid.Row="1">
+        <StackPanel Grid.Row="1" Padding="10,0">
             <TextBlock Margin="0,8" Style="{ThemeResource SubheaderTextBlockStyle}"
                                MaxLines="2"
                                Foreground="{ThemeResource SystemControlForegroundBaseHighBrush}"
@@ -54,7 +54,7 @@
                 </Button>
             </StackPanel>
         </StackPanel>
-        
-        <WebView Grid.Row="2" x:Name="SubmissionWebView" Source="{x:Bind ViewModel.Uri}" />
+
+        <WebView Grid.Row="2" x:Name="SubmissionWebView" Source="{x:Bind ViewModel.Uri, Mode=OneWay}" />
     </Grid>
 </Page>

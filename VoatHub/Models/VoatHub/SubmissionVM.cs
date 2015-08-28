@@ -18,14 +18,13 @@ namespace VoatHub.Models.VoatHub
 
         public SubmissionVM()
         {
-
         }
 
         /// <summary>
         /// Copy constructor
         /// </summary>
         /// <param name="vm"></param>
-        public SubmissionVM(SubmissionVM vm)
+        public SubmissionVM(SubmissionVM vm) : this()
         {
             Submission = vm.Submission;
             ImageSource = vm.ImageSource;

@@ -1,20 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
 using VoatHub.Api.Voat;
 using VoatHub.Models.Voat;
 using VoatHub.Models.Voat.v1;
 using VoatHub.Models.VoatHub;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
-using Windows.UI.Xaml.Data;
-using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
 
@@ -119,7 +112,7 @@ namespace VoatHub
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void MasterListView_ItemClick(object sender, ItemClickEventArgs e)
+        private void SubmissionList_ItemClick(object sender, ItemClickEventArgs e)
         {
             var vm = e.ClickedItem as SubmissionVM;
 
@@ -127,6 +120,17 @@ namespace VoatHub
                 ViewModel.DetailFrame.Navigate(typeof(SubmissionLinkPage), new SubmissionLinkVM(vm));
             else
                 ViewModel.DetailFrame.Navigate(typeof(SubmissionCommentsPage), new SubmissionCommentsVM(vm));
+
+            ViewModel.DetailFrame.BackStack.Clear();
+        }
+
+        private void SubmissionListCommentsButton_Click(object sender, RoutedEventArgs e)
+        {
+            var button = e.OriginalSource as Button;
+            var vm = button.DataContext as SubmissionVM;
+
+            ViewModel.DetailFrame.Navigate(typeof(SubmissionCommentsPage), new SubmissionCommentsVM(vm));
+            ViewModel.DetailFrame.BackStack.Clear();
         }
 
         private void SortSubmissions_Click(object sender, RoutedEventArgs e)
@@ -138,14 +142,6 @@ namespace VoatHub
             ViewModel.Sort = item.Text;
 
             ViewModel.Refresh();
-        }
-
-        private void SubmissionCommentsButton_Click(object sender, RoutedEventArgs e)
-        {
-            var button = e.OriginalSource as Button;
-            var vm = button.DataContext as SubmissionVM;
-
-            ViewModel.DetailFrame.Navigate(typeof(SubmissionCommentsPage), new SubmissionCommentsVM(vm));
         }
 
         private void SubscribeButton_Click(object sender, RoutedEventArgs e)

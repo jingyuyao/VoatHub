@@ -48,7 +48,7 @@ namespace VoatHub
 
         private void RefreshButton_Click(object sender, RoutedEventArgs e)
         {
-            SubmissionWebView.Refresh(); // Neat!
+            SubmissionWebView.Refresh();
         }
 
         private void ShowComments_Click(object sender, RoutedEventArgs e)

@@ -59,10 +59,8 @@ namespace VoatHub
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             ViewModel = new MainPageVM();
-            changeSubverse("_front");
+            changeSubverse("_all");
         }
-
-        #region SplitView
 
         private void TogglePaneButton_Checked(object sender, RoutedEventArgs e)
         {
@@ -143,8 +141,6 @@ namespace VoatHub
 
             sender.Text = "";
         }
-
-        #endregion SplitView
 
         private void changeSubverse(string subverse)
         {

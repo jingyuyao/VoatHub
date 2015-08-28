@@ -34,9 +34,23 @@ namespace VoatHub
             this.InitializeComponent();
         }
 
+        ~SubmissionCommentsPage()
+        {
+            Debug.WriteLine("SubmissionCommentsPage destroyed");
+        }
+
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             ViewModel = e.Parameter as SubmissionCommentsVM;
+        }
+
+        /// <summary>
+        /// Refresh the page and removes the previous page from the backstack
+        /// </summary>
+        private void _refresh()
+        {
+            Frame.Navigate(typeof(SubmissionCommentsPage), new SubmissionCommentsVM(ViewModel as SubmissionVM));
+            Frame.BackStack.RemoveAt(Frame.BackStack.Count - 1);
         }
 
         private void SubmissionUpVote_Click(object sender, RoutedEventArgs e)
@@ -51,7 +65,7 @@ namespace VoatHub
 
         private void RefreshButton_Click(object sender, RoutedEventArgs e)
         {
-            Frame.Navigate(typeof(SubmissionCommentsPage), new SubmissionCommentsVM(ViewModel as SubmissionVM));
+            _refresh();
         }
 
         private void BackButton_Click(object sender, RoutedEventArgs e)
@@ -112,7 +126,7 @@ namespace VoatHub
 
         private void CommentReplyButton_Click(object sender, RoutedEventArgs e)
         {
-            var button = sender as Button;
+            var button = sender as HyperlinkButton;
             var commentTree = button.DataContext as CommentTree;
             commentTree.ReplyOpen = true;
         }
@@ -128,9 +142,8 @@ namespace VoatHub
             var item = e.OriginalSource as MenuFlyoutItem;
 
             VOAT_API.CommentSearchOptions.sort = (SortAlgorithm)Enum.Parse(typeof(SortAlgorithm), item.Text);
-
-            ViewModel.CommentSort = item.Text;
-            ViewModel.LoadComments();
+            
+            _refresh();
         }
 
         private void OpenSubmissionReply_Click(object sender, RoutedEventArgs e)

@@ -75,6 +75,16 @@ namespace VoatHub.Api.Voat
             };
         }
 
+        public void ResetSubmissionPage()
+        {
+            SubmissionSearchOptions.page = 1;
+        }
+
+        public void ResetCommentPage()
+        {
+            CommentSearchOptions.page = 1;
+        }
+
         #region Accounts
         public string UserName
         {

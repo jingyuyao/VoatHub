@@ -13,6 +13,9 @@ namespace VoatHub.Models.VoatHub
 {
     public class MasterPageVM : BindableBase
     {
+        /// <summary>
+        /// Allows MasterPage to control DetailFrame
+        /// </summary>
         public Frame DetailFrame { get; }
 
         public MasterPageVM(string subverse, bool isSubscribed, bool canPost, Frame detailFrame)
