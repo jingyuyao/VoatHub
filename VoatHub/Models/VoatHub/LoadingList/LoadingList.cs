@@ -12,6 +12,12 @@ namespace VoatHub.Models.VoatHub.LoadingList
     /// <typeparam name="T"></typeparam>
     public class LoadingList<T> : LoadingListBase<T>
     {
+        public LoadingList()
+        {
+            _List = new ObservableCollection<T>();
+            _List.CollectionChanged += ListChanged;
+        }
+
         private ObservableCollection<T> _List;
         /// <summary>
         /// Change the list and triggers corresponding changes in the HasItems property.
@@ -19,21 +25,6 @@ namespace VoatHub.Models.VoatHub.LoadingList
         public override ObservableCollection<T> List
         {
             get { return _List; }
-            set
-            {
-                Contract.Requires(value != null);
-                SetProperty(ref _List, value);
-                HasItems = value.Count != 0;
-                value.CollectionChanged += new System.Collections.Specialized.NotifyCollectionChangedEventHandler(ListChanged);
-            }
-        }
-
-        protected override ObservableCollection<T> DefaultList
-        {
-            get
-            {
-                return new ObservableCollection<T>();
-            }
         }
 
         /// <summary>

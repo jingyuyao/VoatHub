@@ -18,10 +18,15 @@ namespace VoatHub.Models.VoatHub
 
         public SubmissionCommentsVM(SubmissionVM vm) : base(vm)
         {
-            VOAT_API.CommentSearchOptions.page = 1;
+            VOAT_API.ResetCommentPage();
             CommentSort = VOAT_API.CommentSearchOptions.sort.ToString();
-            Comments = new LoadingList<CommentVM>();
+            _Comments = new LoadingList<CommentVM>();
             LoadComments();
+        }
+
+        ~SubmissionCommentsVM()
+        {
+            Debug.WriteLine("~SubmissionCommentsVM()");
         }
 
         #region Properties
@@ -50,7 +55,6 @@ namespace VoatHub.Models.VoatHub
         public LoadingList<CommentVM> Comments
         {
             get { return _Comments; }
-            set { SetProperty(ref _Comments, value); }
         }
 
         private bool _HasMoreComments;
@@ -60,49 +64,31 @@ namespace VoatHub.Models.VoatHub
             set { SetProperty(ref _HasMoreComments, value); }
         }
         #endregion
-
-        #region PrivateMethods
+        
         /// <summary>
-        /// This method is kept private because somehow making bulk changes to the comments collection causes
-        /// some painfully heavy memory problems. The problem might be caused by some redrawing or the visual
-        /// tree or some other xaml bullshit. So to change the comments collection you just have to recreate
-        /// the model/page. This is a temporary solution until I can find the root casue of the memory problem
+        /// Used for load and reloading comments.
         /// </summary>
-        private async void LoadComments()
+        public async void LoadComments()
         {
+            Comments.Dispose();
+
             var response = await VOAT_API.GetCommentList(Submission.Subverse, Submission.ID);
             if (response.Success)
             {
-                // TODO: Shit man, we going through the list at least 3 times. Might have to write more
-                // specific code if performance becomes a problem.
-                var commentVMList = CommentVM.FromApiCommentList(response.Data, null);
-                var sortedList = commentVMSorter(commentVMList);
                 if (Submission.CommentCount > response.Data.Count) HasMoreComments = true;
 
-                Comments.List = sortedList;
+                // TODO: Shit man, we going through the list at least 3 times. Might have to write more
+                // specific code if performance becomes a problem.
+                var commentVMList = CommentVM.FromApiCommentList(response.Data);
+
+                foreach (var vm in commentVMList)
+                {
+                    Comments.List.Add(vm);
+                }
             }
 
             Comments.Loading = false;
         }
-
-        /// <summary>
-        /// Sorts the commentVMList based on <see cref="commentSearchOptions"/>.
-        /// <para>Expensive operation</para>
-        /// </summary>
-        /// <param name="commentVM"></param>
-        private ObservableCollection<CommentVM> commentVMSorter(ObservableCollection<CommentVM> commentVMList)
-        {
-            switch (VOAT_API.CommentSearchOptions.sort)
-            {
-                case SortAlgorithm.New:
-                    return CommentVM.SortNew(commentVMList);
-                case SortAlgorithm.Top:
-                    return CommentVM.SortTop(commentVMList);
-            }
-
-            return commentVMList; ;
-        }
-        #endregion
 
         public async void SendSubmissionReply()
         {

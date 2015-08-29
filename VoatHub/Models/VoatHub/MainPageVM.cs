@@ -73,8 +73,12 @@ namespace VoatHub.Models.VoatHub
                 var subscriptions = await VOAT_API.UserSubscriptions(VOAT_API.UserName);
                 
                 if (subscriptions.Success && subscriptions.Data != null)
-                    Subscriptions.List = new ObservableCollection<ApiSubscription>(subscriptions.Data);
-
+                {
+                    foreach (var item in subscriptions.Data)
+                    {
+                        Subscriptions.List.Add(item);
+                    }
+                }
                 Subscriptions.Loading = false;
             }
         }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Diagnostics.Contracts;
 using System.Linq;
 using System.Text;
@@ -38,7 +39,12 @@ namespace VoatHub.Models.VoatHub
             // and the list is empty, it will automatically request more data.
             // ALSO: We make a new object because the events from the previous object can still be fired to change state
             // We could try to do some fancy event management to prevent that but I ain't got the time.
-            SubmissionList = new IncrementalLoadingList<SubmissionVM, IncrementalSubmissionList>(new IncrementalSubmissionList(App.VOAT_API, subverse));
+            _SubmissionList = new IncrementalLoadingList<SubmissionVM, IncrementalSubmissionList>(new IncrementalSubmissionList(App.VOAT_API, subverse));
+        }
+
+        ~MasterPageVM()
+        {
+            Debug.WriteLine("~MasterPageVM()");
         }
 
         #region Properties
@@ -53,7 +59,6 @@ namespace VoatHub.Models.VoatHub
         public IncrementalLoadingList<SubmissionVM, IncrementalSubmissionList> SubmissionList
         {
             get { return _SubmissionList; }
-            set { Contract.Requires(value != null); SetProperty(ref _SubmissionList, value); }
         }
 
         private string _Sort;
@@ -193,11 +198,12 @@ namespace VoatHub.Models.VoatHub
                 postSubmission(submission);
             }
         }
-        #endregion
 
         public void Refresh()
         {
-            SubmissionList = new IncrementalLoadingList<SubmissionVM, IncrementalSubmissionList>(new IncrementalSubmissionList(App.VOAT_API, Subverse));
+            VOAT_API.ResetSubmissionPage();
+            SubmissionList.Dispose();
         }
+        #endregion
     }
 }

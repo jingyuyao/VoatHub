@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using VoatHub.Api.Voat;
 using VoatHub.Models.Voat;
 using VoatHub.Models.Voat.v1;
+using VoatHub.Ui;
 using Windows.UI.Xaml;
 
 namespace VoatHub.Models.VoatHub
@@ -17,15 +18,30 @@ namespace VoatHub.Models.VoatHub
     public class CommentVM : BindableBase
     {
         private static readonly VoatApi VOAT_API = App.VOAT_API;
+        private static readonly int INDENTATION_FACTOR = 10;
+
+        /// <summary>
+        /// Invariant: never null.
+        /// </summary>
+        private List<CommentVM> children;
+
+        /// <summary>
+        /// Keeps track of visibility state changes so we can go back to it once we
+        /// 'open up' the parent block
+        /// </summary>
+        private Stack<Visibility> previousParentVisibility;
 
         public CommentVM(ApiComment comment)
         {
             if (comment == null) throw new ArgumentException("Comment cannot be null.");
 
             Comment = comment;
-            Children = new List<CommentVM>();
+            children = new List<CommentVM>();
             SelfVisibility = Visibility.Visible;
             ParentVisibility = Visibility.Visible;
+            previousParentVisibility = new Stack<Visibility>();
+            int indentValue = Comment.Level == null ? 0 : (int)Comment.Level * INDENTATION_FACTOR;
+            Indentation = new Thickness(indentValue, 0, 0, 0);
 
             ReplyOpen = false;
         }
@@ -41,14 +57,11 @@ namespace VoatHub.Models.VoatHub
             set { SetProperty(ref _Comment, value); }
         }
 
-        /// <summary>
-        /// Invariant: never null.
-        /// </summary>
-        private List<CommentVM> _Children;
-        public List<CommentVM> Children
+        private Thickness _Indentation;
+        public Thickness Indentation
         {
-            get { return _Children; }
-            set { SetProperty(ref _Children, value); }
+            get { return _Indentation; }
+            set { SetProperty(ref _Indentation, value); }
         }
 
         private Visibility _SelfVisibility;
@@ -79,31 +92,28 @@ namespace VoatHub.Models.VoatHub
             set { SetProperty(ref _ReplyText, value); }
         }
         #endregion
-        
-        #region Methods
-        public async void UpVote()
+
+        #region PrivateMethods
+        private void HideChildren()
         {
-            var result = await VOAT_API.PostVoteRevokeOnRevote("comment", _Comment.ID, 1, true);
-        }
-
-        public async void DownVote()
-        {
-            var result = await VOAT_API.PostVoteRevokeOnRevote("comment", _Comment.ID, -1, true);
-        }
-
-        public async void SendReply()
-        {
-            ReplyOpen = false;
-
-            var value = new UserValue { Value = ReplyText };
-            var r = await VOAT_API.PostCommentReply(Comment.Subverse, (int)Comment.SubmissionID, Comment.ID, value);
-
-            if (r.Success)
+            foreach (var child in children)
             {
-                var newComment = r.Data;
-                newComment.Level = Comment.Level + 1;  // Fixes api not returning proper level for newly created comments
-                Children.Add(new CommentVM(newComment));
-                ReplyText = "";
+                child.previousParentVisibility.Push(child.ParentVisibility);
+                child.ParentVisibility = Visibility.Collapsed;
+                child.HideChildren();
+            }
+        }
+
+        private void RestoreChildrenVisibility()
+        {
+            foreach (var child in children)
+            {
+                if (child.previousParentVisibility.Count != 0)
+                {
+                    child.ParentVisibility = child.previousParentVisibility.Pop();
+                }
+
+                child.RestoreChildrenVisibility();
             }
         }
 
@@ -123,20 +133,143 @@ namespace VoatHub.Models.VoatHub
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public CommentVM FindParent(ApiComment target)
+        private CommentVM FindParent(ApiComment target)
         {
             // Optomization: Parent's level must be less than target's level
             if (Comment.Level >= target.Level) return null;
 
             if (target.ParentID != null && Comment.ID == target.ParentID) return this;
 
-            return FindParentList(target, Children);
+            return FindParentList(target, children);
+        }
+
+        private static void Flatten(List<CommentVM> list, List<CommentVM> flattened)
+        {
+            foreach (var vm in list)
+            {
+                Flatten(vm, flattened);
+            }
+        }
+
+        private static void Flatten(CommentVM vm, List<CommentVM> flattened)
+        {
+            flattened.Add(vm);
+            Flatten(vm.children, flattened);
+        }
+
+        private static void insertUsingComparer(CommentVM vm, List<CommentVM> list, IComparer<CommentVM> comparer)
+        {
+            for (int i = 0; i < list.Count; i++)
+            {
+                if (comparer.Compare(vm, list[i]) > 0)
+                {
+                    list.Insert(i, vm);
+                    return;
+                }
+            }
+
+            list.Add(vm);
+        }
+
+        private class DefaultComparer : IComparer<CommentVM>
+        {
+            public int Compare(CommentVM x, CommentVM y)
+            {
+                return -1;
+            }
+        }
+
+        private class DateComparer : IComparer<CommentVM>
+        {
+            public int Compare(CommentVM x, CommentVM y)
+            {
+                if (x.Comment.Date > y.Comment.Date)
+                    return 1;
+                else if (x.Comment.Date < y.Comment.Date)
+                    return -1;
+                else
+                    return 0;
+            }
+        }
+
+        private class VoteComparer : IComparer<CommentVM>
+        {
+            public int Compare(CommentVM x, CommentVM y)
+            {
+                if (x.Comment.TotalVotes > y.Comment.TotalVotes)
+                    return 1;
+                else if (x.Comment.TotalVotes < y.Comment.TotalVotes)
+                    return -1;
+                else
+                    return 0;
+            }
         }
         #endregion
 
-        #region StaticHelpers
+        #region Methods
+        public async void UpVote()
+        {
+            var result = await VOAT_API.PostVoteRevokeOnRevote("comment", _Comment.ID, 1, true);
+        }
+
+        public async void DownVote()
+        {
+            var result = await VOAT_API.PostVoteRevokeOnRevote("comment", _Comment.ID, -1, true);
+        }
+
+        public async Task<CommentVM> SendReply()
+        {
+            ReplyOpen = false;
+
+            var value = new UserValue { Value = ReplyText };
+            var r = await VOAT_API.PostCommentReply(Comment.Subverse, (int)Comment.SubmissionID, Comment.ID, value);
+
+            if (r.Success)
+            {
+                ReplyText = "";
+                
+                r.Data.Level = Comment.Level + 1;  // Fixes api not returning proper level for newly created comments
+                var vm = new CommentVM(r.Data);
+
+                children.Add(vm);
+                return vm;
+            }
+
+            return null;
+        }
+
+        public void ToggleVisibility()
+        {
+            SelfVisibility = SelfVisibility.Inverse();
+
+            if (SelfVisibility == Visibility.Collapsed)
+            {
+                HideChildren();
+            }
+            else
+            {
+                RestoreChildrenVisibility();
+            }
+        }
+
         public static List<CommentVM> FromApiCommentList(List<ApiComment> apiComments)
         {
+            IComparer<CommentVM> comparer;
+
+            var sort = VOAT_API.CommentSearchOptions.sort;
+            switch (sort)
+            {
+                case SortAlgorithm.New:
+                    comparer = new DateComparer();
+                    break;
+                case SortAlgorithm.Top:
+                    comparer = new VoteComparer();
+                    break;
+                default:
+                    comparer = new DefaultComparer();
+                    break;
+            }
+
             var rootNestedComments = new List<CommentVM>();
 
             foreach (var apiComment in apiComments)
@@ -147,107 +280,18 @@ namespace VoatHub.Models.VoatHub
 
                 if (parentComment != null)
                 {
-                    parentComment.Children.Add(nestedComment);
+                    insertUsingComparer(nestedComment, parentComment.children, comparer);
                 }
                 else
                 {
-                    rootNestedComments.Add(nestedComment);
+                    insertUsingComparer(nestedComment, rootNestedComments, comparer);
                 }
             }
 
-            return rootNestedComments;
-        }
+            var flattened = new List<CommentVM>();
+            Flatten(rootNestedComments, flattened);
 
-        /// <summary>
-        /// Recursively sorts the list of <see cref="CommentVM"/> from oldest to newest.
-        /// <para>VERY EXPENSIVE OPERATION!</para>
-        /// <para>Sort so oldest goes first becaues list view displays the first item on the bottom</para>
-        /// </summary>
-        /// <param name="list"></param>
-        public static ObservableCollection<CommentVM> SortNew(ObservableCollection<CommentVM> list)
-        {
-            var sortedList = new List<CommentVM>(list);
-
-            sortedList.Sort((x, y) =>
-            {
-                if (x.Comment.Date > y.Comment.Date)
-                    return -1;
-                else if (x.Comment.Date < y.Comment.Date)
-                    return 1;
-                else
-                    return 0;
-            });
-
-            foreach (var commentVM in sortedList)
-            {
-                commentVM.Children = SortNew(commentVM.Children);
-            }
-
-            return new ObservableCollection<CommentVM>(sortedList);
-        }
-
-        /// <summary>
-        /// Recursively sorts the list of <see cref="CommentVM"/> from least votes to most votes.
-        /// <para>VERY EXPENSIVE OPERATION!</para>
-        /// <para>Sort so least votes goes first becaues list view displays the first item on the bottom</para>
-        /// </summary>
-        /// <param name="list"></param>
-        public static ObservableCollection<CommentVM> SortTop(ObservableCollection<CommentVM> list)
-        {
-            var sortedList = new List<CommentVM>(list);
-
-            sortedList.Sort((x, y) =>
-            {
-                if (x.Comment.TotalVotes > y.Comment.TotalVotes)
-                    return -1;
-                else if (x.Comment.TotalVotes < y.Comment.TotalVotes)
-                    return 1;
-                else
-                    return 0;
-            });
-
-            foreach (var commentVM in sortedList)
-            {
-                commentVM.Children = SortNew(commentVM.Children);
-            }
-
-            return new ObservableCollection<CommentVM>(sortedList);
-        }
-
-        /// <summary>
-        /// Recursively count the number of comments in a list of <see cref="CommentVM"/>.
-        /// </summary>
-        /// <param name="list"></param>
-        /// <returns></returns>
-        public static int Count(ObservableCollection<CommentVM> list)
-        {
-            int counter = 0;
-
-            foreach (var c in list)
-            {
-                counter += Count(c);
-            }
-
-            return counter;
-        }
-
-        /// <summary>
-        /// Recursively count the number of comments in a <see cref="CommentVM"/>.
-        /// </summary>
-        /// <param name="tree"></param>
-        /// <returns></returns>
-        public static int Count(CommentVM tree)
-        {
-            int counter = 0;
-            if (tree != null)
-            {
-                if (tree.Comment != null) counter++;
-                if (tree.Children != null)
-                {
-                    counter += Count(tree.Children);
-                }
-            }
-            return counter;
+            return flattened;
         }
         #endregion
 

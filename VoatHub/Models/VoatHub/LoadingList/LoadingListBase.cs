@@ -12,7 +12,7 @@ namespace VoatHub.Models.VoatHub.LoadingList
     /// <para>NOTE: Child classes must initialize the List property upon construction to perserve the invariant.</para>
     /// </summary>
     /// <typeparam name="T"></typeparam>
-    public abstract class LoadingListBase<T> : BindableBase
+    public abstract class LoadingListBase<T> : BindableBase, IDisposable
     {
         /// <summary>
         /// Creates a new <see cref="LoadingListBase{T}"/> where the initial loading state is set to true.
@@ -20,18 +20,12 @@ namespace VoatHub.Models.VoatHub.LoadingList
         public LoadingListBase()
         {
             Loading = true;
-            List = DefaultList;
         }
-
-        /// <summary>
-        /// Should return a NEW list.
-        /// </summary>
-        protected abstract ObservableCollection<T> DefaultList { get; }
 
         /// <summary>
         /// Invariant: Never null.
         /// </summary>
-        public abstract ObservableCollection<T> List { get; set; }
+        public abstract ObservableCollection<T> List { get; }
 
         private bool _Loading;
         /// <summary>
@@ -53,9 +47,9 @@ namespace VoatHub.Models.VoatHub.LoadingList
             set { SetProperty(ref _HasItems, value); }
         }
 
-        public virtual void Clear()
+        public virtual void Dispose()
         {
-            List = DefaultList;
+            List.Clear();
             Loading = true;
             HasItems = false;
         }

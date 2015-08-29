@@ -40,15 +40,6 @@ namespace VoatHub
         }
 
         #region Misc
-        /// <summary>
-        /// Refresh the page and removes the previous page from the backstack
-        /// </summary>
-        private void _refresh()
-        {
-            Frame.Navigate(typeof(SubmissionCommentsPage), new SubmissionCommentsVM(ViewModel as SubmissionVM));
-            Frame.BackStack.RemoveAt(Frame.BackStack.Count - 1);
-        }
-
         private void PrintDataContext_Click(object sender, RoutedEventArgs e)
         {
             var button = sender as FrameworkElement;
@@ -57,6 +48,13 @@ namespace VoatHub
         #endregion
 
         #region CommentTree
+        private void CommentHeaderButton_Click(object sender, RoutedEventArgs e)
+        {
+            var button = e.OriginalSource as Button;
+            var commentVM = button.DataContext as CommentVM;
+            commentVM.ToggleVisibility();
+        }
+
         private void CommentUpVote_Click(object sender, RoutedEventArgs e)
         {
             var button = e.OriginalSource as Button;
@@ -85,18 +83,29 @@ namespace VoatHub
             vm.ReplyOpen = false;
         }
 
-        private void SendCommentReply_Click(object sender, RoutedEventArgs e)
+        private async void SendCommentReply_Click(object sender, RoutedEventArgs e)
         {
             var button = e.OriginalSource as Button;
             var vm = button.DataContext as CommentVM;
-            vm.SendReply();
+            var reply = await vm.SendReply();
+
+            var list = ViewModel.Comments.List;
+            for (int i = 0; i < list.Count - 1; i++)
+            {
+                if (reply.Comment.ParentID == list[i].Comment.ID)
+                {
+                    list.Insert(i + 1, reply);
+                    return;
+                }
+            }
+            list.Add(reply);
         }
         #endregion
 
         #region AppBar
         private void RefreshButton_Click(object sender, RoutedEventArgs e)
         {
-            _refresh();
+            ViewModel.LoadComments();
         }
 
         private void BackButton_Click(object sender, RoutedEventArgs e)
@@ -114,7 +123,8 @@ namespace VoatHub
         {
             var item = e.OriginalSource as MenuFlyoutItem;
             VOAT_API.CommentSearchOptions.sort = (SortAlgorithm)Enum.Parse(typeof(SortAlgorithm), item.Text);
-            _refresh();
+            ViewModel.CommentSort = item.Text;
+            ViewModel.LoadComments();
         }
         #endregion
 

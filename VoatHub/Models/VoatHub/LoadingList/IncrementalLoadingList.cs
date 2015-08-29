@@ -16,7 +16,12 @@ namespace VoatHub.Models.VoatHub.LoadingList
         /// </summary>
         public IncrementalLoadingList(LoadingObservableCollection<T> collection) : base()
         {
-            List = collection;
+            _List = collection;
+            _List.CollectionChanged += ListChanged;
+            _List.LoadingStart += LoadingStartHandler;
+            _List.LoadingFinish += LoadingFinishHandler;
+
+            HasItems = _List.Count != 0;
         }
 
         private LoadingObservableCollection<T> _List;
@@ -25,24 +30,6 @@ namespace VoatHub.Models.VoatHub.LoadingList
             get
             {
                 return _List;
-            }
-
-            set
-            {
-                Contract.Requires(value != null);
-                SetProperty(ref _List, (LoadingObservableCollection<T>)value);
-                HasItems = value.Count != 0;
-                _List.CollectionChanged += new System.Collections.Specialized.NotifyCollectionChangedEventHandler(ListChanged);
-                _List.LoadingStart += new EventHandler(LoadingStartHandler);
-                _List.LoadingFinish += new EventHandler(LoadingFinishHandler);
-            }
-        }
-
-        protected override ObservableCollection<T> DefaultList
-        {
-            get
-            {
-                return new N();
             }
         }
 

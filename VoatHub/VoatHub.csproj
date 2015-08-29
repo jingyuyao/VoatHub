@@ -160,6 +160,7 @@
     <Compile Include="SubmissionLinkPage.xaml.cs">
       <DependentUpon>SubmissionLinkPage.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Ui\VisibilityExtensions.cs" />
     <Compile Include="Ui\Helpers\Converters.cs" />
     <Compile Include="Ui\ProgressRingExtensions.cs" />
     <Compile Include="Ui\WebViewExtensions.cs" />
