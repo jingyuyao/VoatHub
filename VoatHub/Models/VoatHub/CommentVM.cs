@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using VoatHub.Api.Voat;
 using VoatHub.Models.Voat;
 using VoatHub.Models.Voat.v1;
+using Windows.UI.Xaml;
 
 namespace VoatHub.Models.VoatHub
 {
@@ -22,8 +23,10 @@ namespace VoatHub.Models.VoatHub
             if (comment == null) throw new ArgumentException("Comment cannot be null.");
 
             Comment = comment;
-            Children = new ObservableCollection<CommentVM>();
-            Show = true;
+            Children = new List<CommentVM>();
+            SelfVisibility = Visibility.Visible;
+            ParentVisibility = Visibility.Visible;
+
             ReplyOpen = false;
         }
 
@@ -37,26 +40,29 @@ namespace VoatHub.Models.VoatHub
             get { return _Comment; }
             set { SetProperty(ref _Comment, value); }
         }
+
         /// <summary>
         /// Invariant: never null.
         /// </summary>
-        private ObservableCollection<CommentVM> _Children;
-        public ObservableCollection<CommentVM> Children
+        private List<CommentVM> _Children;
+        public List<CommentVM> Children
         {
             get { return _Children; }
-            set
-            {
-                SetProperty(ref _Children, value);
-                HasMoreComments = Comment.ChildCount > value.Count;  // ChildCount include direct descendents only.
-                value.CollectionChanged += new System.Collections.Specialized.NotifyCollectionChangedEventHandler(ListChangedHandler);
-            }
+            set { SetProperty(ref _Children, value); }
         }
 
-        private bool? _Show;
-        public bool? Show
+        private Visibility _SelfVisibility;
+        public Visibility SelfVisibility
         {
-            get { return _Show; }
-            set { SetProperty(ref _Show, value); }
+            get { return _SelfVisibility; }
+            set { SetProperty(ref _SelfVisibility, value); }
+        }
+
+        private Visibility _ParentVisibility;
+        public Visibility ParentVisibility
+        {
+            get { return _ParentVisibility; }
+            set { SetProperty(ref _ParentVisibility, value); }
         }
 
         private bool? _ReplyOpen;
@@ -72,39 +78,8 @@ namespace VoatHub.Models.VoatHub
             get { return _ReplyText; }
             set { SetProperty(ref _ReplyText, value); }
         }
-
-        private bool _HasMoreComments;
-        public bool HasMoreComments
-        {
-            get { return _HasMoreComments; }
-            set { SetProperty(ref _HasMoreComments, value); }
-        }
         #endregion
-
-        #region Private
-        /// <summary>
-        /// Oh boy, hopefully this isn't called a lot.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void ListChangedHandler(object sender, EventArgs e)
-        {
-            var collection = sender as ObservableCollection<CommentVM>;
-            HasMoreComments = Comment.ChildCount > collection.Count; // ChildCount include direct descendents only.
-        }
-
-        private static CommentVM FindParentList(ApiComment target, ObservableCollection<CommentVM> source)
-        {
-            for (var i = 0; i < source.Count; i++)
-            {
-                var result = source[i].FindParent(target);
-                if (result != null) return result;
-            }
-
-            return null;
-        }
-        #endregion
-
+        
         #region Methods
         public async void UpVote()
         {
@@ -132,6 +107,17 @@ namespace VoatHub.Models.VoatHub
             }
         }
 
+        private static CommentVM FindParentList(ApiComment target, IList<CommentVM> source)
+        {
+            for (var i = 0; i < source.Count; i++)
+            {
+                var result = source[i].FindParent(target);
+                if (result != null) return result;
+            }
+
+            return null;
+        }
+
         /// <summary>
         /// Assumptions: Comment.Level is accurate.
         /// </summary>
@@ -146,17 +132,12 @@ namespace VoatHub.Models.VoatHub
 
             return FindParentList(target, Children);
         }
-
-        public override string ToString()
-        {
-            return _Comment.ToString();
-        }
         #endregion
 
         #region StaticHelpers
-        public static ObservableCollection<CommentVM> FromApiCommentList(List<ApiComment> apiComments, ObservableCollection<CommentVM> source)
+        public static List<CommentVM> FromApiCommentList(List<ApiComment> apiComments)
         {
-            var rootNestedComments = source ?? new ObservableCollection<CommentVM>();
+            var rootNestedComments = new List<CommentVM>();
 
             foreach (var apiComment in apiComments)
             {
@@ -267,7 +248,12 @@ namespace VoatHub.Models.VoatHub
                 }
             }
             return counter;
-        } 
+        }
         #endregion
+
+        public override string ToString()
+        {
+            return _Comment.ToString();
+        }
     }
 }
