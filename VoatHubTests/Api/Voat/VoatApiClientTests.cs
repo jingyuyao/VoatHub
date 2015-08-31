@@ -68,19 +68,19 @@ namespace VoatHubTests.Api.Voat
         [TestMethod]
         public async Task GetAsync()
         {
-            var data = await apiClient.GetAsync<ApiResponse<List<ApiSubmission>>>(submissionListUri);
+            var data = await apiClient.GetAsync<List<ApiSubmission>>(submissionListUri);
             Assert.IsNotNull(data);
         }
 
         [TestMethod]
         public async Task PostAsync()
         {
-            var data = await apiClient.PostAsync<ApiResponse<ApiSubmission>>(submissionListUri, serializedSubmission);
+            var data = await apiClient.PostAsync<ApiSubmission>(submissionListUri, serializedSubmission);
             Assert.IsFalse(data.Success);
 
             await Login();
 
-            data = await apiClient.PostAsync<ApiResponse<ApiSubmission>>(submissionListUri, serializedSubmission);
+            data = await apiClient.PostAsync<ApiSubmission>(submissionListUri, serializedSubmission);
             Assert.IsTrue(data.Success);
 
         }
@@ -89,7 +89,7 @@ namespace VoatHubTests.Api.Voat
         public async Task PutAsync()
         {
             await Login();
-            var data = await apiClient.PostAsync<ApiResponse<ApiSubmission>>(submissionListUri, serializedSubmission);
+            var data = await apiClient.PostAsync<ApiSubmission>(submissionListUri, serializedSubmission);
             Assert.IsNotNull(data.Data);
             int submissionId = data.Data.ID;
 
@@ -98,7 +98,7 @@ namespace VoatHubTests.Api.Voat
 
             var submissionUri = new Uri(TestSettings.FullApiPath + "v/Test/" + submissionId);
 
-            var putData = await apiClient.PutAsync<ApiResponse<ApiSubmission>>(submissionUri, serializedSubmission);
+            var putData = await apiClient.PutAsync<ApiSubmission>(submissionUri, serializedSubmission);
             Assert.IsNotNull(putData.Data);
             Assert.AreEqual("Update content test", putData.Data.Content);
         }
@@ -107,7 +107,7 @@ namespace VoatHubTests.Api.Voat
         public async Task DeleteAsync()
         {
             await Login();
-            var data = await apiClient.PostAsync<ApiResponse<ApiSubmission>>(submissionListUri, serializedSubmission);
+            var data = await apiClient.PostAsync<ApiSubmission>(submissionListUri, serializedSubmission);
             Assert.IsNotNull(data.Data);
             int submissionId = data.Data.ID;
             var submissionUri = new Uri(TestSettings.FullApiPath + "v/Test/" + submissionId);

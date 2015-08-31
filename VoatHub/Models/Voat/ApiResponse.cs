@@ -9,19 +9,11 @@ namespace VoatHub.Models.Voat
     /// </summary>
     /// <remarks>http://fakevout.azurewebsites.net/api/help</remarks>
     /// <typeparam name="T"></typeparam>
-    public class ApiResponse<T>
+    public class ApiResponse<T> : ApiResponse
     {
         [JsonProperty("data")]
         [DataMember(Name = "data")]
         public T Data { get; set; }
-
-        [JsonProperty("success")]
-        [DataMember(Name = "success")]
-        public bool Success { get; set; }
-
-        [JsonProperty("error")]
-        [DataMember(Name = "error")]
-        public ErrorInfo Error { get; set; }
 
         /// <summary>
         /// Ignores any serialization error that might occur. This enable us to already return an ApiResponse Instance

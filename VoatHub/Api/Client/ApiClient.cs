@@ -6,6 +6,7 @@ using Windows.Web.Http.Filters;
 using Windows.Web.Http.Headers;
 
 using VoatHub.Models.Voat;
+using System.Threading;
 
 namespace VoatHub.Api.Client
 {
@@ -41,6 +42,7 @@ namespace VoatHub.Api.Client
             throttleManager = new ThrottleManager(ClientName);
         }
 
+        #region UserAccount
         public string UserName
         {
             get
@@ -124,7 +126,9 @@ namespace VoatHub.Api.Client
                 throw new UnauthenticatedException();
             }
         }
+        #endregion
 
+        #region Http
         /// <summary>
         /// Wraps <see cref="HttpClient.GetAsync(Uri)"/> to return an <see cref="ApiResponse{T}"/>
         /// </summary>
@@ -190,12 +194,14 @@ namespace VoatHub.Api.Client
             HttpResponseMessage response = await httpClient.DeleteAsync(uri);
             return await handleResponse<T>(response);
         }
+        #endregion
 
         public void Dispose()
         {
             httpClient.Dispose();
         }
 
+        #region Abstract/Virtual
         /// <summary>
         /// Return the name of this client.
         /// <para>This method should always return the same name for a given client.</para>
@@ -231,7 +237,9 @@ namespace VoatHub.Api.Client
                 return null;
             }
         }
+        #endregion
 
+        #region Protected
         protected void addHeader(string name, string value)
         {
             httpClient.DefaultRequestHeaders.Add(name, value);
@@ -241,7 +249,9 @@ namespace VoatHub.Api.Client
         {
             httpClient.DefaultRequestHeaders.Remove(name);
         }
+        #endregion
 
+        #region Private
         /// <summary>
         /// Bundles functions that need to happen before each call.
         /// </summary>
@@ -311,5 +321,6 @@ namespace VoatHub.Api.Client
                 return default(T);
             }
         }
+        #endregion
     }
 }

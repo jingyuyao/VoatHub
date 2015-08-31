@@ -46,7 +46,7 @@ namespace VoatHub.Api.Voat
         private static readonly string VOTE_ON_REVOKE = VOTE + "?revokeOnRevote={3}"; 
         #endregion
 
-        private IApiClient apiClient;
+        private VoatApiClient apiClient;
         private ApiUriBuilder uriBuilder;
 
         public SearchOptions SubmissionSearchOptions { get; set; }
@@ -124,54 +124,54 @@ namespace VoatHub.Api.Voat
             Uri uri = uriBuilder.Uri(String.Format(SUBVERSE, subverse), Utility.ToQueryString(SubmissionSearchOptions));
             if (SubmissionSearchOptions.page != null) SubmissionSearchOptions.page++;
 
-            return await apiClient.GetAsync<ApiResponse<List<ApiSubmission>>>(uri);
+            return await apiClient.GetAsync<List<ApiSubmission>>(uri);
         }
 
         public async Task<ApiResponse<ApiSubmission>> GetSubmission(string subverse, int submissionId)
         {
             Uri uri = uriBuilder.Uri(string.Format(SUBVERSE_SUBMISSION, subverse, submissionId));
-            return await apiClient.GetAsync<ApiResponse<ApiSubmission>>(uri);
+            return await apiClient.GetAsync<ApiSubmission>(uri);
         }
 
         public async Task<ApiResponse<ApiSubmission>> GetSubmission(int submissionId)
         {
             Uri uri = uriBuilder.Uri(string.Format(SUBMISSIONS, submissionId));
-            return await apiClient.GetAsync<ApiResponse<ApiSubmission>>(uri);
+            return await apiClient.GetAsync<ApiSubmission>(uri);
         }
 
         public async Task<ApiResponse<ApiSubmission>> PostSubmission(string subverse, UserSubmission submission)
         {
             apiClient.EnsureLoggedIn();
             Uri uri = uriBuilder.Uri(String.Format(SUBVERSE, subverse));
-            return await apiClient.PostAsync<ApiResponse<ApiSubmission>>(uri, Utility.serializeJson(submission));
+            return await apiClient.PostAsync<ApiSubmission>(uri, Utility.serializeJson(submission));
         }
 
         public async Task<ApiResponse<ApiSubmission>> PutSubmission(string subverse, int submissionId, UserSubmission submission)
         {
             apiClient.EnsureLoggedIn();
             Uri uri = uriBuilder.Uri(string.Format(SUBVERSE_SUBMISSION, subverse, submissionId));
-            return await apiClient.PutAsync<ApiResponse<ApiSubmission>>(uri, Utility.serializeJson(submission));
+            return await apiClient.PutAsync<ApiSubmission>(uri, Utility.serializeJson(submission));
         }
 
         public async Task<ApiResponse<ApiSubmission>> PutSubmission(int submissionId, UserSubmission submission)
         {
             apiClient.EnsureLoggedIn();
             Uri uri = uriBuilder.Uri(string.Format(SUBMISSIONS, submissionId));
-            return await apiClient.PutAsync<ApiResponse<ApiSubmission>>(uri, Utility.serializeJson(submission));
+            return await apiClient.PutAsync<ApiSubmission>(uri, Utility.serializeJson(submission));
         }
 
         public async Task<ApiResponse> DeleteSubmission(string subverse, int submissionId)
         {
             apiClient.EnsureLoggedIn();
             Uri uri = uriBuilder.Uri(string.Format(SUBVERSE_SUBMISSION, subverse, submissionId));
-            return await apiClient.DeleteAsync<ApiResponse>(uri);
+            return await apiClient.DeleteAsync(uri);
         }
 
         public async Task<ApiResponse> DeleteSubmission(int submissionId)
         {
             apiClient.EnsureLoggedIn();
             Uri uri = uriBuilder.Uri(string.Format(SUBMISSIONS, submissionId));
-            return await apiClient.DeleteAsync<ApiResponse>(uri);
+            return await apiClient.DeleteAsync(uri);
         }
 
         #endregion Submissions
@@ -181,7 +181,7 @@ namespace VoatHub.Api.Voat
         public async Task<ApiResponse<ApiSubverseInfo>> GetSubverseInfo(string subverse)
         {
             Uri uri = uriBuilder.Uri(string.Format(SUBVERSE_INFO, subverse));
-            return await apiClient.GetAsync<ApiResponse<ApiSubverseInfo>>(uri);
+            return await apiClient.GetAsync<ApiSubverseInfo>(uri);
         }
 
         // Not implemented
@@ -208,27 +208,27 @@ namespace VoatHub.Api.Voat
         {
             Uri uri = uriBuilder.Uri(string.Format(SUBVERSE_SUBMISSION_COMMENTS, subverse, submissionId), Utility.ToQueryString(CommentSearchOptions));
             if (CommentSearchOptions.page != null) CommentSearchOptions.page++;
-            return await apiClient.GetAsync<ApiResponse<List<ApiComment>>>(uri);
+            return await apiClient.GetAsync<List<ApiComment>>(uri);
         }
 
         public async Task<ApiResponse<List<ApiComment>>> GetCommentList(string subverse, int submissionId, int parentId)
         {
             Uri uri = uriBuilder.Uri(string.Format(SUBVERSE_SUBMISSION_COMMENTS, subverse, submissionId, parentId), Utility.ToQueryString(CommentSearchOptions));
             if (CommentSearchOptions.page != null) CommentSearchOptions.page++;
-            return await apiClient.GetAsync<ApiResponse<List<ApiComment>>>(uri);
+            return await apiClient.GetAsync<List<ApiComment>>(uri);
         }
 
         public async Task<ApiResponse<ApiComment>> GetComment(int commentid)
         {
             Uri uri = uriBuilder.Uri(string.Format(COMMENTS, commentid));
-            return await apiClient.GetAsync<ApiResponse<ApiComment>>(uri);
+            return await apiClient.GetAsync<ApiComment>(uri);
         }
 
         public async Task<ApiResponse<ApiComment>> PostComment(string subverse, int submissionId, UserValue comment)
         {
             apiClient.EnsureLoggedIn();
             Uri uri = uriBuilder.Uri(string.Format(SUBVERSE_SUBMISSION_REPLY, subverse, submissionId));
-            return await apiClient.PostAsync<ApiResponse<ApiComment>>(uri, Utility.serializeJson(comment));
+            return await apiClient.PostAsync<ApiComment>(uri, Utility.serializeJson(comment));
         }
 
         /// <summary>
@@ -241,7 +241,7 @@ namespace VoatHub.Api.Voat
         {
             apiClient.EnsureLoggedIn();
             Uri uri = uriBuilder.Uri(string.Format(COMMENTS, commentid));
-            return await apiClient.PostAsync<ApiResponse<ApiComment>>(uri, Utility.serializeJson(comment));
+            return await apiClient.PostAsync<ApiComment>(uri, Utility.serializeJson(comment));
         }
 
         /// <summary>
@@ -256,21 +256,21 @@ namespace VoatHub.Api.Voat
         {
             apiClient.EnsureLoggedIn();
             Uri uri = uriBuilder.Uri(string.Format(SUBVERSE_SUBMISSION_COMMENT_REPLY, subverse, submissionId, commentid));
-            return await apiClient.PostAsync<ApiResponse<ApiComment>>(uri, Utility.serializeJson(comment));
+            return await apiClient.PostAsync<ApiComment>(uri, Utility.serializeJson(comment));
         }
 
         public async Task<ApiResponse<ApiComment>> PutComment(int commentid, UserValue comment)
         {
             apiClient.EnsureLoggedIn();
             Uri uri = uriBuilder.Uri(string.Format(COMMENTS, commentid));
-            return await apiClient.PutAsync<ApiResponse<ApiComment>>(uri, Utility.serializeJson(comment));
+            return await apiClient.PutAsync<ApiComment>(uri, Utility.serializeJson(comment));
         }
 
         public async Task<ApiResponse> DeleteComment(int commentid)
         {
             apiClient.EnsureLoggedIn();
             Uri uri = uriBuilder.Uri(string.Format(COMMENTS, commentid));
-            return await apiClient.DeleteAsync<ApiResponse>(uri);
+            return await apiClient.DeleteAsync(uri);
         }
 
         #endregion Comments
@@ -285,7 +285,7 @@ namespace VoatHub.Api.Voat
         {
             apiClient.EnsureLoggedIn();
             Uri uri = uriBuilder.Uri(USER_PREFERENCES);
-            return await apiClient.GetAsync<ApiResponse<ApiUserPreferences>>(uri);
+            return await apiClient.GetAsync<ApiUserPreferences>(uri);
         }
 
         // Internal server error
@@ -300,28 +300,28 @@ namespace VoatHub.Api.Voat
         {
             apiClient.EnsureLoggedIn();
             Uri uri = uriBuilder.Uri(string.Format(USER_INFO, username));
-            return await apiClient.GetAsync<ApiResponse<ApiUserInfo>>(uri);
+            return await apiClient.GetAsync<ApiUserInfo>(uri);
         }
 
         public async Task<ApiResponse<List<ApiUserInfo>>> UserComments(string username)
         {
             apiClient.EnsureLoggedIn();
             Uri uri = uriBuilder.Uri(string.Format(USER_COMMENTS, username));
-            return await apiClient.GetAsync<ApiResponse<List<ApiUserInfo>>>(uri);
+            return await apiClient.GetAsync<List<ApiUserInfo>>(uri);
         }
 
         public async Task<ApiResponse<List<ApiSubmission>>> UserSubmissions(string username)
         {
             apiClient.EnsureLoggedIn();
             Uri uri = uriBuilder.Uri(string.Format(USER_SUBMISSIONS, username));
-            return await apiClient.GetAsync<ApiResponse<List<ApiSubmission>>>(uri);
+            return await apiClient.GetAsync<List<ApiSubmission>>(uri);
         }
 
         public async Task<ApiResponse<List<ApiSubscription>>> UserSubscriptions(string username)
         {
             apiClient.EnsureLoggedIn();
             Uri uri = uriBuilder.Uri(string.Format(USER_SUBSCRIPTIONS, username));
-            return await apiClient.GetAsync<ApiResponse<List<ApiSubscription>>>(uri);
+            return await apiClient.GetAsync<List<ApiSubscription>>(uri);
         }
 
         // Not yet implemented by the Voat API
@@ -347,7 +347,7 @@ namespace VoatHub.Api.Voat
         {
             apiClient.EnsureLoggedIn();
             Uri uri = uriBuilder.Uri(string.Format(VOTE, type, id, vote));
-            return await apiClient.PostAsync<ApiResponse<VoteResponse>>(uri, null);
+            return await apiClient.PostAsync<VoteResponse>(uri, null);
         }
 
         /// <summary>
@@ -368,7 +368,7 @@ namespace VoatHub.Api.Voat
         {
             apiClient.EnsureLoggedIn();
             Uri uri = uriBuilder.Uri(string.Format(VOTE_ON_REVOKE, type, id, vote, revokeOnRevote));
-            return await apiClient.PostAsync<ApiResponse<VoteResponse>>(uri, null);
+            return await apiClient.PostAsync<VoteResponse>(uri, null);
         }
 
         #endregion Voting
@@ -379,28 +379,28 @@ namespace VoatHub.Api.Voat
         {
             apiClient.EnsureLoggedIn();
             Uri uri = uriBuilder.Uri(string.Format(SUBMISSIONS_SAVE, submissionId));
-            return await apiClient.PostAsync<ApiResponse>(uri, null);
+            return await apiClient.PostAsync(uri, null);
         }
 
         public async Task<ApiResponse> DeleteSubmissionsSave(int submissionId)
         {
             apiClient.EnsureLoggedIn();
             Uri uri = uriBuilder.Uri(string.Format(SUBMISSIONS_SAVE, submissionId));
-            return await apiClient.DeleteAsync<ApiResponse>(uri);
+            return await apiClient.DeleteAsync(uri);
         }
 
         public async Task<ApiResponse> PostCommentsSave(int submissionId)
         {
             apiClient.EnsureLoggedIn();
             Uri uri = uriBuilder.Uri(string.Format(COMMENTS_SAVE, submissionId));
-            return await apiClient.PostAsync<ApiResponse>(uri, null);
+            return await apiClient.PostAsync(uri, null);
         }
 
         public async Task<ApiResponse> DeleteCommentsSave(int submissionId)
         {
             apiClient.EnsureLoggedIn();
             Uri uri = uriBuilder.Uri(string.Format(COMMENTS_SAVE, submissionId));
-            return await apiClient.DeleteAsync<ApiResponse>(uri);
+            return await apiClient.DeleteAsync(uri);
         }
 
         #endregion Saving
