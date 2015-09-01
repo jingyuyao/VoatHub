@@ -215,7 +215,7 @@ namespace VoatHub.Api.Voat
         /// <returns></returns>
         public async Task<ApiResponse> DeleteAsync(Uri uri)
         {
-            return await sendRequest(HttpMethod.Post, uri, null);
+            return await sendRequest(HttpMethod.Delete, uri, null);
         }
         #endregion
 
@@ -227,7 +227,7 @@ namespace VoatHub.Api.Voat
 
             var request = new HttpRequestMessage(method, uri);
 
-            if (method != HttpMethod.Get || method != HttpMethod.Delete && content != null)
+            if ((method == HttpMethod.Post || method == HttpMethod.Put) && content != null)
             {
                 content.Headers.ContentType = REQUEST_HEADER_VALUE;
                 request.Content = content;
@@ -272,6 +272,12 @@ namespace VoatHub.Api.Voat
             return false;
         }
 
+        /// <summary>
+        /// Should never return null.
+        /// </summary>
+        /// <param name="username"></param>
+        /// <param name="password"></param>
+        /// <returns><see cref="ApiToken"/></returns>
         private async Task<ApiToken> retrieveToken(string username, string password)
         {
             Debug.WriteLine("Retrieving token...", "VoatApiClient");
@@ -288,7 +294,7 @@ namespace VoatHub.Api.Voat
             var response = await httpClient.PostAsync(tokenUri, content);
 
             if (!response.IsSuccessStatusCode || response.Content == null)
-                return null;
+                return new ApiToken();
 
             var token = await deserializeResponse<ApiToken>(response);
 

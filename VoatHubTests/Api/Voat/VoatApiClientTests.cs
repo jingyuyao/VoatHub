@@ -75,6 +75,7 @@ namespace VoatHubTests.Api.Voat
         [TestMethod]
         public async Task PostAsync()
         {
+            apiClient.Logout();
             var data = await apiClient.PostAsync<ApiSubmission>(submissionListUri, serializedSubmission);
             Assert.IsFalse(data.Success);
 
