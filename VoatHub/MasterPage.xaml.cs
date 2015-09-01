@@ -110,7 +110,7 @@ namespace VoatHub
             else
                 ViewModel.DetailFrame.Navigate(typeof(SubmissionCommentsPage), new SubmissionCommentsVM(vm));
 
-            ViewModel.DetailFrame.BackStack.Clear();
+            clearShit();
         }
 
         private void SubmissionListCommentsButton_Click(object sender, RoutedEventArgs e)
@@ -119,7 +119,13 @@ namespace VoatHub
             var vm = button.DataContext as SubmissionVM;
 
             ViewModel.DetailFrame.Navigate(typeof(SubmissionCommentsPage), new SubmissionCommentsVM(vm));
+            clearShit();
+        }
+
+        private async void clearShit()
+        {
             ViewModel.DetailFrame.BackStack.Clear();
+            await WebView.ClearTemporaryWebDataAsync();
         }
         #endregion
 

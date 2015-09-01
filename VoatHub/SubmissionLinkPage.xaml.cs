@@ -39,7 +39,9 @@ namespace VoatHub
 
         protected override void OnNavigatedFrom(NavigationEventArgs e)
         {
-            SubmissionWebView.Stop();
+            // Changing webview source instead of ViewModel.Uri so that when
+            // we come back to this page we still have a reference to the actual uri.
+            SubmissionWebView.Source = App.DEFAULT_URI;
         }
         #endregion
 
