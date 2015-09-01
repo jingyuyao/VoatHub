@@ -85,7 +85,7 @@
 
         <CommandBar Grid.Row="0" x:Name="MasterCommandBar">
             <CommandBar.Content>
-                <TextBlock HorizontalAlignment="Left" Margin="12,14">
+                <TextBlock Style="{StaticResource CommandBarTextStyle}">
                     <Run FontWeight="Bold" Text="{x:Bind ViewModel.Subverse, Mode=OneWay}" /> 
                     :: <Run Text="{x:Bind ViewModel.Sort, Mode=OneWay}"/>
                 </TextBlock>

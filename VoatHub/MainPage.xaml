@@ -23,8 +23,8 @@
                      It appears when the user hovers over the icon, but not the label which provides
                      value when the SplitView is 'Compact' while reducing the likelihood of showing
                      redundant information when the label is shown.-->
-                <FontIcon x:Name="Glyph" FontSize="16" Glyph="{x:Bind SymbolAsChar}" VerticalAlignment="Center" HorizontalAlignment="Center" ToolTipService.ToolTip="{x:Bind Label}"/>
-                <TextBlock x:Name="Text" Grid.Column="1" Text="{x:Bind Label}" />
+                <FontIcon FontSize="16" Glyph="{x:Bind SymbolAsChar}" VerticalAlignment="Center" HorizontalAlignment="Center" ToolTipService.ToolTip="{x:Bind Label}"/>
+                <TextBlock Grid.Column="1" Text="{x:Bind Label}" />
             </Grid>
         </DataTemplate>
         
@@ -65,9 +65,8 @@
                     <Grid.RowDefinitions>
                         <RowDefinition Height="48" />
                         <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
                         <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
                     <AutoSuggestBox x:Name="MasterSearchBox" Grid.Row="0"
@@ -77,7 +76,7 @@
                                     QuerySubmitted="SearchBox_QuerySubmitted"
                                     PlaceholderText="Go to Subverse..."/>
 
-                    <ListView x:Name="NavMenuList" Grid.Row="1"
+                    <ListView Grid.Row="1"
                             ItemContainerStyle="{StaticResource NavMenuItemContainerStyle}"
                             ItemsSource="{x:Bind ViewModel.Navlist, Mode=OneWay}"
                             ItemTemplate="{StaticResource NavMenuItemTemplate}"
@@ -85,12 +84,18 @@
                               SelectionMode="None"
                               ItemClick="NavMenuList_ItemClick"/>
 
-                    <ProgressRing x:Name="MasterProgressRing" Grid.Row="2"
+                    <Grid Grid.Row="2">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <ProgressRing x:Name="MasterProgressRing" Grid.Row="0"
                               Margin="0,50" Width="50" Height="50"
                               Visibility="{x:Bind ViewModel.Subscriptions.HasItems, Converter={StaticResource BoolToNegateVisibilityConverter}, Mode=OneWay}" 
                               IsActive="{x:Bind ViewModel.Subscriptions.HasItems, Converter={StaticResource BoolNegateConverter}, Mode=OneWay}"/>
 
-                    <ListView x:Name="SubscriptionsListView" Grid.Row="3"
+                        <ListView x:Name="SubscriptionsListView" Grid.Row="1"
                               SelectionMode="None"
                               IsItemClickEnabled="True"
                               ItemClick="SubscriptionsListView_ItemClick"
@@ -98,6 +103,15 @@
                               ItemContainerStyle="{StaticResource NavMenuItemContainerStyle}"
                               ItemTemplate="{StaticResource SubscriptionItemTemplate}"
                               ItemsSource="{x:Bind ViewModel.Subscriptions.List, Mode=OneWay}"/>
+                    </Grid>
+
+                    <ListView Grid.Row="3"
+                            ItemContainerStyle="{StaticResource NavMenuItemContainerStyle}"
+                            ItemsSource="{x:Bind ViewModel.OptionList, Mode=OneWay}"
+                            ItemTemplate="{StaticResource NavMenuItemTemplate}"
+                            IsItemClickEnabled="True"
+                            SelectionMode="None"
+                            ItemClick="NavMenuList_ItemClick"/>
                 </Grid>
             </SplitView.Pane>
 

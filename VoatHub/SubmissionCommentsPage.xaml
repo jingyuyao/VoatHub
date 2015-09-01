@@ -21,7 +21,7 @@
 
         <CommandBar Grid.Row="0">
             <CommandBar.Content>
-                <TextBlock Margin="12,14">
+                <TextBlock Style="{StaticResource CommandBarTextStyle}">
                       Sort By: <Run Text="{x:Bind ViewModel.CommentSort, Mode=OneWay}" />
                 </TextBlock>
             </CommandBar.Content>

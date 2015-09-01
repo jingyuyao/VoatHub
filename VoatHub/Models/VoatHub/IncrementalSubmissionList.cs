@@ -23,7 +23,6 @@ namespace VoatHub.Models.VoatHub
     public class IncrementalSubmissionList : LoadingObservableCollection<SubmissionVM>
     {
         private VoatApi api;
-        private bool hasMoreItems;
         private string subverse;
 
         /// <summary>
@@ -31,20 +30,33 @@ namespace VoatHub.Models.VoatHub
         /// </summary>
         public IncrementalSubmissionList() : base()
         {
+            _HasMoreItems = true;
         }
 
         public IncrementalSubmissionList(VoatApi api, string subverse) : this()
         {
             this.api = api;
             this.subverse = subverse;
-            hasMoreItems = true;
             api.ResetSubmissionPage();
         }
 
+        #region Methods
+        public void Start()
+        {
+            _HasMoreItems = true;
+        }
+
+        public void Stop()
+        {
+            _HasMoreItems = false;
+        }
+        #endregion
+
         #region IncrementalLoadingBase
+        private bool _HasMoreItems;
         public override bool HasMoreItems
         {
-            get { return hasMoreItems; }
+            get { return _HasMoreItems; }
         }
         
         public override IAsyncOperation<LoadMoreItemsResult> LoadMoreItemsAsync(uint count)
@@ -69,7 +81,7 @@ namespace VoatHub.Models.VoatHub
                     resultCount = (uint)response.Data.Count;
                 }
 
-                if (resultCount == 0) hasMoreItems = false;
+                if (resultCount == 0) _HasMoreItems = false;
 
                 OnLoadingFinish(EventArgs.Empty);
                 return new LoadMoreItemsResult { Count = resultCount };

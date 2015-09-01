@@ -27,17 +27,32 @@ namespace VoatHub.Models.VoatHub
 
             Navlist = new List<NavMenuItem>(new[]
             {
-                new NavMenuItem()
+                new NavMenuItem
                 {
                     Symbol = Symbol.Home,
                     Label = "Front Page"
                 },
-                new NavMenuItem()
+                new NavMenuItem
                 {
                     Symbol = Symbol.AllApps,
                     Label = "All"
                 }
             });
+
+            OptionList = new List<NavMenuItem>(new[]
+            {
+                new NavMenuItem
+                {
+                    Symbol = Symbol.Contact,
+                    Label = "Account"
+                },
+                new NavMenuItem
+                {
+                    Symbol = Symbol.Setting,
+                    Label = "Settings"
+                }
+            });
+
             Subscriptions = new LoadingList<ApiSubscription>();
         }
 
@@ -47,6 +62,13 @@ namespace VoatHub.Models.VoatHub
         {
             get { return _Navlist; }
             set { SetProperty(ref _Navlist, value); }
+        }
+
+        private List<NavMenuItem> _OptionList;
+        public List<NavMenuItem> OptionList
+        {
+            get { return _OptionList; }
+            set { SetProperty(ref _OptionList, value); }
         }
 
         private ApiUserInfo _UserInfo;

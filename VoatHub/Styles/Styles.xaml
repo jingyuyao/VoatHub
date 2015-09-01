@@ -101,6 +101,17 @@
         <Setter Property="Padding" Value="0"/>
     </Style>
 
+    <Style x:Key="NavMenuOptionsItemStyle" TargetType="Grid">
+        <Setter Property="MinWidth" Value="{StaticResource SplitViewCompactPaneThemeLength}"/>
+        <Setter Property="Height" Value="48"/>
+        <Setter Property="Padding" Value="0"/>
+    </Style>
+
+    <Style x:Key="CommandBarTextStyle" TargetType="TextBlock">
+        <Setter Property="Margin" Value="12,14"/>
+        <Setter Property="HorizontalAlignment" Value="Left"/>
+    </Style>
+
     <Style x:Key="DefaultProgressRingStyle" TargetType="ProgressRing">
         <Setter Property="HorizontalAlignment" Value="Center"/>
         <Setter Property="Height" Value="50"/>

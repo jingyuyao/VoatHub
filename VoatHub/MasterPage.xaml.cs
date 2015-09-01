@@ -36,6 +36,14 @@ namespace VoatHub
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             ViewModel = e.Parameter as MasterPageVM;
+            var list = ViewModel.SubmissionList.List as IncrementalSubmissionList;
+            list.Start();
+        }
+
+        protected override void OnNavigatedFrom(NavigationEventArgs e)
+        {
+            var list = ViewModel.SubmissionList.List as IncrementalSubmissionList;
+            list.Stop();
         }
 
         #region NewSubmission

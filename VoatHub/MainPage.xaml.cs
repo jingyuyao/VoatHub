@@ -120,6 +120,14 @@ namespace VoatHub
                 case "All":
                     changeSubverse("_all");
                     break;
+
+                case "Account":
+                    if (MasterFrame.CurrentSourcePageType != typeof(AccountPage))
+                        MasterFrame.Navigate(typeof(AccountPage), Frame);
+                    break;
+
+                case "Settings":
+                    break;
             }
         }
 
