@@ -19,6 +19,22 @@
 
             <StackPanel Padding="10,5">
                 <Button Content="Logout" Click="LogoutButton_Click"/>
+
+                <ProgressRing x:Name="UserInfoProgressRing" 
+                              Style="{StaticResource DefaultProgressRingStyle}"
+                              Visibility="{x:Bind ViewModel.Loading, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}" 
+                              IsActive="{x:Bind ViewModel.Loading, Mode=OneWay}"/>
+
+                <StackPanel Visibility="{x:Bind ViewModel.Loading, Mode=OneWay, Converter={StaticResource BoolToNegateVisibilityConverter}}">
+                    <TextBlock Text="{x:Bind ViewModel.UserInfo.UserName, Mode=OneWay}" FontWeight="Bold"/>
+                    <TextBlock Text="{x:Bind ViewModel.UserInfo.RegistrationDate, Mode=OneWay}"/>
+                    <TextBlock Text="Bio" FontWeight="Bold"/>
+                    <TextBlock Text="{x:Bind ViewModel.UserInfo.Bio, Mode=OneWay}" TextWrapping="WrapWholeWords"/>
+                    <TextBlock Text="SubmissionPoints" FontWeight="Bold"/>
+                    <TextBlock Text="{x:Bind ViewModel.UserInfo.SubmissionPoints, Mode=OneWay}"/>
+                    <TextBlock Text="CommentPoints" FontWeight="Bold"/>
+                    <TextBlock Text="{x:Bind ViewModel.UserInfo.CommentPoints, Mode=OneWay}"/>
+                </StackPanel>
             </StackPanel>
         </StackPanel>
     </Grid>

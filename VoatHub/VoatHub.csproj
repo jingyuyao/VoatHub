@@ -120,6 +120,7 @@
       <DependentUpon>MasterPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Models\IOauthToken.cs" />
+    <Compile Include="Models\VoatHub\AccountPageVM.cs" />
     <Compile Include="Models\VoatHub\BindableBase.cs" />
     <Compile Include="Models\VoatHub\LoadingList\LoadingObservableCollection.cs" />
     <Compile Include="Models\VoatHub\LoadingList\IncrementalLoadingList.cs" />

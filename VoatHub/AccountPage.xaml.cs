@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using VoatHub.Models.Voat.v1;
+using VoatHub.Models.VoatHub;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.UI.Xaml;
@@ -23,10 +25,12 @@ namespace VoatHub
     public sealed partial class AccountPage : Page
     {
         private Frame mainFrame;
+        private AccountPageVM ViewModel;
 
         public AccountPage()
         {
             this.InitializeComponent();
+            ViewModel = new AccountPageVM();
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
