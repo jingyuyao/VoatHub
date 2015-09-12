@@ -8,6 +8,7 @@ using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.Storage;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -25,6 +26,7 @@ namespace VoatHub
     {
         public static readonly VoatApi VOAT_API = new VoatApi("ZbDlC73ndD6TB84WQmKvMA==", "https", "fakevout.azurewebsites.net", "api/v1/", "https://fakevout.azurewebsites.net/api/token");
         public static readonly Uri DEFAULT_URI = new Uri("about:blank", UriKind.Absolute);
+        private static readonly string ThemeSettingsKey = "CurrentTheme";
 
         /// <summary>
         /// Initializes the singleton application object.  This is the first line of authored code
@@ -37,6 +39,7 @@ namespace VoatHub
                 Microsoft.ApplicationInsights.WindowsCollectors.Session);
             this.InitializeComponent();
             this.Suspending += OnSuspending;
+            loadCurrentTheme();
         }
 
         /// <summary>
@@ -107,6 +110,32 @@ namespace VoatHub
             var deferral = e.SuspendingOperation.GetDeferral();
             //TODO: Save application state and stop any background activity
             deferral.Complete();
+        }
+
+        /// <summary>
+        /// Should only be used upon application start up.
+        /// </summary>
+        private void loadCurrentTheme()
+        {
+            ApplicationDataContainer settings = ApplicationData.Current.RoamingSettings;
+            var saved = settings.Values[ThemeSettingsKey];
+            if (saved != null)
+            {
+                var theme = (ApplicationTheme)Enum.Parse(typeof(ApplicationTheme), (string)saved);
+                App.Current.RequestedTheme = theme;
+            }
+            // Default
+            else
+            {
+                App.Current.RequestedTheme = ApplicationTheme.Dark;
+                settings.Values[ThemeSettingsKey] = ApplicationTheme.Dark.ToString();
+            }
+        }
+
+        public static void ChangeThemeSetting(ApplicationTheme theme)
+        {
+            var settings = ApplicationData.Current.RoamingSettings;
+            settings.Values[ThemeSettingsKey] = theme.ToString();
         }
     }
 }

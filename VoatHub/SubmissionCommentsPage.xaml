@@ -29,6 +29,8 @@
             <AppBarButton Icon="Back" Label="Back" Tag="back" IsEnabled="{x:Bind Frame.CanGoBack, Mode=OneWay}"  
                           Click="BackButton_Click"/>
 
+            <AppBarButton Icon="Refresh" Label="Refresh" Tag="refresh" Click="RefreshButton_Click"/>
+
             <AppBarButton Icon="Sort" Label="Sort">
                 <AppBarButton.Flyout>
                     <MenuFlyout>
@@ -38,8 +40,6 @@
                     </MenuFlyout>
                 </AppBarButton.Flyout>
             </AppBarButton>
-
-            <AppBarButton Icon="Refresh" Label="Refresh" Tag="refresh" Click="RefreshButton_Click"/>
 
             <CommandBar.SecondaryCommands>
                 <AppBarButton Icon="Save" Label="Save" Tag="save"/>

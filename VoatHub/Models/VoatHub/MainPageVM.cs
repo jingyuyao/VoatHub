@@ -20,6 +20,7 @@ namespace VoatHub.Models.VoatHub
     public class MainPageVM : BindableBase
     {
         private VoatApi VOAT_API = App.VOAT_API;
+        private bool loadInitiated = false;
 
         public MainPageVM()
         {
@@ -90,8 +91,10 @@ namespace VoatHub.Models.VoatHub
         
         public async void LoadSubscriptions()
         {
-            if (Subscriptions.Loading)
+            if (!loadInitiated)
             {
+                loadInitiated = true;
+
                 var subscriptions = await VOAT_API.UserSubscriptions(VOAT_API.UserName);
                 
                 if (subscriptions.Success && subscriptions.Data != null)

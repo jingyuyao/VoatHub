@@ -127,6 +127,8 @@ namespace VoatHub
                     break;
 
                 case "Settings":
+                    if (MasterFrame.CurrentSourcePageType != typeof(SettingsPage))
+                        MasterFrame.Navigate(typeof(SettingsPage));
                     break;
             }
         }

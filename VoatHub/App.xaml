@@ -5,8 +5,7 @@
     xmlns:local="using:VoatHub"
     xmlns:voatModels="using:VoatHub.Models.Voat.v1"
     xmlns:voatHubModels="using:VoatHub.Models.VoatHub"
-    xmlns:helpers="using:VoatHub.Ui.Helpers"
-    RequestedTheme="Light">
+    xmlns:helpers="using:VoatHub.Ui.Helpers">
 
     <Application.Resources>
         <ResourceDictionary>
