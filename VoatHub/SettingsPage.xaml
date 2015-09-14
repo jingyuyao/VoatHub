@@ -16,10 +16,32 @@
     </Page.Resources>
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup>
+                <VisualState>
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="720" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <Setter Target="SettingsCommandBar.Padding" Value="0"/>
+                    </VisualState.Setters>
+                </VisualState>
+                <VisualState>
+                    <VisualState.StateTriggers>
+                        <AdaptiveTrigger MinWindowWidth="0" />
+                    </VisualState.StateTriggers>
+                    <VisualState.Setters>
+                        <!--This prevents the hamberger button from overlapping with the title-->
+                        <Setter Target="SettingsCommandBar.Padding" Value="48,0,0,0"/>
+                    </VisualState.Setters>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
+        
         <StackPanel>
-            <CommandBar>
+            <CommandBar x:Name="SettingsCommandBar">
                 <CommandBar.Content>
-                    <TextBlock Text="Account" Style="{StaticResource CommandBarTextStyle}"/>
+                    <TextBlock Text="Settings" Style="{StaticResource CommandBarTextStyle}"/>
                 </CommandBar.Content>
 
                 <AppBarButton Label="Back" Icon="Back" Click="BackButton_Click" />
