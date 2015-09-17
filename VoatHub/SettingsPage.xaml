@@ -49,7 +49,7 @@
 
             <StackPanel Padding="10,5">
                 <StackPanel Orientation="Horizontal">
-                    <TextBlock Text="Theme:"/>
+                    <TextBlock VerticalAlignment="Center" Text="Theme:"/>
                     <ComboBox x:Name="ThemeComboBox" SelectionChanged="ThemeComboBox_SelectionChanged">
                         <ComboBoxItem x:Name="ThemeLightItem" Content="Light"/>
                         <ComboBoxItem x:Name="ThemeDarkItem" Content="Dark"/>

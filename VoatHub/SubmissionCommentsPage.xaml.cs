@@ -131,12 +131,12 @@ namespace VoatHub
         #region Submission
         private void SubmissionUpVote_Click(object sender, RoutedEventArgs e)
         {
-            ViewModel.UpVote();
+            ViewModel.SubmissionVM.UpVote();
         }
 
         private void SubmissionDownVote_Click(object sender, RoutedEventArgs e)
         {
-            ViewModel.DownVote();
+            ViewModel.SubmissionVM.DownVote();
         }
 
         private void OpenSubmissionReply_Click(object sender, RoutedEventArgs e)

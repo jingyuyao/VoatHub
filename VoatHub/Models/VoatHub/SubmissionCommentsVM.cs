@@ -12,12 +12,13 @@ using VoatHub.Models.VoatHub.LoadingList;
 
 namespace VoatHub.Models.VoatHub
 {
-    public class SubmissionCommentsVM : SubmissionVM
+    public class SubmissionCommentsVM : BindableBase
     {
         private VoatApi VOAT_API = App.VOAT_API;
 
-        public SubmissionCommentsVM(SubmissionVM vm) : base(vm)
+        public SubmissionCommentsVM(SubmissionVM vm)
         {
+            SubmissionVM = vm;
             VOAT_API.ResetCommentPage();
             CommentSort = VOAT_API.CommentSearchOptions.sort.ToString();
             _Comments = new LoadingList<CommentVM>();
@@ -30,6 +31,13 @@ namespace VoatHub.Models.VoatHub
         }
 
         #region Properties
+        private SubmissionVM _SubmissionVM;
+        public SubmissionVM SubmissionVM
+        {
+            get { return _SubmissionVM; }
+            set { SetProperty(ref _SubmissionVM, value); }
+        }
+
         private string _CommentSort;
         public string CommentSort
         {
@@ -71,11 +79,11 @@ namespace VoatHub.Models.VoatHub
         public async void LoadComments()
         {
             Comments.Dispose();
-
-            var response = await VOAT_API.GetCommentList(Submission.Subverse, Submission.ID);
+            var submission = SubmissionVM.Submission;
+            var response = await VOAT_API.GetCommentList(submission.Subverse, submission.ID);
             if (response.Success)
             {
-                if (Submission.CommentCount > response.Data.Count) HasMoreComments = true;
+                if (submission.CommentCount > response.Data.Count) HasMoreComments = true;
 
                 // TODO: Shit man, we going through the list at least 3 times. Might have to write more
                 // specific code if performance becomes a problem.
@@ -92,10 +100,11 @@ namespace VoatHub.Models.VoatHub
 
         public async void SendSubmissionReply()
         {
+            var submission = SubmissionVM.Submission;
             ReplyOpen = false;
 
             var value = new UserValue { Value = ReplyText };
-            var r = await VOAT_API.PostComment(Submission.Subverse, Submission.ID, value);
+            var r = await VOAT_API.PostComment(submission.Subverse, submission.ID, value);
 
             if (r.Success)
             {
