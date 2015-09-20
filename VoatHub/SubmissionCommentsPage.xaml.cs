@@ -100,6 +100,14 @@ namespace VoatHub
             }
             list.Add(reply);
         }
+
+        private void OpenAsButton_Click(object sender, RoutedEventArgs e)
+        {
+            var button = e.OriginalSource as HyperlinkButton;
+            var vm = button.DataContext as CommentVM;
+
+            Frame.Navigate(typeof(SubmissionCommentsPage), new SubmissionCommentsVM(vm.Comment));
+        }
         #endregion
 
         #region AppBar

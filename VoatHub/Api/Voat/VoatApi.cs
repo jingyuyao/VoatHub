@@ -19,6 +19,7 @@ namespace VoatHub.Api.Voat
         private static readonly string SUBVERSE = "v/{0}";
         private static readonly string SUBVERSE_SUBMISSION = SUBVERSE + "/{1}";
         private static readonly string SUBVERSE_SUBMISSION_COMMENTS = SUBVERSE_SUBMISSION + "/comments";
+        private static readonly string SUBVERSE_SUBMISSION_COMMENTS_FROM_PARENT = SUBVERSE_SUBMISSION_COMMENTS + "/{2}";
         private static readonly string SUBVERSE_INFO = SUBVERSE + "/info";
         private static readonly string SUBVERSE_SUBMISSION_REPLY = SUBVERSE_SUBMISSION + "/comment";
         private static readonly string SUBVERSE_SUBMISSION_COMMENT_REPLY = SUBVERSE_SUBMISSION_REPLY + "/{2}";
@@ -213,7 +214,7 @@ namespace VoatHub.Api.Voat
 
         public async Task<ApiResponse<List<ApiComment>>> GetCommentList(string subverse, int submissionId, int parentId)
         {
-            Uri uri = uriBuilder.Uri(string.Format(SUBVERSE_SUBMISSION_COMMENTS, subverse, submissionId, parentId), Utility.ToQueryString(CommentSearchOptions));
+            Uri uri = uriBuilder.Uri(string.Format(SUBVERSE_SUBMISSION_COMMENTS_FROM_PARENT, subverse, submissionId, parentId), Utility.ToQueryString(CommentSearchOptions));
             if (CommentSearchOptions.page != null) CommentSearchOptions.page++;
             return await apiClient.GetAsync<List<ApiComment>>(uri);
         }

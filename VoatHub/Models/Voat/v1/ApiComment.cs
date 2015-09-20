@@ -20,6 +20,39 @@ namespace VoatHub.Models.Voat.v1
 {
     public class ApiComment : FormattedContentContainer
     {
+        /// <summary>
+        /// Since we defined a copy constructor we need to define the empty constructor
+        /// so the compiler don't always use the copy constructor.
+        /// </summary>
+        public ApiComment()
+        {
+
+        }
+
+        /// <summary>
+        /// Copy constructor
+        /// </summary>
+        /// <param name="comment"></param>
+        public ApiComment(ApiComment comment)
+        {
+            if (comment != null)
+            {
+                Content = comment.Content;
+                FormattedContent = comment.FormattedContent;
+                ID = comment.ID;
+                ParentID = comment.ParentID;
+                SubmissionID = comment.SubmissionID;
+                Subverse = comment.Subverse;
+                Date = comment.Date;
+                LastEditDate = comment.LastEditDate;
+                UpVotes = comment.UpVotes;
+                DownVotes = comment.DownVotes;
+                UserName = comment.UserName;
+                ChildCount = comment.ChildCount;
+                Level = comment.Level;
+            }
+        }
+
 
         /// <summary>
         /// The comment ID.

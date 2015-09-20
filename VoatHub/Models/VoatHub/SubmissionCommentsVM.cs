@@ -16,13 +16,27 @@ namespace VoatHub.Models.VoatHub
     {
         private VoatApi VOAT_API = App.VOAT_API;
 
-        public SubmissionCommentsVM(SubmissionVM vm)
+        private SubmissionCommentsVM()
         {
-            SubmissionVM = vm;
             VOAT_API.ResetCommentPage();
             CommentSort = VOAT_API.CommentSearchOptions.sort.ToString();
             _Comments = new LoadingList<CommentVM>();
-            LoadComments();
+        }
+
+        public SubmissionCommentsVM(SubmissionVM vm) : this()
+        {
+            SubmissionVM = vm;
+            loadSubmissionComments();
+        }
+
+        public SubmissionCommentsVM(ApiComment parentComment) : this()
+        {
+            // Defensive copying
+            ParentComment = new ApiComment(parentComment);
+            // Since we are displaying the parent in the comment list along with other comments
+            // we need to set it's level to zero
+            ParentComment.Level = 0;
+            loadParentComments();
         }
 
         ~SubmissionCommentsVM()
@@ -36,6 +50,13 @@ namespace VoatHub.Models.VoatHub
         {
             get { return _SubmissionVM; }
             set { SetProperty(ref _SubmissionVM, value); }
+        }
+
+        private ApiComment _ParentComment;
+        public ApiComment ParentComment
+        {
+            get { return _ParentComment; }
+            set { SetProperty(ref _ParentComment, value); }
         }
 
         private string _CommentSort;
@@ -76,14 +97,59 @@ namespace VoatHub.Models.VoatHub
         /// <summary>
         /// Used for load and reloading comments.
         /// </summary>
-        public async void LoadComments()
+        public void LoadComments()
         {
             Comments.Dispose();
+
+            if (SubmissionVM != null)
+                loadSubmissionComments();
+            else if (ParentComment != null)
+                loadParentComments();
+            else
+                Debug.WriteLine("Both SubmissionVM and ParentComment is null!");
+        }
+
+        private async void loadSubmissionComments()
+        {
             var submission = SubmissionVM.Submission;
             var response = await VOAT_API.GetCommentList(submission.Subverse, submission.ID);
             if (response.Success)
             {
                 if (submission.CommentCount > response.Data.Count) HasMoreComments = true;
+
+                // TODO: Shit man, we going through the list at least 3 times. Might have to write more
+                // specific code if performance becomes a problem.
+                var commentVMList = CommentVM.FromApiCommentList(response.Data);
+
+                foreach (var vm in commentVMList)
+                {
+                    Comments.List.Add(vm);
+                }
+            }
+
+            Comments.Loading = false;
+        }
+
+        private async void loadParentComments()
+        {
+            // Always load the parent comment as the first comment
+            Comments.List.Add(new CommentVM(ParentComment));
+
+            if (ParentComment.SubmissionID == null) return;
+
+            var response = await VOAT_API.GetCommentList(ParentComment.Subverse, (int)ParentComment.SubmissionID, ParentComment.ID);
+            if (response.Success)
+            {
+                if (ParentComment.ChildCount > response.Data.Count) HasMoreComments = true;
+
+                // We increment the level here since the api return the level start with zero
+                // but our parent comment occupies the first level.
+                // We also have to increment it before constructing the viewmodels since
+                // CommentVM uses the level during instantiation to create indentation
+                foreach (var comment in response.Data)
+                {
+                    comment.Level++;
+                }
 
                 // TODO: Shit man, we going through the list at least 3 times. Might have to write more
                 // specific code if performance becomes a problem.

@@ -53,42 +53,44 @@
                     Background="{ThemeResource SystemControlBackgroundAltHighBrush}"
                     Padding="10,0">
             <StackPanel>
-                <TextBlock Margin="0,8" Style="{ThemeResource SubheaderTextBlockStyle}"
+                <StackPanel Visibility="{x:Bind ViewModel.SubmissionVM, Converter={StaticResource NullToVisibilityConverter}, Mode=OneWay}">
+                    <TextBlock Margin="0,8" Style="{ThemeResource SubheaderTextBlockStyle}"
                         MaxLines="2" TextTrimming="CharacterEllipsis"
                         HorizontalAlignment="Left" Text="{x:Bind ViewModel.SubmissionVM.Submission.Title, Mode=OneWay}"/>
 
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock Style="{ThemeResource CaptionTextBlockStyle}"
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Style="{ThemeResource CaptionTextBlockStyle}"
                                    VerticalAlignment="Center"
                                    Foreground="{ThemeResource SystemControlForegroundBaseMediumBrush}">
                             <Run FontWeight="Bold" Text="{x:Bind ViewModel.SubmissionVM.Submission.UserName, Mode=OneWay}"/>
                             <Run Text="{x:Bind ViewModel.SubmissionVM.Submission.TotalVotes, Mode=OneWay}"/> pts
                             <Run Text="{x:Bind ViewModel.SubmissionVM.Submission.Date, Converter={StaticResource TimeAgoConverter}, Mode=OneWay}"/>
-                    </TextBlock>
+                        </TextBlock>
 
-                    <Button Click="SubmissionUpVote_Click" Style="{StaticResource CommentTreeVoteButtonStyle}">
-                        <Polygon Points="5,0 10,10, 0,10" Stroke="{ThemeResource SystemControlForegroundBaseMediumLowBrush}" Fill="{ThemeResource SystemControlForegroundBaseMediumLowBrush}" />
-                    </Button>
-                    <Button Click="SubmissionDownVote_Click" Style="{StaticResource CommentTreeVoteButtonStyle}">
-                        <Polygon Points="0,0 5,10, 10,0" Stroke="{ThemeResource SystemControlForegroundBaseMediumLowBrush}" Fill="{ThemeResource SystemControlForegroundBaseMediumLowBrush}" />
-                    </Button>
-                </StackPanel>
+                        <Button Click="SubmissionUpVote_Click" Style="{StaticResource CommentTreeVoteButtonStyle}">
+                            <Polygon Points="5,0 10,10, 0,10" Stroke="{ThemeResource SystemControlForegroundBaseMediumLowBrush}" Fill="{ThemeResource SystemControlForegroundBaseMediumLowBrush}" />
+                        </Button>
+                        <Button Click="SubmissionDownVote_Click" Style="{StaticResource CommentTreeVoteButtonStyle}">
+                            <Polygon Points="0,0 5,10, 10,0" Stroke="{ThemeResource SystemControlForegroundBaseMediumLowBrush}" Fill="{ThemeResource SystemControlForegroundBaseMediumLowBrush}" />
+                        </Button>
+                    </StackPanel>
 
-                <TextBlock Margin="0,9" HorizontalAlignment="Left"
+                    <TextBlock Margin="0,9" HorizontalAlignment="Left"
                                 Style="{ThemeResource BaseTextBlockStyle}" 
                                 Text="{x:Bind ViewModel.SubmissionVM.Submission.Content, Mode=OneWay}" />
 
-                <StackPanel Orientation="Horizontal">
-                    <HyperlinkButton Click="OpenSubmissionReply_Click" Content="Reply" Style="{StaticResource CommentTreeMiscButtonStyle}"/>
-                </StackPanel>
+                    <StackPanel Orientation="Horizontal">
+                        <HyperlinkButton Click="OpenSubmissionReply_Click" Content="Reply" Style="{StaticResource CommentTreeMiscButtonStyle}"/>
+                    </StackPanel>
 
-                <StackPanel Visibility="{x:Bind ViewModel.ReplyOpen, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}">
-                    <TextBox Text="{x:Bind ViewModel.ReplyText, Mode=TwoWay}" 
+                    <StackPanel Visibility="{x:Bind ViewModel.ReplyOpen, Converter={StaticResource BoolToVisibilityConverter}, Mode=OneWay}">
+                        <TextBox Text="{x:Bind ViewModel.ReplyText, Mode=TwoWay}" 
                                              AcceptsReturn="True" TextWrapping="Wrap" 
                                              PlaceholderText="Post reply..."/>
-                    <StackPanel Orientation="Horizontal">
-                        <Button Click="CloseSubmissionReply_Click"  Content="Close" />
-                        <Button Click="SendSubmissionReply_Click"  Content="Submit"/>
+                        <StackPanel Orientation="Horizontal">
+                            <Button Click="CloseSubmissionReply_Click"  Content="Close" />
+                            <Button Click="SendSubmissionReply_Click"  Content="Submit"/>
+                        </StackPanel>
                     </StackPanel>
                 </StackPanel>
 
@@ -136,6 +138,7 @@
                                         <StackPanel Orientation="Horizontal">
                                             <HyperlinkButton Click="CommentReplyButton_Click" Content="Reply" Style="{StaticResource CommentTreeMiscButtonStyle}"/>
                                             <HyperlinkButton Click="PrintDataContext_Click" Content="Help" Style="{StaticResource CommentTreeMiscButtonStyle}"/>
+                                            <HyperlinkButton Click="OpenAsButton_Click" Content="OpenAs" Style="{StaticResource CommentTreeMiscButtonStyle}"/>
                                         </StackPanel>
 
                                         <!--Reply-->
